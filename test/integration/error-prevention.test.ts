@@ -350,7 +350,7 @@ describe('Error Prevention - Real Git', () => {
       expect(status).toContain('M README.md');
 
       // In real scenario, checkout might fail or warn
-      // GitSense should catch this BEFORE attempting checkout
+      // GitCoach should catch this BEFORE attempting checkout
     } finally {
       repo.cleanup();
     }

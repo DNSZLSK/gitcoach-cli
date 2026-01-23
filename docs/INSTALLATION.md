@@ -9,15 +9,15 @@
 ## Install from npm
 
 ```bash
-npm install -g gitsense
+npm install -g gitcoach
 ```
 
 ## Install from Source
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/gitsense.git
-cd gitsense
+git clone https://github.com/your-username/gitcoach.git
+cd gitcoach
 ```
 
 2. Install dependencies:
@@ -38,10 +38,10 @@ npm link
 ## Verify Installation
 
 ```bash
-gitsense --help
+gitcoach --help
 ```
 
-You should see the GitSense help output with available commands.
+You should see the GitCoach help output with available commands.
 
 ## GitHub Copilot CLI Setup (Optional)
 
@@ -76,28 +76,28 @@ gh copilot --version
 
 ## First Run
 
-When you first run `gitsense`, you'll be guided through setup:
+When you first run `gitcoach`, you'll be guided through setup:
 
 1. Select your preferred language (English, French, Spanish)
 2. Choose your theme (Colored or Monochrome)
 3. Select your experience level (Beginner, Intermediate, Expert)
 
-You can change these settings anytime using `gitsense config`.
+You can change these settings anytime using `gitcoach config`.
 
 ## Troubleshooting
 
 ### "Not a Git repository" error
 
-Make sure you're running GitSense inside a Git repository:
+Make sure you're running GitCoach inside a Git repository:
 ```bash
 cd your-project
 git init  # if not already a repo
-gitsense
+gitcoach
 ```
 
 ### "GitHub Copilot CLI is not available"
 
-This warning appears if Copilot CLI isn't installed. GitSense will still work, but AI features will be disabled.
+This warning appears if Copilot CLI isn't installed. GitCoach will still work, but AI features will be disabled.
 
 ### Permission denied on Linux/macOS
 

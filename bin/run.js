@@ -55,7 +55,7 @@ async function main() {
   }
 
   if (args.includes('--version') || args.includes('-v')) {
-    console.log(`gitsense/${config.version} ${process.platform}-${process.arch} node-${process.version}`);
+    console.log(`gitcoach/${config.version} ${process.platform}-${process.arch} node-${process.version}`);
     return;
   }
 

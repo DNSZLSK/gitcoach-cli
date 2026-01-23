@@ -27,7 +27,7 @@ import {
 import { showHelpMenu } from '../ui/menus/help-menu.js';
 
 export default class Index extends Command {
-  static override description = 'GitSense - Your AI-Powered Git Coach';
+  static override description = 'GitCoach - Your AI-Powered Git Coach';
 
   static override examples = [
     '<%= config.bin %>',

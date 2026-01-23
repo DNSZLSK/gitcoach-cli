@@ -1,34 +1,34 @@
-# GitSense
+# GitCoach
 
 ```
-    ██████╗ ██╗████████╗███████╗███████╗███╗   ██╗███████╗███████╗
-   ██╔════╝ ██║╚══██╔══╝██╔════╝██╔════╝████╗  ██║██╔════╝██╔════╝
-   ██║  ███╗██║   ██║   ███████╗█████╗  ██╔██╗ ██║███████╗█████╗  
-   ██║   ██║██║   ██║   ╚════██║██╔══╝  ██║╚██╗██║╚════██║██╔══╝  
-   ╚██████╔╝██║   ██║   ███████║███████╗██║ ╚████║███████║███████╗
-    ╚═════╝ ╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝
+    ██████╗ ██╗████████╗ ██████╗ ██████╗  █████╗  ██████╗██╗  ██╗
+   ██╔════╝ ██║╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██║  ██║
+   ██║  ███╗██║   ██║   ██║     ██║   ██║███████║██║     ███████║
+   ██║   ██║██║   ██║   ██║     ██║   ██║██╔══██║██║     ██╔══██║
+   ╚██████╔╝██║   ██║   ╚██████╗╚██████╔╝██║  ██║╚██████╗██║  ██║
+    ╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 ```
 
 **The AI-powered Git coach that prevents mistakes before they happen.**
 
-[![GitHub](https://img.shields.io/github/stars/DNSZLSK/git-sense?style=social)](https://github.com/DNSZLSK/git-sense)
-[![npm version](https://img.shields.io/npm/v/gitsense)](https://www.npmjs.com/package/gitsense)
+[![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach?style=social)](https://github.com/DNSZLSK/gitcoach)
+[![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## Why GitSense?
+## Why GitCoach?
 
 Git is powerful but brutal to beginners. Cryptic error messages, lost work from uncommitted changes, fear of breaking everything.
 
-**GitSense is different:**
+**GitCoach is different:**
 - Prevents mistakes BEFORE they happen
 - Shows you the Git commands being executed (learn while you do)
 - Uses GitHub Copilot CLI to generate smart commit messages
 - Answers your Git questions in plain language
 - Works in English, French, and Spanish
 
-Built for the **GitHub Copilot CLI Challenge 2025**.
+Built for the **GitHub Copilot CLI Challenge 2026**.
 
 ---
 
@@ -36,12 +36,12 @@ Built for the **GitHub Copilot CLI Challenge 2025**.
 
 ```bash
 # Install globally
-npm install -g gitsense
+npm install -g gitcoach-cli
 
 # Run in any directory
-gitsense
+gitcoach
 
-# That's it. GitSense guides you from there.
+# That's it. GitCoach guides you from there.
 ```
 
 ---
@@ -73,7 +73,7 @@ No more memorizing commands. Navigate Git with simple menus.
 ```
 
 ### AI-Powered Commits
-GitSense uses GitHub Copilot CLI to analyze your changes and generate meaningful commit messages.
+GitCoach uses GitHub Copilot CLI to analyze your changes and generate meaningful commit messages.
 
 ```
 ✔ Generate message with AI? Yes
@@ -89,7 +89,7 @@ GitSense uses GitHub Copilot CLI to analyze your changes and generate meaningful
 ```
 
 ### Error Prevention
-GitSense warns you before you make mistakes:
+GitCoach warns you before you make mistakes:
 
 - **Uncommitted changes** before switching branches
 - **Force push** requires double confirmation
@@ -140,7 +140,7 @@ Every action shows the Git command being executed:
 ✔ 5 file(s) staged successfully.
 ```
 
-You learn Git while using GitSense. Eventually, you won't need it anymore. That's the goal.
+You learn Git while using GitCoach. Eventually, you won't need it anymore. That's the goal.
 
 ### Multilingual
 Switch between English, French, and Spanish anytime.
@@ -149,7 +149,7 @@ Switch between English, French, and Spanish anytime.
 ✔ Select language: Français
 ✔ Configuration updated.
 
-Bienvenue dans GitSense !
+Bienvenue dans GitCoach !
 ```
 
 ---
@@ -158,11 +158,11 @@ Bienvenue dans GitSense !
 
 | Command | Description |
 |---------|-------------|
-| `gitsense` | Launch interactive menu |
-| `gitsense init` | First-time setup |
-| `gitsense config` | Change settings |
-| `gitsense quick -m "msg"` | Quick commit + push |
-| `gitsense stats` | View your statistics |
+| `gitcoach` | Launch interactive menu |
+| `gitcoach init` | First-time setup |
+| `gitcoach config` | Change settings |
+| `gitcoach quick -m "msg"` | Quick commit + push |
+| `gitcoach stats` | View your statistics |
 
 ---
 
@@ -195,8 +195,8 @@ Change your level anytime in Config.
 
 ```bash
 # Clone
-git clone https://github.com/DNSZLSK/git-sense.git
-cd git-sense
+git clone https://github.com/DNSZLSK/gitcoach.git
+cd gitcoach
 
 # Install
 npm install
@@ -224,11 +224,11 @@ Contributions welcome! Please open an issue first to discuss what you'd like to 
 
 ## Author
 
-**Kewin (DNSZLSK)**
+**DNSZLSK**
 
 CDA Student at AFPA, France.
 
-Built for the [GitHub Copilot CLI Challenge 2025](https://dev.to/challenges/github).
+Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github).
 
 ---
 

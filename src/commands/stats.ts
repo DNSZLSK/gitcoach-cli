@@ -8,7 +8,7 @@ import { titleBox, infoBox } from '../ui/components/box.js';
 import { statsTable } from '../ui/components/table.js';
 
 export default class Stats extends Command {
-  static override description = 'View your GitSense statistics';
+  static override description = 'View your GitCoach statistics';
 
   static override examples = ['<%= config.bin %> stats'];
 
@@ -17,7 +17,7 @@ export default class Stats extends Command {
 
     const theme = getTheme();
 
-    logger.raw('\n' + titleBox(t('stats.title'), 'Your GitSense Journey'));
+    logger.raw('\n' + titleBox(t('stats.title'), 'Your GitCoach Journey'));
 
     const totalCommits = userConfig.getTotalCommits();
     const errorsPrevented = userConfig.getErrorsPreventedCount();

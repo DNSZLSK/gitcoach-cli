@@ -50,7 +50,7 @@ const DEFAULT_ANALYTICS: AnalyticsData = {
 };
 
 const analyticsStore = new Conf<AnalyticsData>({
-  projectName: 'gitsense',
+  projectName: 'gitcoach',
   configName: 'analytics',
   defaults: DEFAULT_ANALYTICS
 });

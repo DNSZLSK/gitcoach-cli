@@ -1,11 +1,11 @@
 {
-  "name": "gitsense",
+  "name": "gitcoach-cli",
   "version": "1.0.0",
   "description": "AI-powered Git coach CLI that prevents mistakes before they happen",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "gitsense": "./bin/run.js"
+    "gitcoach": "./bin/run.js"
   },
   "scripts": {
     "dev": "tsc -w",
@@ -33,8 +33,8 @@
   "author": "",
   "license": "MIT",
   "oclif": {
-    "bin": "gitsense",
-    "dirname": "gitsense",
+    "bin": "gitcoach",
+    "dirname": "gitcoach",
     "commands": "./dist/commands",
     "topicSeparator": " "
   },
@@ -51,7 +51,7 @@
     "conf": "^13.1.0",
     "i18next": "^24.2.2",
     "ora": "^8.1.1",
-    "simple-git": "^3.27.0"
+    "simple-git": "^3.30.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
