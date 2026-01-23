@@ -45,11 +45,18 @@ export async function promptInput(
 ): Promise<string> {
   const theme = getTheme();
 
-  return input({
+  const result = await input({
     message: theme.primary(message),
     default: defaultValue,
     validate
   });
+
+  // Detect escape sequences (^[ or \x1b) and treat as cancellation
+  if (result.includes('\x1b') || result.includes('^[')) {
+    return '';
+  }
+
+  return result;
 }
 
 export async function promptConfirm(
