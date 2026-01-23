@@ -149,7 +149,7 @@ function showAbout(): void {
   const theme = getTheme();
 
   logger.raw('\n' + theme.title('About GitCoach') + '\n');
-  logger.raw(theme.textBold('GitCoach v1.0.0'));
+  logger.raw(theme.textBold('GitCoach v1.0.2'));
   logger.raw(t('app.tagline') || 'Your AI-Powered Git Coach');
   logger.raw('');
   logger.raw(t('help.aboutDesc') || 'GitCoach is an interactive CLI tool that helps developers master Git');
