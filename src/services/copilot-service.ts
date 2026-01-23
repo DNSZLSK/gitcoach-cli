@@ -57,18 +57,8 @@ class CopilotService {
       // Summarize the diff for the prompt (extract file names and key changes)
       const diffSummary = this.summarizeDiff(diff);
 
-      // Build the prompt for commit message generation
-      const prompt = `You are a git commit message generator. Generate a single-line conventional commit message for these changes.
-
-Rules:
-- Use format: type: description (e.g., "feat: add user authentication")
-- Types: feat, fix, docs, style, refactor, test, chore
-- Keep it under 72 characters
-- Be concise and descriptive
-- Reply with ONLY the commit message, nothing else
-
-Changes:
-${diffSummary}`;
+      // Build a single-line prompt for commit message generation
+      const prompt = `Generate a conventional commit message (format: type: description) for these changes. Types: feat, fix, docs, refactor, test, chore. Keep under 72 chars. Reply with ONLY the commit message. Changes: ${diffSummary}`;
 
       // Use copilot CLI in non-interactive mode with silent output
       const { stdout, stderr } = await executeCommand(
@@ -104,8 +94,7 @@ ${diffSummary}`;
   private summarizeDiff(diff: string): string {
     const lines = diff.split('\n');
     const files: string[] = [];
-    const addedLines: string[] = [];
-    const removedLines: string[] = [];
+    const changes: string[] = [];
 
     for (const line of lines) {
       // Extract file names
@@ -115,37 +104,29 @@ ${diffSummary}`;
           files.push(match[1]);
         }
       }
-      // Extract added lines (limit to avoid overflow)
-      else if (line.startsWith('+') && !line.startsWith('+++') && addedLines.length < 15) {
+      // Extract key changes (added/removed lines)
+      else if ((line.startsWith('+') || line.startsWith('-')) &&
+               !line.startsWith('+++') && !line.startsWith('---') &&
+               changes.length < 8) {
         const content = line.substring(1).trim();
-        if (content.length > 0 && content.length < 150) {
-          addedLines.push(`+ ${content}`);
-        }
-      }
-      // Extract removed lines
-      else if (line.startsWith('-') && !line.startsWith('---') && removedLines.length < 10) {
-        const content = line.substring(1).trim();
-        if (content.length > 0 && content.length < 150) {
-          removedLines.push(`- ${content}`);
+        if (content.length > 3 && content.length < 80) {
+          changes.push(content);
         }
       }
     }
 
+    // Build a single-line summary
     const parts: string[] = [];
 
     if (files.length > 0) {
-      parts.push(`Files modified: ${files.slice(0, 5).join(', ')}`);
+      parts.push(`Files: ${files.slice(0, 3).join(', ')}`);
     }
 
-    if (addedLines.length > 0) {
-      parts.push(`Added:\n${addedLines.slice(0, 10).join('\n')}`);
+    if (changes.length > 0) {
+      parts.push(`Changes: ${changes.slice(0, 5).join('; ')}`);
     }
 
-    if (removedLines.length > 0) {
-      parts.push(`Removed:\n${removedLines.slice(0, 5).join('\n')}`);
-    }
-
-    return parts.join('\n\n').substring(0, 1000);
+    return parts.join('. ').substring(0, 500);
   }
 
   private escapeForShell(str: string): string {
