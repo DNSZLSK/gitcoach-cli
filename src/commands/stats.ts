@@ -41,11 +41,11 @@ export default class Stats extends Command {
     // Show some insights
     if (totalCommits > 0) {
       const aiPercentage = Math.round((aiCommits / totalCommits) * 100);
-      logger.raw('\n' + theme.textMuted(`AI-assisted commits: ${aiPercentage}%`));
+      logger.raw('\n' + theme.textMuted(t('stats.aiPercentage', { percentage: aiPercentage })));
     }
 
     if (errorsPrevented > 0) {
-      logger.raw(theme.success(`You've avoided ${errorsPrevented} potential mistake${errorsPrevented > 1 ? 's' : ''}!`));
+      logger.raw(theme.success(t('stats.mistakesAvoided', { count: errorsPrevented })));
     }
 
     logger.raw('');
