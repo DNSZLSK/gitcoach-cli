@@ -26,11 +26,24 @@ export async function showPushMenu(): Promise<PushResult> {
     const status = await gitService.getStatus();
     const currentBranch = status.current;
     const remote = 'origin';
+    const hasTracking = !!status.tracking;
 
     // Check if there's anything to push
-    if (status.ahead === 0 && status.behind === 0) {
+    // When no upstream is set, status.ahead is 0, so we need to check differently
+    const hasUnpushedCommits = await gitService.hasUnpushedCommits();
+
+    if (!hasUnpushedCommits && status.behind === 0) {
       logger.raw(infoBox(t('commands.push.nothingToPush')));
       return { pushed: false };
+    }
+
+    // Show info about first push if no tracking
+    if (!hasTracking && hasUnpushedCommits) {
+      const commitCount = await gitService.getUnpushedCommitCount();
+      logger.raw(infoBox(
+        t('commands.push.noUpstream', { branch: currentBranch, count: commitCount }),
+        t('commands.push.firstPush')
+      ));
     }
 
     // PREVENTION: Check if remote is ahead (need to pull first)
@@ -81,7 +94,10 @@ export async function showPushMenu(): Promise<PushResult> {
 
     // Check if there's anything to push after potential pull
     const updatedStatus = await gitService.getStatus();
-    if (updatedStatus.ahead === 0) {
+    const updatedHasUnpushed = await gitService.hasUnpushedCommits();
+    const needsSetUpstream = !updatedStatus.tracking;
+
+    if (!updatedHasUnpushed) {
       logger.raw(infoBox(t('commands.push.nothingToPush')));
       return { pushed: false };
     }
@@ -103,9 +119,12 @@ export async function showPushMenu(): Promise<PushResult> {
       }
     }
 
+    // Get commit count for display
+    const commitCount = await gitService.getUnpushedCommitCount();
+
     // Show what will be pushed
     logger.raw(theme.info(t('commands.push.confirm', {
-      count: updatedStatus.ahead,
+      count: commitCount,
       remote,
       branch: currentBranch
     })) + '\n');
@@ -117,12 +136,17 @@ export async function showPushMenu(): Promise<PushResult> {
       return { pushed: false };
     }
 
-    // Perform push
-    logger.command(`git push ${remote} ${currentBranch || ''}`);
+    // Perform push (with -u flag if no upstream is set)
+    if (needsSetUpstream) {
+      logger.command(`git push -u ${remote} ${currentBranch || ''}`);
+    } else {
+      logger.command(`git push ${remote} ${currentBranch || ''}`);
+    }
+
     await withSpinner(
       t('commands.push.pushing', { remote }),
       async () => {
-        await gitService.push(remote, currentBranch || undefined);
+        await gitService.push(remote, currentBranch || undefined, false, needsSetUpstream);
       },
       t('commands.push.success', { remote, branch: currentBranch })
     );

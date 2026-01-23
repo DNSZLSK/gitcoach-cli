@@ -80,7 +80,9 @@
       "forcePushWarning": "Forzar subida sobreescribira el historial remoto. Estas seguro?",
       "remoteBehind": "El remoto tiene {{count}} commit(s) nuevo(s). Deberias hacer pull primero!",
       "behindAction": "Que te gustaria hacer?",
-      "pullThenPush": "Hacer pull primero, luego push"
+      "pullThenPush": "Hacer pull primero, luego push",
+      "noUpstream": "La rama '{{branch}}' no tiene upstream. {{count}} commit(s) seran enviados.",
+      "firstPush": "Primer Push"
     },
     "pull": {
       "title": "Descargar Cambios",

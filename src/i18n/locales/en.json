@@ -80,7 +80,9 @@
       "forcePushWarning": "Force push will overwrite remote history. Are you sure?",
       "remoteBehind": "Remote has {{count}} new commit(s). You should pull first!",
       "behindAction": "What would you like to do?",
-      "pullThenPush": "Pull first, then push"
+      "pullThenPush": "Pull first, then push",
+      "noUpstream": "Branch '{{branch}}' has no upstream. {{count}} commit(s) will be pushed.",
+      "firstPush": "First Push"
     },
     "pull": {
       "title": "Pull Changes",
