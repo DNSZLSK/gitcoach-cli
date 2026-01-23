@@ -47,10 +47,11 @@ export async function showCommitMenu(): Promise<CommitResult> {
 
     let commitMessage: string = '';
 
-    // Check if user wants AI generation
-    const shouldAutoGenerate = userConfig.getAutoGenerateCommitMessages();
+    // Check if Copilot CLI is available and offer AI generation
+    const copilotAvailable = await copilotService.isAvailable();
+    const shouldOfferAI = copilotAvailable && userConfig.getAutoGenerateCommitMessages();
 
-    if (shouldAutoGenerate) {
+    if (shouldOfferAI) {
       const useAI = await promptConfirm(t('commands.commit.generateAI'), true);
 
       if (useAI) {
@@ -82,12 +83,18 @@ export async function showCommitMenu(): Promise<CommitResult> {
 
     // If no AI message, prompt for manual entry
     if (!commitMessage) {
+      logger.raw(theme.textMuted(t('commands.commit.emptyToCancel') || '(Leave empty to cancel)'));
+
       const manualMessage = await promptInput(
         t('commands.commit.enterMessage'),
         '',
         (value) => {
+          // Allow empty string for cancellation
+          if (value.trim().length === 0) {
+            return true;
+          }
           if (!isValidCommitMessage(value)) {
-            return 'Commit message must be at least 3 characters';
+            return t('commands.commit.messageTooShort') || 'Commit message must be at least 3 characters';
           }
           return true;
         }

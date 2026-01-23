@@ -67,7 +67,9 @@
       "useGenerated": "Usar este mensaje?",
       "editMessage": "Editar mensaje",
       "success": "Commit exitoso: {{message}}",
-      "cancelled": "Commit cancelado."
+      "cancelled": "Commit cancelado.",
+      "emptyToCancel": "(Deja vacio para cancelar)",
+      "messageTooShort": "El mensaje de commit debe tener al menos 3 caracteres"
     },
     "push": {
       "title": "Subir Cambios",

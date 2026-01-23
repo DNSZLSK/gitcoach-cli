@@ -67,7 +67,9 @@
       "useGenerated": "Use this message?",
       "editMessage": "Edit message",
       "success": "Successfully committed: {{message}}",
-      "cancelled": "Commit cancelled."
+      "cancelled": "Commit cancelled.",
+      "emptyToCancel": "(Leave empty to cancel)",
+      "messageTooShort": "Commit message must be at least 3 characters"
     },
     "push": {
       "title": "Push Changes",

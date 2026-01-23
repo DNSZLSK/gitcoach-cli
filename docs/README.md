@@ -1,3 +1,4 @@
+
 # GitSense
 
 **Your AI-Powered Git Coach**

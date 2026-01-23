@@ -16,13 +16,27 @@ class CopilotService {
     }
 
     try {
-      const { stderr } = await executeCommand('gh copilot --version');
-      this.available = !stderr.includes('unknown command');
+      const { stdout, stderr } = await executeCommand('gh copilot --version');
+      // Check if stderr contains error indicators
+      if (stderr.includes('unknown command') || stderr.includes('not found')) {
+        this.available = false;
+        return false;
+      }
+      // Check if stdout contains version info (e.g., "version 1.2.0" or "gh copilot version")
+      const hasVersion = stdout.toLowerCase().includes('version') || /\d+\.\d+/.test(stdout);
+      this.available = hasVersion || (!stderr.includes('error'));
+      logger.debug('Copilot availability check:', { stdout, stderr, available: this.available });
       return this.available;
-    } catch {
+    } catch (error) {
+      logger.debug('Copilot availability check failed:', error);
       this.available = false;
       return false;
     }
+  }
+
+  // Reset cached availability (useful for testing)
+  resetAvailability(): void {
+    this.available = null;
   }
 
   async generateCommitMessage(diff: string): Promise<CopilotSuggestion> {
