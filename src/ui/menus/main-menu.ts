@@ -60,11 +60,6 @@ export async function showMainMenu(): Promise<MainMenuAction> {
       value: 'branch' as MainMenuAction
     },
     {
-      name: theme.dim('─'.repeat(40)),
-      value: 'separator1' as MainMenuAction,
-      disabled: true
-    },
-    {
       name: theme.menuItem('U', `${t('menu.undo')} - ${t('menu.undoDesc')}`),
       value: 'undo' as MainMenuAction
     },
@@ -75,11 +70,6 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     {
       name: theme.menuItem('W', `${t('menu.stash')} - ${t('menu.stashDesc')}`),
       value: 'stash' as MainMenuAction
-    },
-    {
-      name: theme.dim('─'.repeat(40)),
-      value: 'separator2' as MainMenuAction,
-      disabled: true
     },
     {
       name: theme.menuItem('G', `${t('menu.config')} - ${t('menu.configDesc')}`),

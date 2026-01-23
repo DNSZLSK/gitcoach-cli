@@ -54,11 +54,13 @@ class CopilotService {
     }
 
     try {
-      // Summarize the diff for the prompt (extract file names and key changes)
+      // Summarize the diff for the prompt (extract file names only for safety)
       const diffSummary = this.summarizeDiff(diff);
 
-      // Build a single-line prompt for commit message generation
-      const prompt = `Generate a conventional commit message (format: type: description) for these changes. Types: feat, fix, docs, refactor, test, chore. Keep under 72 chars. Reply with ONLY the commit message. Changes: ${diffSummary}`;
+      // Build a simple prompt - keep it clean with only alphanumeric chars
+      const prompt = `Generate a conventional commit message for these file changes: ${diffSummary}. Use format type: description where type is feat fix docs refactor test or chore. Reply with only the commit message.`;
+
+      logger.debug('Copilot prompt:', prompt);
 
       // Use copilot CLI in non-interactive mode with silent output
       const { stdout, stderr } = await executeCommand(
@@ -94,7 +96,8 @@ class CopilotService {
   private summarizeDiff(diff: string): string {
     const lines = diff.split('\n');
     const files: string[] = [];
-    const changes: string[] = [];
+    let additions = 0;
+    let deletions = 0;
 
     for (const line of lines) {
       // Extract file names
@@ -104,29 +107,29 @@ class CopilotService {
           files.push(match[1]);
         }
       }
-      // Extract key changes (added/removed lines)
-      else if ((line.startsWith('+') || line.startsWith('-')) &&
-               !line.startsWith('+++') && !line.startsWith('---') &&
-               changes.length < 8) {
-        const content = line.substring(1).trim();
-        if (content.length > 3 && content.length < 80) {
-          changes.push(content);
-        }
+      // Count additions and deletions (safer than including code content)
+      else if (line.startsWith('+') && !line.startsWith('+++')) {
+        additions++;
+      }
+      else if (line.startsWith('-') && !line.startsWith('---')) {
+        deletions++;
       }
     }
 
-    // Build a single-line summary
+    // Build a safe single-line summary (no code content, just metadata)
     const parts: string[] = [];
 
     if (files.length > 0) {
-      parts.push(`Files: ${files.slice(0, 3).join(', ')}`);
+      // Clean file names (remove special chars)
+      const cleanFiles = files.slice(0, 5).map(f => f.replace(/[^a-zA-Z0-9._/-]/g, ''));
+      parts.push(`Files: ${cleanFiles.join(', ')}`);
     }
 
-    if (changes.length > 0) {
-      parts.push(`Changes: ${changes.slice(0, 5).join('; ')}`);
+    if (additions > 0 || deletions > 0) {
+      parts.push(`${additions} additions, ${deletions} deletions`);
     }
 
-    return parts.join('. ').substring(0, 500);
+    return parts.join('. ');
   }
 
   private escapeForShell(str: string): string {
