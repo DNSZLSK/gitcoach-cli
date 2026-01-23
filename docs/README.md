@@ -1,19 +1,36 @@
-
 # GitSense
 
-**Your AI-Powered Git Coach**
+```
+    ██████╗ ██╗████████╗███████╗███████╗███╗   ██╗███████╗███████╗
+   ██╔════╝ ██║╚══██╔══╝██╔════╝██╔════╝████╗  ██║██╔════╝██╔════╝
+   ██║  ███╗██║   ██║   ███████╗█████╗  ██╔██╗ ██║███████╗█████╗  
+   ██║   ██║██║   ██║   ╚════██║██╔══╝  ██║╚██╗██║╚════██║██╔══╝  
+   ╚██████╔╝██║   ██║   ███████║███████╗██║ ╚████║███████║███████╗
+    ╚═════╝ ╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝
+```
 
-GitSense is an interactive CLI tool that helps developers master Git through guided menus, intelligent suggestions, and real-time error prevention. Built for the GitHub Copilot CLI Challenge.
+**The AI-powered Git coach that prevents mistakes before they happen.**
 
-## Features
+[![GitHub](https://img.shields.io/github/stars/DNSZLSK/git-sense?style=social)](https://github.com/DNSZLSK/git-sense)
+[![npm version](https://img.shields.io/npm/v/gitsense)](https://www.npmjs.com/package/gitsense)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- **Interactive Menus**: Spring Boot CLI-inspired navigation for all Git operations
-- **AI Commit Messages**: Generate conventional commit messages using GitHub Copilot CLI
-- **Error Prevention**: Warnings before dangerous operations (force push, uncommitted changes, etc.)
-- **Multilingual**: Support for English, French, and Spanish
-- **Adaptive Modes**: Beginner, Intermediate, and Expert experience levels
-- **Themes**: Colored and Monochrome display options
-- **Analytics**: Track your Git usage and see errors prevented
+---
+
+## Why GitSense?
+
+Git is powerful but brutal to beginners. Cryptic error messages, lost work from uncommitted changes, fear of breaking everything.
+
+**GitSense is different:**
+- Prevents mistakes BEFORE they happen
+- Shows you the Git commands being executed (learn while you do)
+- Uses GitHub Copilot CLI to generate smart commit messages
+- Answers your Git questions in plain language
+- Works in English, French, and Spanish
+
+Built for the **GitHub Copilot CLI Challenge 2025**.
+
+---
 
 ## Quick Start
 
@@ -21,116 +38,199 @@ GitSense is an interactive CLI tool that helps developers master Git through gui
 # Install globally
 npm install -g gitsense
 
-# Run in any Git repository
+# Run in any directory
 gitsense
 
-# Quick commit and push (expert mode)
-gitsense quick -m "feat: add new feature"
+# That's it. GitSense guides you from there.
 ```
+
+---
+
+## Requirements
+
+- **Node.js** 18 or higher
+- **Git** installed and configured
+- **GitHub Copilot CLI** (optional, for AI features) - [Install here](https://github.com/github/copilot-cli)
+
+---
+
+## Features
+
+### Interactive Menus
+No more memorizing commands. Navigate Git with simple menus.
+
+```
+[S] Status   - View current changes
+[A] Add      - Stage files for commit
+[C] Commit   - Save your changes
+[P] Push     - Upload to remote
+[L] Pull     - Download changes
+[B] Branch   - Manage branches
+[U] Undo     - Undo actions
+[H] History  - View commit history
+[W] Stash    - Save work temporarily
+[?] Help     - Ask Git questions (AI)
+```
+
+### AI-Powered Commits
+GitSense uses GitHub Copilot CLI to analyze your changes and generate meaningful commit messages.
+
+```
+✔ Generate message with AI? Yes
+✔ Generating...
+
+╭─────────────── Suggested message ───────────────╮
+│                                                 │
+│   feat: add user authentication with OAuth2     │
+│                                                 │
+╰─────────────────────────────────────────────────╯
+
+? Use this message? (Y/n)
+```
+
+### Error Prevention
+GitSense warns you before you make mistakes:
+
+- **Uncommitted changes** before switching branches
+- **Force push** requires double confirmation
+- **Detached HEAD** with clear explanation
+- **No upstream** detected on first push
+
+```
+┏━━━━━━━━━━━━━━━━━━━ Warning ━━━━━━━━━━━━━━━━━━━━┓
+┃                                                ┃
+┃  You have uncommitted changes!                 ┃
+┃  Switching branches will lose your work.       ┃
+┃                                                ┃
+┃  Recommended: Commit or stash first.           ┃
+┃                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+```
+
+### Ask Git Questions
+Don't know what a rebase is? Just ask.
+
+```
+✔ Your question: What's the difference between merge and rebase?
+✔ Thinking...
+
+╭─────────────────── Answer ───────────────────╮
+│                                              │
+│  Both integrate changes from one branch      │
+│  into another, but differently:              │
+│                                              │
+│  **merge** creates a merge commit,           │
+│  preserving history as it happened.          │
+│                                              │
+│  **rebase** rewrites history by moving       │
+│  your commits on top of the target branch.   │
+│                                              │
+│  Use merge for shared branches.              │
+│  Use rebase for local cleanup.               │
+│                                              │
+╰──────────────────────────────────────────────╯
+```
+
+### Educational
+Every action shows the Git command being executed:
+
+```
+✔ Stage all files? Yes
+  > git add -A
+✔ 5 file(s) staged successfully.
+```
+
+You learn Git while using GitSense. Eventually, you won't need it anymore. That's the goal.
+
+### Multilingual
+Switch between English, French, and Spanish anytime.
+
+```
+✔ Select language: Français
+✔ Configuration updated.
+
+Bienvenue dans GitSense !
+```
+
+---
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `gitsense` | Launch interactive main menu |
-| `gitsense init` | First-time setup wizard |
-| `gitsense config` | Configure settings |
-| `gitsense quick` | Quick commit and push |
+| `gitsense` | Launch interactive menu |
+| `gitsense init` | First-time setup |
+| `gitsense config` | Change settings |
+| `gitsense quick -m "msg"` | Quick commit + push |
 | `gitsense stats` | View your statistics |
 
-## Main Menu Options
-
-- **[S] Status** - View current changes in your repository
-- **[A] Add** - Stage files for commit
-- **[C] Commit** - Create a commit with staged changes
-- **[P] Push** - Upload commits to remote repository
-- **[L] Pull** - Download changes from remote repository
-- **[B] Branch** - Create, switch, or delete branches
-- **[U] Undo** - Undo last commit, unstage files, or discard changes
-- **[H] History** - View commit history
-- **[W] Stash** - Save work temporarily
-- **[G] Config** - Change language, theme, and preferences
-- **[T] Stats** - View your GitSense statistics
-- **[?] Help** - Get assistance
-- **[Q] Quit** - Exit GitSense
+---
 
 ## Experience Levels
 
-### Beginner
-- Verbose explanations for every action
-- Step-by-step guidance
-- Educational tips after operations
+| Level | Description |
+|-------|-------------|
+| **Beginner** | Verbose explanations, step-by-step guidance |
+| **Intermediate** | Helpful tips, conventional commit suggestions |
+| **Expert** | Minimal output, warnings only |
 
-### Intermediate
-- Helpful tips with moderate explanations
-- Conventional commit suggestions
+Change your level anytime in Config.
 
-### Expert
-- Minimal output, only warnings and errors
-- Quick mode available (Ctrl+Shift+G hotkey concept)
-
-## Error Prevention
-
-GitSense protects you from common Git mistakes:
-
-- **Uncommitted Changes**: Warning before checkout that would lose changes
-- **Force Push**: Confirmation required with explanation of risks
-- **Wrong Branch**: Alert when operating on unexpected branch
-- **Detached HEAD**: Warning with guidance to create a branch
-- **No Remote**: Information when no remote is configured
-
-## Languages
-
-- English (en)
-- French (fr)
-- Spanish (es)
-
-Change language anytime in the Config menu.
-
-## Themes
-
-- **Colored**: Syntax highlighting with colors
-- **Monochrome**: Plain text output
-
-## GitHub Copilot CLI Integration
-
-GitSense leverages GitHub Copilot CLI for:
-
-1. **Commit Message Generation**: Analyzes your diff and suggests conventional commit messages
-2. **Context Analysis**: Suggests next actions based on repository state
-3. **Error Prediction**: Warns about potential issues before they occur
-
-Requires GitHub Copilot CLI to be installed and authenticated.
+---
 
 ## Tech Stack
 
-- TypeScript
-- Oclif (CLI framework)
-- Inquirer.js (Interactive prompts)
-- simple-git (Git operations)
-- i18next (Internationalization)
-- Chalk (Colors)
-- Boxen (Boxes)
-- Conf (Persistent configuration)
+- **TypeScript** - Type-safe code
+- **Oclif** - CLI framework
+- **Inquirer.js** - Interactive prompts
+- **simple-git** - Git operations
+- **GitHub Copilot CLI** - AI features
+- **i18next** - Internationalization
+- **Chalk** - Terminal colors
+- **Jest** - 181 tests
+
+---
 
 ## Development
 
 ```bash
-# Install dependencies
+# Clone
+git clone https://github.com/DNSZLSK/git-sense.git
+cd git-sense
+
+# Install
 npm install
 
 # Build
 npm run build
 
+# Test
+npm test
+
 # Run locally
 ./bin/run.js
 
-# Run tests
-npm test
-
-# Link globally for testing
+# Link globally
 npm link
 ```
+
+---
+
+## Contributing
+
+Contributions welcome! Please open an issue first to discuss what you'd like to change.
+
+---
+
+## Author
+
+**Kewin (DNSZLSK)**
+
+CDA Student at AFPA, France.
+
+Built for the [GitHub Copilot CLI Challenge 2025](https://dev.to/challenges/github).
+
+---
 
 ## License
 
