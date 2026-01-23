@@ -1,4 +1,4 @@
-// GitSense - AI-Powered Git Coach CLI
+// GitCoach - AI-Powered Git Coach CLI
 // Main entry point for programmatic usage
 
 export * from './config/defaults.js';

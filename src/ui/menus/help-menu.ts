@@ -28,7 +28,7 @@ export async function showHelpMenu(): Promise<void> {
           value: 'quickHelp'
         },
         {
-          name: theme.menuItem('I', t('help.about') || 'About GitSense'),
+          name: theme.menuItem('I', t('help.about') || 'About GitCoach'),
           value: 'about'
         },
         {
@@ -139,7 +139,7 @@ function showQuickReference(): void {
   logger.raw('');
 
   logger.raw(theme.textBold(t('help.tips') || 'Tips:'));
-  logger.raw('  - ' + (t('help.tip1') || 'GitSense warns you before dangerous operations'));
+  logger.raw('  - ' + (t('help.tip1') || 'GitCoach warns you before dangerous operations'));
   logger.raw('  - ' + (t('help.tip2') || 'AI can generate commit messages from your changes'));
   logger.raw('  - ' + (t('help.tip3') || 'Change experience level in settings for more/less guidance'));
   logger.raw('');
@@ -148,11 +148,11 @@ function showQuickReference(): void {
 function showAbout(): void {
   const theme = getTheme();
 
-  logger.raw('\n' + theme.title('About GitSense') + '\n');
-  logger.raw(theme.textBold('GitSense v1.0.0'));
+  logger.raw('\n' + theme.title('About GitCoach') + '\n');
+  logger.raw(theme.textBold('GitCoach v1.0.0'));
   logger.raw(t('app.tagline') || 'Your AI-Powered Git Coach');
   logger.raw('');
-  logger.raw(t('help.aboutDesc') || 'GitSense is an interactive CLI tool that helps developers master Git');
+  logger.raw(t('help.aboutDesc') || 'GitCoach is an interactive CLI tool that helps developers master Git');
   logger.raw(t('help.aboutDesc2') || 'through guided menus, intelligent suggestions, and real-time error prevention.');
   logger.raw('');
   logger.raw(theme.textBold(t('help.features') || 'Features:'));

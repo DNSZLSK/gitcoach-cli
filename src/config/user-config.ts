@@ -15,7 +15,7 @@ interface ConfigSchema {
 }
 
 const config = new Conf<ConfigSchema>({
-  projectName: 'gitsense',
+  projectName: 'gitcoach',
   defaults: {
     preferences: DEFAULT_PREFERENCES,
     app: DEFAULT_APP_CONFIG

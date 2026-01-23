@@ -33,9 +33,49 @@ class CopilotService {
     }
   }
 
-  // Reset cached availability (useful for testing)
+  // Reset cached availability (useful for testing or after installation)
   resetAvailability(): void {
     this.available = null;
+  }
+
+  /**
+   * Install GitHub Copilot CLI
+   * Returns true if installation succeeded, false otherwise
+   */
+  async installCopilotCli(): Promise<{ success: boolean; message: string }> {
+    try {
+      // Install the GitHub Copilot CLI package globally
+      const { stdout, stderr } = await executeCommand(
+        'npm install -g @githubnext/github-copilot-cli',
+        120000 // 2 minute timeout for installation
+      );
+
+      logger.debug('Copilot CLI installation output:', { stdout, stderr });
+
+      // Reset cached availability to force re-check
+      this.resetAvailability();
+
+      // Verify installation worked
+      const isNowAvailable = await this.isAvailable();
+
+      if (isNowAvailable) {
+        return {
+          success: true,
+          message: 'GitHub Copilot CLI installed successfully'
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Installation completed but Copilot CLI verification failed'
+        };
+      }
+    } catch (error) {
+      logger.debug('Copilot CLI installation failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Installation failed'
+      };
+    }
   }
 
   async generateCommitMessage(diff: string): Promise<CopilotSuggestion> {

@@ -1,11 +1,11 @@
 # Usage Guide
 
-## Starting GitSense
+## Starting GitCoach
 
 Navigate to any Git repository and run:
 
 ```bash
-gitsense
+gitcoach
 ```
 
 ## Main Menu Navigation
@@ -35,7 +35,7 @@ Use arrow keys to navigate and Enter to select.
 1. Select **[S] Status** to see your changes
 2. Select **[A] Add** to stage files
 3. Select **[C] Commit** to create a commit
-   - GitSense will offer to generate a message with AI
+   - GitCoach will offer to generate a message with AI
    - Or enter your own message
 
 ### Quick Commit and Push
@@ -44,13 +44,13 @@ For experienced users, use the quick command:
 
 ```bash
 # Stage all, commit with AI message, and push
-gitsense quick --all
+gitcoach quick --all
 
 # Commit with specific message and push
-gitsense quick -m "feat: add user authentication"
+gitcoach quick -m "feat: add user authentication"
 
 # Commit without pushing
-gitsense quick -m "wip: work in progress" --no-push
+gitcoach quick -m "wip: work in progress" --no-push
 ```
 
 ### Branch Management
@@ -67,7 +67,7 @@ Select **[B] Branch** from the main menu:
 Select **[T] Stats** or run:
 
 ```bash
-gitsense stats
+gitcoach stats
 ```
 
 See:
@@ -81,7 +81,7 @@ See:
 Access via **[G] Config** or:
 
 ```bash
-gitsense config
+gitcoach config
 ```
 
 ### Available Settings
@@ -131,7 +131,7 @@ Create a branch to save your work.
 
 ## AI Commit Messages
 
-When committing, GitSense can generate messages:
+When committing, GitCoach can generate messages:
 
 1. Enable "Auto Commit Messages" in config
 2. When committing, select "Generate commit message with AI"
@@ -164,6 +164,6 @@ Example generated messages:
 - Review diffs before committing
 
 ### Expert Tips
-- Use `gitsense quick` for rapid workflows
+- Use `gitcoach quick` for rapid workflows
 - Customize settings for minimal output
 - Leverage AI for consistent commit messages

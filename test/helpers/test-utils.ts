@@ -1,5 +1,5 @@
 /**
- * Test utilities for GitSense integration tests
+ * Test utilities for GitCoach integration tests
  */
 
 import { mkdirSync, rmSync, writeFileSync, existsSync } from 'node:fs';
@@ -21,7 +21,7 @@ export interface TestRepo {
  * Create a temporary test repository
  */
 export function createTestRepo(name: string = 'test-repo'): TestRepo {
-  const basePath = join(tmpdir(), 'gitsense-tests', `${name}-${Date.now()}`);
+  const basePath = join(tmpdir(), 'gitcoach-tests', `${name}-${Date.now()}`);
 
   // Create directory
   mkdirSync(basePath, { recursive: true });
@@ -76,7 +76,7 @@ export function createTestRepo(name: string = 'test-repo'): TestRepo {
  * Create a bare repository (for remote simulation)
  */
 export function createBareRepo(name: string = 'bare-repo'): { path: string; cleanup: () => void } {
-  const basePath = join(tmpdir(), 'gitsense-tests', `${name}-bare-${Date.now()}`);
+  const basePath = join(tmpdir(), 'gitcoach-tests', `${name}-bare-${Date.now()}`);
 
   mkdirSync(basePath, { recursive: true });
   execSync('git init --bare', { cwd: basePath, stdio: 'pipe' });
@@ -138,7 +138,7 @@ export async function waitFor(
  * Create a directory that is NOT a git repo
  */
 export function createNonGitDir(name: string = 'non-git'): { path: string; cleanup: () => void } {
-  const basePath = join(tmpdir(), 'gitsense-tests', `${name}-${Date.now()}`);
+  const basePath = join(tmpdir(), 'gitcoach-tests', `${name}-${Date.now()}`);
   mkdirSync(basePath, { recursive: true });
 
   return {

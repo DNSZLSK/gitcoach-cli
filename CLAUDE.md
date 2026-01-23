@@ -1,8 +1,8 @@
-# CLAUDE.md - GitSense Project
+# CLAUDE.md - GitCoach Project
 
 ## Project Overview
 
-**GitSense** is an AI-powered Git coach CLI that prevents mistakes before they happen. Built for the GitHub Copilot CLI Challenge (deadline: February 15, 2025, 23:59 PST).
+**GitCoach** is an AI-powered Git coach CLI that prevents mistakes before they happen. Built for the GitHub Copilot CLI Challenge (deadline: February 15, 2025, 23:59 PST).
 
 **Core Problem:** Beginners lose work from Git mistakes; developers waste time searching for solutions; commit messages are generic.
 
@@ -30,7 +30,7 @@
 ## Project Structure
 
 ```
-gitsense/
+gitcoach/
 ├── bin/
 │   └── run.js                    # Entry point
 ├── src/
