@@ -135,14 +135,58 @@ class GitService {
     return result.commit;
   }
 
-  async push(remote: string = 'origin', branch?: string, force: boolean = false): Promise<void> {
+  async push(remote: string = 'origin', branch?: string, force: boolean = false, setUpstream: boolean = false): Promise<void> {
     const currentBranch = branch || (await this.getCurrentBranch());
     if (!currentBranch) {
       throw new Error('Cannot push: no branch specified and detached HEAD');
     }
 
-    const options = force ? ['--force'] : [];
+    const options: string[] = [];
+    if (force) options.push('--force');
+    if (setUpstream) options.push('-u');
     await this.git.push(remote, currentBranch, options);
+  }
+
+  /**
+   * Check if there are local commits that haven't been pushed
+   * Works even when there's no upstream branch set
+   */
+  async hasUnpushedCommits(): Promise<boolean> {
+    try {
+      const status = await this.git.status();
+
+      // If tracking is set, use ahead count
+      if (status.tracking) {
+        return status.ahead > 0;
+      }
+
+      // No tracking branch - check if there are any commits at all
+      const log = await this.git.log({ maxCount: 1 });
+      return log.total > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get the number of unpushed commits
+   * Returns -1 if no upstream is set (meaning all commits are unpushed)
+   */
+  async getUnpushedCommitCount(): Promise<number> {
+    try {
+      const status = await this.git.status();
+
+      // If tracking is set, return ahead count
+      if (status.tracking) {
+        return status.ahead;
+      }
+
+      // No tracking branch - count all local commits
+      const log = await this.git.log();
+      return log.total;
+    } catch {
+      return 0;
+    }
   }
 
   async pull(remote: string = 'origin', branch?: string): Promise<void> {

@@ -101,14 +101,12 @@ export default class Index extends Command {
               return true;
             }
             // Stay in setup menu
-            await this.waitForKeypress();
             break;
           }
 
           case 'clone':
             await handleGitClone();
             // After clone, user needs to cd into directory, so exit
-            await this.waitForKeypress();
             return false;
 
           case 'quit':
@@ -133,42 +131,34 @@ export default class Index extends Command {
     switch (action) {
       case 'status':
         await showStatusScreen();
-        await this.waitForKeypress();
         return true;
 
       case 'add':
         await showAddMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'commit':
         await showCommitMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'push':
         await showPushMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'pull':
         await showPullMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'branch':
         await showBranchMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'undo':
         await showUndoMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'history':
         await showHistoryMenu();
-        await this.waitForKeypress();
         return true;
 
       case 'stash':
@@ -181,12 +171,10 @@ export default class Index extends Command {
 
       case 'stats':
         await this.config.runCommand('stats');
-        await this.waitForKeypress();
         return true;
 
       case 'help':
         await this.showHelp();
-        await this.waitForKeypress();
         return true;
 
       case 'quit':
@@ -224,19 +212,4 @@ export default class Index extends Command {
     logger.raw('  - Change your experience level in settings for more/less guidance\n');
   }
 
-  private async waitForKeypress(): Promise<void> {
-    // Use readline for proper terminal handling
-    const readline = await import('node:readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-
-    return new Promise((resolve) => {
-      rl.question('\n' + t('prompts.pressEnter'), () => {
-        rl.close();
-        resolve();
-      });
-    });
-  }
 }

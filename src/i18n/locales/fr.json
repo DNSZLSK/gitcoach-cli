@@ -80,7 +80,9 @@
       "forcePushWarning": "Forcer l'envoi ecrasera l'historique distant. Etes-vous sur ?",
       "remoteBehind": "Le serveur a {{count}} nouveau(x) commit(s). Vous devriez pull d'abord !",
       "behindAction": "Que souhaitez-vous faire ?",
-      "pullThenPush": "Pull d'abord, puis push"
+      "pullThenPush": "Pull d'abord, puis push",
+      "noUpstream": "La branche '{{branch}}' n'a pas d'upstream. {{count}} commit(s) seront envoyes.",
+      "firstPush": "Premier Push"
     },
     "pull": {
       "title": "Recuperer les Modifications",
