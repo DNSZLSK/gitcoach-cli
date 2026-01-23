@@ -276,7 +276,9 @@
     "errorsPrevented": "Erreurs Evitees",
     "aiCommits": "Commits Generes par l'IA",
     "timeSaved": "Temps Estime Economise",
-    "noData": "Pas encore de statistiques. Commencez a utiliser GitSense !"
+    "noData": "Pas encore de statistiques. Commencez a utiliser GitSense !",
+    "aiPercentage": "Commits assistes par l'IA : {{percentage}}%",
+    "mistakesAvoided": "Vous avez evite {{count}} erreur(s) potentielle(s) !"
   },
   "tips": {
     "beginner": {

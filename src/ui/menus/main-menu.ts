@@ -73,7 +73,7 @@ export async function showMainMenu(): Promise<MainMenuAction> {
       value: 'history' as MainMenuAction
     },
     {
-      name: theme.menuItem('T', `${t('menu.stash')} - ${t('menu.stashDesc')}`),
+      name: theme.menuItem('W', `${t('menu.stash')} - ${t('menu.stashDesc')}`),
       value: 'stash' as MainMenuAction
     },
     {
@@ -86,7 +86,7 @@ export async function showMainMenu(): Promise<MainMenuAction> {
       value: 'config' as MainMenuAction
     },
     {
-      name: theme.menuItem('I', `${t('menu.stats')} - ${t('menu.statsDesc')}`),
+      name: theme.menuItem('T', `${t('menu.stats')} - ${t('menu.statsDesc')}`),
       value: 'stats' as MainMenuAction
     },
     {
