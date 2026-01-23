@@ -5,7 +5,8 @@
       "Bash(npm run build:*)",
       "Bash(npx oclif manifest)",
       "Bash(node ./bin/run.js:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm ls:*)"
     ]
   }
 }
