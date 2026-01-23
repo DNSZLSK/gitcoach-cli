@@ -16,19 +16,18 @@ class CopilotService {
     }
 
     try {
-      const { stdout, stderr } = await executeCommand('gh copilot --version');
-      // Check if stderr contains error indicators
-      if (stderr.includes('unknown command') || stderr.includes('not found')) {
-        this.available = false;
-        return false;
-      }
-      // Check if stdout contains version info (e.g., "version 1.2.0" or "gh copilot version")
-      const hasVersion = stdout.toLowerCase().includes('version') || /\d+\.\d+/.test(stdout);
-      this.available = hasVersion || (!stderr.includes('error'));
-      logger.debug('Copilot availability check:', { stdout, stderr, available: this.available });
+      // Use the new GitHub Copilot CLI (not gh copilot extension)
+      const { stdout, stderr } = await executeCommand('copilot --version');
+
+      // Check for version number in output (e.g., "0.0.393")
+      const hasVersion = /\d+\.\d+/.test(stdout);
+      const hasError = stderr.includes('not found') || stderr.includes('not recognized');
+
+      this.available = hasVersion && !hasError;
+      logger.debug('Copilot CLI availability check:', { stdout, stderr, available: this.available });
       return this.available;
     } catch (error) {
-      logger.debug('Copilot availability check failed:', error);
+      logger.debug('Copilot CLI availability check failed:', error);
       this.available = false;
       return false;
     }
@@ -58,14 +57,26 @@ class CopilotService {
       // Summarize the diff for the prompt (extract file names and key changes)
       const diffSummary = this.summarizeDiff(diff);
 
-      // Use gh copilot explain with a specific prompt for commit message generation
-      const prompt = `Generate a single-line conventional commit message (format: type: description) for these git changes. Types: feat, fix, docs, style, refactor, test, chore. Changes: ${diffSummary}. Reply with ONLY the commit message, nothing else.`;
+      // Build the prompt for commit message generation
+      const prompt = `You are a git commit message generator. Generate a single-line conventional commit message for these changes.
 
+Rules:
+- Use format: type: description (e.g., "feat: add user authentication")
+- Types: feat, fix, docs, style, refactor, test, chore
+- Keep it under 72 characters
+- Be concise and descriptive
+- Reply with ONLY the commit message, nothing else
+
+Changes:
+${diffSummary}`;
+
+      // Use copilot CLI in non-interactive mode with silent output
       const { stdout, stderr } = await executeCommand(
-        `gh copilot explain "${this.escapeForShell(prompt)}"`
+        `copilot -p "${this.escapeForShell(prompt)}" -s`,
+        60000 // 60 second timeout for AI response
       );
 
-      logger.debug('Copilot response:', { stdout, stderr });
+      logger.debug('Copilot CLI response:', { stdout: stdout.substring(0, 500), stderr });
 
       // Parse the response to extract the suggested commit message
       const message = this.parseCommitMessage(stdout, stderr);
@@ -82,7 +93,7 @@ class CopilotService {
         message: 'Could not generate a commit message'
       };
     } catch (error) {
-      logger.debug('Copilot suggestion failed:', error);
+      logger.debug('Copilot CLI suggestion failed:', error);
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -93,7 +104,8 @@ class CopilotService {
   private summarizeDiff(diff: string): string {
     const lines = diff.split('\n');
     const files: string[] = [];
-    const changes: string[] = [];
+    const addedLines: string[] = [];
+    const removedLines: string[] = [];
 
     for (const line of lines) {
       // Extract file names
@@ -103,19 +115,37 @@ class CopilotService {
           files.push(match[1]);
         }
       }
-      // Extract added lines (limit to avoid command line overflow)
-      else if (line.startsWith('+') && !line.startsWith('+++') && changes.length < 10) {
+      // Extract added lines (limit to avoid overflow)
+      else if (line.startsWith('+') && !line.startsWith('+++') && addedLines.length < 15) {
         const content = line.substring(1).trim();
-        if (content.length > 0 && content.length < 100) {
-          changes.push(content);
+        if (content.length > 0 && content.length < 150) {
+          addedLines.push(`+ ${content}`);
+        }
+      }
+      // Extract removed lines
+      else if (line.startsWith('-') && !line.startsWith('---') && removedLines.length < 10) {
+        const content = line.substring(1).trim();
+        if (content.length > 0 && content.length < 150) {
+          removedLines.push(`- ${content}`);
         }
       }
     }
 
-    const filesSummary = files.length > 0 ? `Files: ${files.slice(0, 5).join(', ')}` : '';
-    const changesSummary = changes.length > 0 ? `Key changes: ${changes.slice(0, 5).join('; ')}` : '';
+    const parts: string[] = [];
 
-    return `${filesSummary}. ${changesSummary}`.substring(0, 500);
+    if (files.length > 0) {
+      parts.push(`Files modified: ${files.slice(0, 5).join(', ')}`);
+    }
+
+    if (addedLines.length > 0) {
+      parts.push(`Added:\n${addedLines.slice(0, 10).join('\n')}`);
+    }
+
+    if (removedLines.length > 0) {
+      parts.push(`Removed:\n${removedLines.slice(0, 5).join('\n')}`);
+    }
+
+    return parts.join('\n\n').substring(0, 1000);
   }
 
   private escapeForShell(str: string): string {
@@ -124,7 +154,7 @@ class CopilotService {
       .replace(/"/g, '\\"')
       .replace(/`/g, '\\`')
       .replace(/\$/g, '\\$')
-      .replace(/\n/g, ' ')
+      .replace(/\n/g, '\\n')
       .replace(/\r/g, '');
   }
 
@@ -142,10 +172,11 @@ class CopilotService {
 
     try {
       const context = `Branch: ${branch}. Staged files: ${stagedFiles.join(', ') || 'none'}. Modified files: ${modifiedFiles.join(', ') || 'none'}.`;
-      const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion.`;
+      const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion in one sentence.`;
 
       const { stdout, stderr } = await executeCommand(
-        `gh copilot explain "${this.escapeForShell(prompt)}"`
+        `copilot -p "${this.escapeForShell(prompt)}" -s`,
+        30000
       );
 
       const suggestion = this.parseSuggestion(stdout, stderr);
@@ -179,7 +210,8 @@ class CopilotService {
       const prompt = `Will this git action cause problems? ${context} Reply briefly in one sentence.`;
 
       const { stdout, stderr } = await executeCommand(
-        `gh copilot explain "${this.escapeForShell(prompt)}"`
+        `copilot -p "${this.escapeForShell(prompt)}" -s`,
+        30000
       );
 
       const prediction = this.parseSuggestion(stdout, stderr);
@@ -205,22 +237,18 @@ class CopilotService {
     }
 
     try {
-      const prompt = `Explain this Git concept briefly for a beginner: ${concept}`;
+      const prompt = `Explain this Git concept briefly for a beginner in 2-3 sentences: ${concept}`;
 
       const { stdout, stderr } = await executeCommand(
-        `gh copilot explain "${prompt}"`
+        `copilot -p "${this.escapeForShell(prompt)}" -s`,
+        30000
       );
 
-      if (stderr && stderr.includes('error')) {
-        return {
-          success: false,
-          message: 'Copilot returned an error'
-        };
-      }
+      const explanation = this.parseSuggestion(stdout, stderr);
 
       return {
-        success: true,
-        message: stdout.trim() || 'No explanation available'
+        success: !!explanation,
+        message: explanation || 'No explanation available'
       };
     } catch (error) {
       return {
@@ -230,26 +258,158 @@ class CopilotService {
     }
   }
 
-  private parseCommitMessage(output: string, stderr?: string): string | null {
-    // Combine stdout and stderr, as Copilot may output to either
+  /**
+   * Ask a Git question in natural language
+   */
+  async askGitQuestion(question: string): Promise<CopilotSuggestion> {
+    if (!(await this.isAvailable())) {
+      return {
+        success: false,
+        message: 'GitHub Copilot CLI is not available'
+      };
+    }
+
+    if (!question || question.trim().length === 0) {
+      return {
+        success: false,
+        message: 'Please provide a question'
+      };
+    }
+
+    try {
+      const prompt = `You are a Git expert assistant. Answer this Git question clearly and concisely. If it involves commands, show the exact command to use.
+
+Question: ${question}
+
+Provide a helpful answer in 2-4 sentences. If relevant, include the Git command.`;
+
+      const { stdout, stderr } = await executeCommand(
+        `copilot -p "${this.escapeForShell(prompt)}" -s`,
+        45000
+      );
+
+      const answer = this.parseAnswer(stdout, stderr);
+
+      return {
+        success: !!answer,
+        message: answer || 'Could not get an answer'
+      };
+    } catch (error) {
+      logger.debug('askGitQuestion failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Explain a Git error and suggest solutions
+   */
+  async explainGitError(errorMessage: string, command?: string): Promise<CopilotSuggestion> {
+    if (!(await this.isAvailable())) {
+      return {
+        success: false,
+        message: 'GitHub Copilot CLI is not available'
+      };
+    }
+
+    if (!errorMessage || errorMessage.trim().length === 0) {
+      return {
+        success: false,
+        message: 'No error message provided'
+      };
+    }
+
+    try {
+      const commandContext = command ? `Command executed: ${command}\n` : '';
+      const prompt = `You are a Git expert. Explain this Git error simply and provide a solution.
+
+${commandContext}Error message: ${errorMessage}
+
+1. Explain what this error means in simple terms (1 sentence)
+2. Provide the solution or command to fix it (1-2 sentences)
+
+Be concise and practical.`;
+
+      const { stdout, stderr } = await executeCommand(
+        `copilot -p "${this.escapeForShell(prompt)}" -s`,
+        45000
+      );
+
+      const explanation = this.parseAnswer(stdout, stderr);
+
+      return {
+        success: !!explanation,
+        message: explanation || 'Could not explain the error'
+      };
+    } catch (error) {
+      logger.debug('explainGitError failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  private parseAnswer(output: string, stderr?: string): string | null {
     const combined = `${output}\n${stderr || ''}`.trim();
     const lines = combined.split('\n');
 
-    // Patterns to filter out (GitHub CLI warnings, prompts, etc.)
+    // Patterns to filter out (CLI stats)
     const filterPatterns = [
-      /deprecated/i,
-      /extension/i,
-      /warning/i,
-      /error/i,
+      /^\s*$/,
+      /tokens?/i,
+      /model/i,
+      /session/i,
+      /^\d+\s*(tokens?|ms|s)\b/i,
+      /^Time:/i,
+      /^Cost:/i,
+      /^Input:/i,
+      /^Output:/i
+    ];
+
+    // Collect all meaningful lines
+    const meaningfulLines: string[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
+        continue;
+      }
+
+      if (trimmed.length >= 5) {
+        meaningfulLines.push(trimmed);
+      }
+    }
+
+    if (meaningfulLines.length > 0) {
+      return meaningfulLines.join('\n');
+    }
+
+    return null;
+  }
+
+  private parseCommitMessage(output: string, stderr?: string): string | null {
+    // Combine stdout and stderr
+    const combined = `${output}\n${stderr || ''}`.trim();
+    const lines = combined.split('\n');
+
+    // Patterns to filter out (CLI noise, stats, etc.)
+    const filterPatterns = [
       /^\s*$/,
       /^#/,
       /^\$/,
       /^>/,
-      /welcome/i,
-      /copilot/i,
-      /github/i,
-      /authenticate/i,
-      /^\d+\./  // Numbered lists
+      /tokens?/i,
+      /model/i,
+      /session/i,
+      /^\d+\s*(tokens?|ms|s)\b/i,
+      /^Time:/i,
+      /^Cost:/i,
+      /^Input:/i,
+      /^Output:/i
     ];
 
     // First pass: look for conventional commit pattern
@@ -264,7 +424,7 @@ class CopilotService {
       // Match conventional commit format
       if (/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?:\s*.+/i.test(trimmed)) {
         // Clean up the message (remove quotes, backticks)
-        return trimmed.replace(/^["'`]|["'`]$/g, '');
+        return trimmed.replace(/^["'`]|["'`]$/g, '').substring(0, 100);
       }
     }
 
@@ -308,21 +468,19 @@ class CopilotService {
 
     // Patterns to filter out
     const filterPatterns = [
-      /deprecated/i,
-      /extension/i,
-      /warning/i,
-      /error/i,
       /^\s*$/,
       /^#/,
       /^\$/,
       /^>/,
-      /welcome/i,
-      /copilot/i,
-      /github/i,
-      /authenticate/i
+      /tokens?/i,
+      /model/i,
+      /session/i,
+      /^\d+\s*(tokens?|ms|s)\b/i,
+      /^Time:/i,
+      /^Cost:/i
     ];
 
-    // Return meaningful content, filtering out CLI messages
+    // Return meaningful content, filtering out CLI stats
     for (const line of lines) {
       const trimmed = line.trim();
 
@@ -330,7 +488,7 @@ class CopilotService {
         continue;
       }
 
-      if (trimmed.length >= 10 && trimmed.length <= 200) {
+      if (trimmed.length >= 10 && trimmed.length <= 500) {
         return trimmed;
       }
     }

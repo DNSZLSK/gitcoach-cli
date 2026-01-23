@@ -24,6 +24,7 @@ import {
   handleGitClone,
   SetupMenuAction
 } from '../ui/menus/setup-menu.js';
+import { showHelpMenu } from '../ui/menus/help-menu.js';
 
 export default class Index extends Command {
   static override description = 'GitSense - Your AI-Powered Git Coach';
@@ -174,7 +175,7 @@ export default class Index extends Command {
         return true;
 
       case 'help':
-        await this.showHelp();
+        await showHelpMenu();
         return true;
 
       case 'quit':
@@ -183,33 +184,6 @@ export default class Index extends Command {
       default:
         return true;
     }
-  }
-
-  private async showHelp(): Promise<void> {
-    const theme = getTheme();
-
-    logger.raw('\n' + theme.title('GitSense Help') + '\n');
-    logger.raw(theme.textBold('Navigation:'));
-    logger.raw('  Use arrow keys to navigate menus');
-    logger.raw('  Press Enter to select an option');
-    logger.raw('  Press Ctrl+C to exit at any time\n');
-
-    logger.raw(theme.textBold('Main Commands:'));
-    logger.raw('  [S] Status  - View current changes in your repository');
-    logger.raw('  [A] Add     - Stage files for commit');
-    logger.raw('  [C] Commit  - Create a commit with staged changes');
-    logger.raw('  [P] Push    - Upload commits to remote repository');
-    logger.raw('  [L] Pull    - Download changes from remote repository');
-    logger.raw('  [B] Branch  - Create, switch, or delete branches\n');
-
-    logger.raw(theme.textBold('Settings:'));
-    logger.raw('  [G] Config  - Change language, theme, and preferences');
-    logger.raw('  [T] Stats   - View your GitSense statistics\n');
-
-    logger.raw(theme.textBold('Tips:'));
-    logger.raw('  - GitSense will warn you before dangerous operations');
-    logger.raw('  - AI can generate commit messages from your changes');
-    logger.raw('  - Change your experience level in settings for more/less guidance\n');
   }
 
 }

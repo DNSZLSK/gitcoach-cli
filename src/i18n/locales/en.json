@@ -212,6 +212,7 @@
     "copilotUnavailable": "GitHub Copilot CLI is not available. Some features may be limited."
   },
   "errors": {
+    "title": "Error",
     "generic": "An error occurred: {{message}}",
     "gitNotInstalled": "Git is not installed or not in PATH.",
     "networkError": "Network error. Please check your connection.",
@@ -219,7 +220,12 @@
     "invalidInput": "Invalid input: {{message}}",
     "branchExists": "Branch '{{branch}}' already exists.",
     "branchNotFound": "Branch '{{branch}}' not found.",
-    "mergeConflict": "Merge conflict in {{file}}."
+    "mergeConflict": "Merge conflict in {{file}}.",
+    "explainWithAI": "Would you like an AI explanation of this error?",
+    "analyzing": "Analyzing error...",
+    "explanation": "Explanation",
+    "noExplanation": "Could not explain the error",
+    "explainFailed": "Failed to get explanation"
   },
   "success": {
     "title": "Success",
@@ -298,6 +304,41 @@
       "commit": "Use conventional commits (feat:, fix:, docs:) for better history.",
       "rebase": "Consider rebasing for a cleaner history before merging."
     }
+  },
+  "help": {
+    "title": "Help",
+    "selectAction": "What would you like to do?",
+    "askQuestion": "Ask a Git question (AI)",
+    "quickHelp": "Quick reference",
+    "about": "About GitSense",
+    "askHint": "Ask any Git question in natural language. Leave empty to cancel.",
+    "askExamples": "Examples: \"How do I undo my last commit?\" or \"What is a rebase?\"",
+    "enterQuestion": "Your question:",
+    "questionTooShort": "Please enter a more detailed question",
+    "thinking": "Thinking...",
+    "answer": "Answer",
+    "noAnswer": "Could not get an answer",
+    "errorAsking": "Error getting answer",
+    "copilotUnavailable": "GitHub Copilot CLI is not available. Install it to ask questions.",
+    "quickRefTitle": "Quick Reference",
+    "navigation": "Navigation:",
+    "navArrows": "Use arrow keys to navigate menus",
+    "navEnter": "Press Enter to select an option",
+    "navCtrlC": "Press Ctrl+C to exit at any time",
+    "mainCommands": "Main Commands:",
+    "additionalCommands": "Additional Commands:",
+    "tips": "Tips:",
+    "tip1": "GitSense warns you before dangerous operations",
+    "tip2": "AI can generate commit messages from your changes",
+    "tip3": "Change experience level in settings for more/less guidance",
+    "aboutDesc": "GitSense is an interactive CLI tool that helps developers master Git",
+    "aboutDesc2": "through guided menus, intelligent suggestions, and real-time error prevention.",
+    "features": "Features:",
+    "feature1": "Interactive menus for all Git operations",
+    "feature2": "AI-generated commit messages with Copilot CLI",
+    "feature3": "Error prevention and warnings",
+    "feature4": "Multilingual support (EN, FR, ES)",
+    "feature5": "Beginner, Intermediate, and Expert modes"
   },
   "prompts": {
     "confirm": "Are you sure?",

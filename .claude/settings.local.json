@@ -6,7 +6,9 @@
       "Bash(npx oclif manifest)",
       "Bash(node ./bin/run.js:*)",
       "Bash(npm run lint)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(copilot --help:*)",
+      "Bash(copilot --version:*)"
     ]
   }
 }

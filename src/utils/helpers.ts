@@ -3,11 +3,11 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-export async function executeCommand(command: string): Promise<{ stdout: string; stderr: string }> {
+export async function executeCommand(command: string, timeout: number = 30000): Promise<{ stdout: string; stderr: string }> {
   try {
     const result = await execAsync(command, {
       maxBuffer: 1024 * 1024 * 10, // 10MB buffer
-      timeout: 30000 // 30 second timeout
+      timeout // Custom timeout (default 30s)
     });
     return result;
   } catch (error) {

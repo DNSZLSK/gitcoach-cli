@@ -212,6 +212,7 @@
     "copilotUnavailable": "GitHub Copilot CLI n'est pas disponible. Certaines fonctionnalites peuvent etre limitees."
   },
   "errors": {
+    "title": "Erreur",
     "generic": "Une erreur s'est produite : {{message}}",
     "gitNotInstalled": "Git n'est pas installe ou pas dans le PATH.",
     "networkError": "Erreur reseau. Verifiez votre connexion.",
@@ -219,7 +220,12 @@
     "invalidInput": "Entree invalide : {{message}}",
     "branchExists": "La branche '{{branch}}' existe deja.",
     "branchNotFound": "Branche '{{branch}}' introuvable.",
-    "mergeConflict": "Conflit de fusion dans {{file}}."
+    "mergeConflict": "Conflit de fusion dans {{file}}.",
+    "explainWithAI": "Voulez-vous une explication IA de cette erreur ?",
+    "analyzing": "Analyse de l'erreur...",
+    "explanation": "Explication",
+    "noExplanation": "Impossible d'expliquer l'erreur",
+    "explainFailed": "Echec de l'explication"
   },
   "success": {
     "title": "Succes",
@@ -298,6 +304,41 @@
       "commit": "Utilisez les commits conventionnels (feat:, fix:, docs:) pour un meilleur historique.",
       "rebase": "Considerez le rebase pour un historique plus propre avant de fusionner."
     }
+  },
+  "help": {
+    "title": "Aide",
+    "selectAction": "Que souhaitez-vous faire ?",
+    "askQuestion": "Poser une question sur Git (IA)",
+    "quickHelp": "Reference rapide",
+    "about": "A propos de GitSense",
+    "askHint": "Posez une question sur Git en langage naturel. Laissez vide pour annuler.",
+    "askExamples": "Exemples : \"Comment annuler mon dernier commit ?\" ou \"C'est quoi un rebase ?\"",
+    "enterQuestion": "Votre question :",
+    "questionTooShort": "Veuillez entrer une question plus detaillee",
+    "thinking": "Reflexion en cours...",
+    "answer": "Reponse",
+    "noAnswer": "Impossible d'obtenir une reponse",
+    "errorAsking": "Erreur lors de la demande",
+    "copilotUnavailable": "GitHub Copilot CLI n'est pas disponible. Installez-le pour poser des questions.",
+    "quickRefTitle": "Reference Rapide",
+    "navigation": "Navigation :",
+    "navArrows": "Utilisez les fleches pour naviguer dans les menus",
+    "navEnter": "Appuyez sur Entree pour selectionner",
+    "navCtrlC": "Appuyez sur Ctrl+C pour quitter a tout moment",
+    "mainCommands": "Commandes Principales :",
+    "additionalCommands": "Commandes Supplementaires :",
+    "tips": "Astuces :",
+    "tip1": "GitSense vous avertit avant les operations dangereuses",
+    "tip2": "L'IA peut generer des messages de commit a partir de vos modifications",
+    "tip3": "Changez le niveau d'experience dans les parametres pour plus/moins de guidage",
+    "aboutDesc": "GitSense est un outil CLI interactif qui aide les developpeurs a maitriser Git",
+    "aboutDesc2": "grace a des menus guides, des suggestions intelligentes et la prevention d'erreurs en temps reel.",
+    "features": "Fonctionnalites :",
+    "feature1": "Menus interactifs pour toutes les operations Git",
+    "feature2": "Messages de commit generes par l'IA avec Copilot CLI",
+    "feature3": "Prevention des erreurs et avertissements",
+    "feature4": "Support multilingue (EN, FR, ES)",
+    "feature5": "Modes Debutant, Intermediaire et Expert"
   },
   "prompts": {
     "confirm": "Etes-vous sur ?",
