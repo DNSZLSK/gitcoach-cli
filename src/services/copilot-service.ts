@@ -55,32 +55,20 @@ class CopilotService {
     }
 
     try {
-      // Truncate diff if too long to avoid command line limits
-      const truncatedDiff = diff.length > 3000 ? diff.substring(0, 3000) + '...' : diff;
+      // Summarize the diff for the prompt (extract file names and key changes)
+      const diffSummary = this.summarizeDiff(diff);
 
-      // Escape special characters for shell
-      const escapedDiff = truncatedDiff
-        .replace(/"/g, '\\"')
-        .replace(/`/g, '\\`')
-        .replace(/\$/g, '\\$')
-        .replace(/\n/g, ' ');
-
-      const prompt = `Generate a concise conventional commit message (type: description format) for these changes: ${escapedDiff}`;
+      // Use gh copilot explain with a specific prompt for commit message generation
+      const prompt = `Generate a single-line conventional commit message (format: type: description) for these git changes. Types: feat, fix, docs, style, refactor, test, chore. Changes: ${diffSummary}. Reply with ONLY the commit message, nothing else.`;
 
       const { stdout, stderr } = await executeCommand(
-        `gh copilot suggest -t shell "${prompt}"`
+        `gh copilot explain "${this.escapeForShell(prompt)}"`
       );
 
-      if (stderr && stderr.includes('error')) {
-        logger.debug('Copilot error:', stderr);
-        return {
-          success: false,
-          message: 'Copilot returned an error'
-        };
-      }
+      logger.debug('Copilot response:', { stdout, stderr });
 
       // Parse the response to extract the suggested commit message
-      const message = this.parseCommitMessage(stdout);
+      const message = this.parseCommitMessage(stdout, stderr);
 
       if (message) {
         return {
@@ -102,6 +90,44 @@ class CopilotService {
     }
   }
 
+  private summarizeDiff(diff: string): string {
+    const lines = diff.split('\n');
+    const files: string[] = [];
+    const changes: string[] = [];
+
+    for (const line of lines) {
+      // Extract file names
+      if (line.startsWith('diff --git')) {
+        const match = line.match(/b\/(.+)$/);
+        if (match) {
+          files.push(match[1]);
+        }
+      }
+      // Extract added lines (limit to avoid command line overflow)
+      else if (line.startsWith('+') && !line.startsWith('+++') && changes.length < 10) {
+        const content = line.substring(1).trim();
+        if (content.length > 0 && content.length < 100) {
+          changes.push(content);
+        }
+      }
+    }
+
+    const filesSummary = files.length > 0 ? `Files: ${files.slice(0, 5).join(', ')}` : '';
+    const changesSummary = changes.length > 0 ? `Key changes: ${changes.slice(0, 5).join('; ')}` : '';
+
+    return `${filesSummary}. ${changesSummary}`.substring(0, 500);
+  }
+
+  private escapeForShell(str: string): string {
+    return str
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/`/g, '\\`')
+      .replace(/\$/g, '\\$')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, '');
+  }
+
   async analyzeContext(
     branch: string,
     stagedFiles: string[],
@@ -116,20 +142,13 @@ class CopilotService {
 
     try {
       const context = `Branch: ${branch}. Staged files: ${stagedFiles.join(', ') || 'none'}. Modified files: ${modifiedFiles.join(', ') || 'none'}.`;
-      const prompt = `Given this git state: ${context} What should the user do next? Give a brief suggestion.`;
+      const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion.`;
 
       const { stdout, stderr } = await executeCommand(
-        `gh copilot suggest -t shell "${prompt}"`
+        `gh copilot explain "${this.escapeForShell(prompt)}"`
       );
 
-      if (stderr && stderr.includes('error')) {
-        return {
-          success: false,
-          message: 'Copilot returned an error'
-        };
-      }
-
-      const suggestion = this.parseSuggestion(stdout);
+      const suggestion = this.parseSuggestion(stdout, stderr);
 
       return {
         success: !!suggestion,
@@ -157,13 +176,13 @@ class CopilotService {
 
     try {
       const context = `Action: ${action}. Branch: ${currentBranch}. Uncommitted changes: ${hasUncommitted}.`;
-      const prompt = `Will this action cause problems? ${context} Answer briefly.`;
+      const prompt = `Will this git action cause problems? ${context} Reply briefly in one sentence.`;
 
-      const { stdout } = await executeCommand(
-        `gh copilot suggest -t shell "${prompt}"`
+      const { stdout, stderr } = await executeCommand(
+        `gh copilot explain "${this.escapeForShell(prompt)}"`
       );
 
-      const prediction = this.parseSuggestion(stdout);
+      const prediction = this.parseSuggestion(stdout, stderr);
 
       return {
         success: true,
@@ -211,38 +230,107 @@ class CopilotService {
     }
   }
 
-  private parseCommitMessage(output: string): string | null {
-    // Try to extract a commit message from Copilot output
-    // Copilot may return the message in various formats
+  private parseCommitMessage(output: string, stderr?: string): string | null {
+    // Combine stdout and stderr, as Copilot may output to either
+    const combined = `${output}\n${stderr || ''}`.trim();
+    const lines = combined.split('\n');
 
-    const lines = output.trim().split('\n');
+    // Patterns to filter out (GitHub CLI warnings, prompts, etc.)
+    const filterPatterns = [
+      /deprecated/i,
+      /extension/i,
+      /warning/i,
+      /error/i,
+      /^\s*$/,
+      /^#/,
+      /^\$/,
+      /^>/,
+      /welcome/i,
+      /copilot/i,
+      /github/i,
+      /authenticate/i,
+      /^\d+\./  // Numbered lists
+    ];
 
-    // Look for conventional commit pattern
+    // First pass: look for conventional commit pattern
     for (const line of lines) {
       const trimmed = line.trim();
+
+      // Skip filtered patterns
+      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
+        continue;
+      }
+
+      // Match conventional commit format
       if (/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?:\s*.+/i.test(trimmed)) {
-        return trimmed;
+        // Clean up the message (remove quotes, backticks)
+        return trimmed.replace(/^["'`]|["'`]$/g, '');
       }
     }
 
-    // If no conventional commit found, return the first non-empty line
+    // Second pass: look for any meaningful commit-like message
     for (const line of lines) {
       const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#') && trimmed.length > 3) {
-        return trimmed;
+
+      // Skip filtered patterns
+      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
+        continue;
+      }
+
+      // Accept lines that look like commit messages (start with verb, reasonable length)
+      if (trimmed.length >= 10 && trimmed.length <= 100) {
+        // Check if it starts with a common commit verb
+        if (/^(add|update|fix|remove|refactor|implement|create|delete|change|improve|move|rename)/i.test(trimmed)) {
+          return trimmed.replace(/^["'`]|["'`]$/g, '');
+        }
+      }
+    }
+
+    // Third pass: return first clean line as fallback
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
+        continue;
+      }
+
+      if (trimmed.length >= 5 && trimmed.length <= 100) {
+        return trimmed.replace(/^["'`]|["'`]$/g, '');
       }
     }
 
     return null;
   }
 
-  private parseSuggestion(output: string): string | null {
-    const lines = output.trim().split('\n');
+  private parseSuggestion(output: string, stderr?: string): string | null {
+    const combined = `${output}\n${stderr || ''}`.trim();
+    const lines = combined.split('\n');
 
-    // Return meaningful content, filtering out command prompts
+    // Patterns to filter out
+    const filterPatterns = [
+      /deprecated/i,
+      /extension/i,
+      /warning/i,
+      /error/i,
+      /^\s*$/,
+      /^#/,
+      /^\$/,
+      /^>/,
+      /welcome/i,
+      /copilot/i,
+      /github/i,
+      /authenticate/i
+    ];
+
+    // Return meaningful content, filtering out CLI messages
     for (const line of lines) {
       const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('$') && !trimmed.startsWith('>')) {
+
+      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
+        continue;
+      }
+
+      if (trimmed.length >= 10 && trimmed.length <= 200) {
         return trimmed;
       }
     }

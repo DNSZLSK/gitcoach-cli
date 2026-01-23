@@ -46,43 +46,54 @@ export async function showCommitMenu(): Promise<CommitResult> {
     logger.raw('');
 
     let commitMessage: string = '';
+    let copilotFailed = false;
 
     // Check if Copilot CLI is available and offer AI generation
     const copilotAvailable = await copilotService.isAvailable();
-    const shouldOfferAI = copilotAvailable && userConfig.getAutoGenerateCommitMessages();
+    const wantsAutoGenerate = userConfig.getAutoGenerateCommitMessages();
 
-    if (shouldOfferAI) {
-      const useAI = await promptConfirm(t('commands.commit.generateAI'), true);
+    if (wantsAutoGenerate) {
+      if (copilotAvailable) {
+        const useAI = await promptConfirm(t('commands.commit.generateAI'), true);
 
-      if (useAI) {
-        const spinner = createSpinner({ text: t('commands.commit.generating') });
-        spinner.start();
+        if (useAI) {
+          const spinner = createSpinner({ text: t('commands.commit.generating') });
+          spinner.start();
 
-        try {
-          const diff = await gitService.getDiff(true);
-          const suggestion = await copilotService.generateCommitMessage(diff);
+          try {
+            const diff = await gitService.getDiff(true);
+            const suggestion = await copilotService.generateCommitMessage(diff);
 
-          if (suggestion.success) {
-            spinner.succeed();
-            logger.raw(infoBox(suggestion.message, t('commands.commit.suggested', { message: '' })));
+            if (suggestion.success && suggestion.message) {
+              spinner.succeed();
+              logger.raw(infoBox(suggestion.message, t('commands.commit.suggested', { message: '' })));
 
-            const useGenerated = await promptConfirm(t('commands.commit.useGenerated'), true);
+              const useGenerated = await promptConfirm(t('commands.commit.useGenerated'), true);
 
-            if (useGenerated) {
-              commitMessage = suggestion.message;
-              userConfig.incrementAiCommitsGenerated();
+              if (useGenerated) {
+                commitMessage = suggestion.message;
+                userConfig.incrementAiCommitsGenerated();
+              }
+            } else {
+              spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
+              copilotFailed = true;
             }
-          } else {
-            spinner.warn('AI generation unavailable');
+          } catch {
+            spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
+            copilotFailed = true;
           }
-        } catch {
-          spinner.warn('AI generation failed');
         }
+      } else {
+        // Copilot not available - show info message
+        logger.raw(theme.textMuted(t('commands.commit.copilotUnavailable') || 'GitHub Copilot CLI not available'));
       }
     }
 
     // If no AI message, prompt for manual entry
     if (!commitMessage) {
+      if (copilotFailed) {
+        logger.raw(theme.textMuted(t('commands.commit.enterManually') || 'Please enter your commit message manually:'));
+      }
       logger.raw(theme.textMuted(t('commands.commit.emptyToCancel') || '(Leave empty to cancel)'));
 
       const manualMessage = await promptInput(

@@ -69,7 +69,10 @@
       "success": "Commit exitoso: {{message}}",
       "cancelled": "Commit cancelado.",
       "emptyToCancel": "(Deja vacio para cancelar)",
-      "messageTooShort": "El mensaje de commit debe tener al menos 3 caracteres"
+      "messageTooShort": "El mensaje de commit debe tener al menos 3 caracteres",
+      "copilotUnavailable": "GitHub Copilot CLI no disponible - ingresa el mensaje manualmente",
+      "aiGenerationFailed": "Generacion IA fallida - ingresa el mensaje manualmente",
+      "enterManually": "Ingresa tu mensaje de commit:"
     },
     "push": {
       "title": "Subir Cambios",

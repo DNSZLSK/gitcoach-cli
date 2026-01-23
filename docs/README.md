@@ -46,9 +46,12 @@ gitsense quick -m "feat: add new feature"
 - **[P] Push** - Upload commits to remote repository
 - **[L] Pull** - Download changes from remote repository
 - **[B] Branch** - Create, switch, or delete branches
+- **[U] Undo** - Undo last commit, unstage files, or discard changes
+- **[H] History** - View commit history
+- **[W] Stash** - Save work temporarily
 - **[G] Config** - Change language, theme, and preferences
 - **[T] Stats** - View your GitSense statistics
-- **[H] Help** - Get assistance
+- **[?] Help** - Get assistance
 - **[Q] Quit** - Exit GitSense
 
 ## Experience Levels
