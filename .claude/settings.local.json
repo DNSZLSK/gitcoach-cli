@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm run build:*)",
+      "Bash(npx oclif manifest)",
+      "Bash(node ./bin/run.js:*)",
+      "Bash(npm run lint)"
+    ]
+  }
+}

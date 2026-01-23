@@ -1,0 +1,242 @@
+import { Command } from '@oclif/core';
+import { initI18n, t } from '../i18n/index.js';
+import { userConfig } from '../config/user-config.js';
+import { gitService } from '../services/git-service.js';
+import { logger } from '../utils/logger.js';
+import { getTheme } from '../ui/themes/index.js';
+import {
+  showMainMenu,
+  showStatusScreen,
+  MainMenuAction
+} from '../ui/menus/main-menu.js';
+import { showAddMenu } from '../ui/menus/add-menu.js';
+import { showCommitMenu } from '../ui/menus/commit-menu.js';
+import { showBranchMenu } from '../ui/menus/branch-menu.js';
+import { showConfigMenu } from '../ui/menus/config-menu.js';
+import { showPushMenu } from '../ui/menus/push-menu.js';
+import { showPullMenu } from '../ui/menus/pull-menu.js';
+import { showUndoMenu } from '../ui/menus/undo-menu.js';
+import { showHistoryMenu } from '../ui/menus/history-menu.js';
+import { showStashMenu } from '../ui/menus/stash-menu.js';
+import {
+  showSetupMenu,
+  handleGitInit,
+  handleGitClone,
+  SetupMenuAction
+} from '../ui/menus/setup-menu.js';
+
+export default class Index extends Command {
+  static override description = 'GitSense - Your AI-Powered Git Coach';
+
+  static override examples = [
+    '<%= config.bin %>',
+    '<%= config.bin %> init',
+    '<%= config.bin %> config',
+    '<%= config.bin %> quick'
+  ];
+
+  async run(): Promise<void> {
+    // Initialize i18n
+    await initI18n();
+
+    // Check if we're in a git repository
+    const isRepo = await gitService.isGitRepo();
+
+    if (!isRepo) {
+      // Show setup menu for non-git directories
+      const setupResult = await this.handleSetupMenu();
+      if (!setupResult) {
+        // User chose to quit or setup failed
+        return;
+      }
+      // After init, continue to main menu
+    }
+
+    // Update last used timestamp
+    userConfig.updateLastUsed();
+
+    // Check if first run and needs setup
+    if (userConfig.isFirstRun()) {
+      // Run init command for first-time setup
+      await this.config.runCommand('init');
+    }
+
+    // Main menu loop
+    let running = true;
+
+    while (running) {
+      try {
+        const action = await showMainMenu();
+        running = await this.handleAction(action);
+      } catch (error) {
+        // Handle Ctrl+C gracefully
+        if (error instanceof Error && error.message.includes('User force closed')) {
+          running = false;
+        } else {
+          logger.error(t('errors.generic', {
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }));
+        }
+      }
+    }
+
+    // Goodbye message
+    const theme = getTheme();
+    logger.raw('\n' + theme.textMuted(t('app.goodbye')) + '\n');
+  }
+
+  private async handleSetupMenu(): Promise<boolean> {
+    const theme = getTheme();
+
+    let running = true;
+    while (running) {
+      try {
+        const action: SetupMenuAction = await showSetupMenu();
+
+        switch (action) {
+          case 'init': {
+            const initSuccess = await handleGitInit();
+            if (initSuccess) {
+              // Repo created, can continue to main menu
+              return true;
+            }
+            // Stay in setup menu
+            await this.waitForKeypress();
+            break;
+          }
+
+          case 'clone':
+            await handleGitClone();
+            // After clone, user needs to cd into directory, so exit
+            await this.waitForKeypress();
+            return false;
+
+          case 'quit':
+            logger.raw('\n' + theme.textMuted(t('app.goodbye')) + '\n');
+            return false;
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('User force closed')) {
+          running = false;
+        } else {
+          logger.error(t('errors.generic', {
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }));
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private async handleAction(action: MainMenuAction): Promise<boolean> {
+    switch (action) {
+      case 'status':
+        await showStatusScreen();
+        await this.waitForKeypress();
+        return true;
+
+      case 'add':
+        await showAddMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'commit':
+        await showCommitMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'push':
+        await showPushMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'pull':
+        await showPullMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'branch':
+        await showBranchMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'undo':
+        await showUndoMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'history':
+        await showHistoryMenu();
+        await this.waitForKeypress();
+        return true;
+
+      case 'stash':
+        await showStashMenu();
+        return true;
+
+      case 'config':
+        await showConfigMenu();
+        return true;
+
+      case 'stats':
+        await this.config.runCommand('stats');
+        await this.waitForKeypress();
+        return true;
+
+      case 'help':
+        await this.showHelp();
+        await this.waitForKeypress();
+        return true;
+
+      case 'quit':
+        return false;
+
+      default:
+        return true;
+    }
+  }
+
+  private async showHelp(): Promise<void> {
+    const theme = getTheme();
+
+    logger.raw('\n' + theme.title('GitSense Help') + '\n');
+    logger.raw(theme.textBold('Navigation:'));
+    logger.raw('  Use arrow keys to navigate menus');
+    logger.raw('  Press Enter to select an option');
+    logger.raw('  Press Ctrl+C to exit at any time\n');
+
+    logger.raw(theme.textBold('Main Commands:'));
+    logger.raw('  [S] Status  - View current changes in your repository');
+    logger.raw('  [A] Add     - Stage files for commit');
+    logger.raw('  [C] Commit  - Create a commit with staged changes');
+    logger.raw('  [P] Push    - Upload commits to remote repository');
+    logger.raw('  [L] Pull    - Download changes from remote repository');
+    logger.raw('  [B] Branch  - Create, switch, or delete branches\n');
+
+    logger.raw(theme.textBold('Settings:'));
+    logger.raw('  [G] Config  - Change language, theme, and preferences');
+    logger.raw('  [T] Stats   - View your GitSense statistics\n');
+
+    logger.raw(theme.textBold('Tips:'));
+    logger.raw('  - GitSense will warn you before dangerous operations');
+    logger.raw('  - AI can generate commit messages from your changes');
+    logger.raw('  - Change your experience level in settings for more/less guidance\n');
+  }
+
+  private async waitForKeypress(): Promise<void> {
+    // Use readline for proper terminal handling
+    const readline = await import('node:readline');
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    return new Promise((resolve) => {
+      rl.question('\n' + t('prompts.pressEnter'), () => {
+        rl.close();
+        resolve();
+      });
+    });
+  }
+}
