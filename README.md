@@ -129,7 +129,10 @@ No more memorizing commands. Navigate Git with simple menus.
   [U] Undo     - Undo actions
   [H] History  - View commit history
   [W] Stash    - Save work temporarily
+  [G] Config   - Configure GitCoach
+  [T] Stats    - View your statistics
   [?] Help     - Ask Git questions (AI)
+  [Q] Quit     - Exit GitCoach
 ```
 
 ### AI-Powered Commits
@@ -227,43 +230,17 @@ Don't know what a rebase is? Just ask.
 +------------------------------------------------+
 ```
 
-### Conflict Resolution
-
-When merge conflicts occur, GitCoach guides you through resolution:
-
-```
-+------------ Merge Conflicts Detected ----------+
-|                                                |
-|  A conflict occurs when the same file was      |
-|  modified both locally and on the server.      |
-|  Git cannot automatically merge these changes. |
-|                                                |
-+------------------------------------------------+
-
-Conflicting files:
-  - src/index.ts
-  - README.md
-
-? How do you want to resolve?
-> [V] View conflicts
-  [O] Open in editor
-  [A] Accept local changes (--ours)
-  [T] Accept remote changes (--theirs)
-  [M] Mark as resolved
-  [X] Abort merge
-```
-
 ### Branch Management
 
 Create, switch, merge, and delete branches with guidance:
 
 ```
 ? Select an option
-> [C] Create a new branch
-  [S] Switch branch
-  [F] Merge a branch
-  [D] Delete a branch
-  [R] Return
+> Create a new branch
+  Switch branch
+  Merge a branch
+  Delete a branch
+  Back
 ```
 
 **Merge with explanation:**
