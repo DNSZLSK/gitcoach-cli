@@ -11,7 +11,7 @@
 
 **The AI-powered Git coach that prevents mistakes before they happen.**
 
-[![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach?style=social)](https://github.com/DNSZLSK/gitcoach)
+[![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach?style=social)](https://github.com/DNSZLSK/gitcoach-cli)
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
