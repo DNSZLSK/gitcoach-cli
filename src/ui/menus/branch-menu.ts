@@ -1,7 +1,7 @@
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
 import { promptSelect, promptInput, promptConfirm } from '../components/prompt.js';
-import { successBox, warningBox, errorBox } from '../components/box.js';
+import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { branchTable } from '../components/table.js';
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
@@ -9,7 +9,7 @@ import { preventionService } from '../../services/prevention-service.js';
 import { isValidBranchName } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
 
-export type BranchAction = 'list' | 'create' | 'switch' | 'delete' | 'back';
+export type BranchAction = 'list' | 'create' | 'switch' | 'merge' | 'delete' | 'back';
 
 export interface BranchResult {
   action: BranchAction;
@@ -30,6 +30,7 @@ export async function showBranchMenu(): Promise<BranchResult> {
       { name: t('commands.branch.list'), value: 'list' },
       { name: t('commands.branch.create'), value: 'create' },
       { name: t('commands.branch.switch'), value: 'switch' },
+      { name: t('commands.branch.merge'), value: 'merge' },
       { name: t('commands.branch.delete'), value: 'delete' },
       { name: t('menu.back'), value: 'back' }
     ]);
@@ -43,6 +44,9 @@ export async function showBranchMenu(): Promise<BranchResult> {
 
       case 'switch':
         return await switchBranch();
+
+      case 'merge':
+        return await mergeBranch();
 
       case 'delete':
         return await deleteBranch();
@@ -60,8 +64,8 @@ export async function showBranchMenu(): Promise<BranchResult> {
 async function listBranches(): Promise<BranchResult> {
   const theme = getTheme();
 
-  logger.command('git branch -a');
-  const branches = await gitService.getBranches();
+  logger.command('git branch');
+  const branches = await gitService.getLocalBranches();
 
   logger.raw('\n' + theme.subtitle(t('commands.branch.list')) + '\n');
   logger.raw(branchTable(branches));
@@ -111,7 +115,7 @@ async function createBranch(): Promise<BranchResult> {
 
 async function switchBranch(): Promise<BranchResult> {
   const theme = getTheme();
-  const branches = await gitService.getBranches();
+  const branches = await gitService.getLocalBranches();
 
   // Filter out current branch
   const otherBranches = branches.filter(b => !b.current);
@@ -166,7 +170,7 @@ async function switchBranch(): Promise<BranchResult> {
 
 async function deleteBranch(): Promise<BranchResult> {
   const theme = getTheme();
-  const branches = await gitService.getBranches();
+  const branches = await gitService.getLocalBranches();
 
   // Filter out current branch
   const deletableBranches = branches.filter(b => !b.current);
@@ -219,4 +223,91 @@ async function deleteBranch(): Promise<BranchResult> {
   ));
 
   return { action: 'delete', branch: selectedBranch, success: true };
+}
+
+async function mergeBranch(): Promise<BranchResult> {
+  const theme = getTheme();
+  const currentBranch = await gitService.getCurrentBranch();
+  const branches = await gitService.getLocalBranches();
+
+  // Filter out current branch
+  const otherBranches = branches.filter(b => !b.current);
+
+  if (otherBranches.length === 0) {
+    logger.raw(warningBox(t('commands.branch.noOtherBranches') || 'No other branches available'));
+    return { action: 'merge', success: false };
+  }
+
+  // Show educational explanation
+  logger.raw('\n' + infoBox(
+    t('commands.branch.mergeExplain', { branch: currentBranch || 'current' }),
+    t('commands.branch.merge')
+  ));
+
+  const selectedBranch = await promptSelect<string>(
+    t('commands.branch.selectToMerge') || 'Select branch to merge:',
+    otherBranches.map(b => ({
+      name: theme.branchName(b.name, false),
+      value: b.name
+    }))
+  );
+
+  // Show command and confirm
+  const commandPreview = `git merge ${selectedBranch}`;
+  logger.raw(theme.textMuted(`\n${t('commands.branch.willExecute') || 'Will execute:'} ${commandPreview}\n`));
+
+  const confirmMerge = await promptConfirm(
+    t('commands.branch.mergeConfirm', { branch: selectedBranch }),
+    true
+  );
+
+  if (!confirmMerge) {
+    return { action: 'merge', success: false };
+  }
+
+  logger.command(commandPreview);
+
+  try {
+    await withSpinner(
+      t('commands.branch.merging', { branch: selectedBranch }) || `Merging ${selectedBranch}...`,
+      async () => {
+        await gitService.merge(selectedBranch);
+      },
+      t('commands.branch.mergeSuccess', { branch: selectedBranch })
+    );
+
+    // Check for conflicts after merge
+    const hasConflicts = await gitService.hasConflicts();
+    if (hasConflicts) {
+      const conflictedFiles = await gitService.getConflictedFiles();
+      logger.raw('\n' + errorBox(
+        t('commands.branch.mergeConflicts') || 'Merge conflicts detected!',
+        t('warnings.title')
+      ));
+      logger.raw(theme.warning(t('commands.branch.conflictedFiles') || 'Conflicted files:'));
+      conflictedFiles.forEach(f => logger.raw(theme.file(f, 'conflict')));
+      return { action: 'merge', branch: selectedBranch, success: false };
+    }
+
+    logger.raw('\n' + successBox(
+      t('commands.branch.mergeSuccess', { branch: selectedBranch }),
+      t('success.title')
+    ));
+
+    return { action: 'merge', branch: selectedBranch, success: true };
+  } catch (error) {
+    // Check if it's a merge conflict
+    const hasConflicts = await gitService.hasConflicts();
+    if (hasConflicts) {
+      const conflictedFiles = await gitService.getConflictedFiles();
+      logger.raw('\n' + errorBox(
+        t('commands.branch.mergeConflicts') || 'Merge conflicts detected!',
+        t('warnings.title')
+      ));
+      logger.raw(theme.warning(t('commands.branch.conflictedFiles') || 'Conflicted files:'));
+      conflictedFiles.forEach(f => logger.raw(theme.file(f, 'conflict')));
+      return { action: 'merge', branch: selectedBranch, success: false };
+    }
+    throw error;
+  }
 }

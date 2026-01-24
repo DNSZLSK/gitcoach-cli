@@ -72,7 +72,9 @@
       "messageTooShort": "El mensaje de commit debe tener al menos 3 caracteres",
       "copilotUnavailable": "GitHub Copilot CLI no disponible - ingresa el mensaje manualmente",
       "aiGenerationFailed": "Generacion IA fallida - ingresa el mensaje manualmente",
-      "enterManually": "Ingresa tu mensaje de commit:"
+      "enterManually": "Ingresa tu mensaje de commit:",
+      "conflictsDetected": "Conflictos de fusion detectados! Resuelvalos antes de commitear.",
+      "conflictedFiles": "Archivos en conflicto:"
     },
     "push": {
       "title": "Subir Cambios",
@@ -104,12 +106,22 @@
       "create": "Crear nueva rama",
       "switch": "Cambiar de rama",
       "delete": "Eliminar rama",
+      "merge": "Fusionar una rama",
       "enterName": "Ingresa el nombre de la rama:",
       "createSuccess": "Rama creada: {{branch}}",
       "switchSuccess": "Cambiado a la rama: {{branch}}",
       "deleteSuccess": "Rama eliminada: {{branch}}",
       "deleteConfirm": "Eliminar la rama '{{branch}}'? Esta accion no se puede deshacer.",
-      "cannotDeleteCurrent": "No se puede eliminar la rama actual."
+      "cannotDeleteCurrent": "No se puede eliminar la rama actual.",
+      "noOtherBranches": "No hay otras ramas disponibles.",
+      "mergeExplain": "Fusionar combina los cambios de otra rama en tu rama actual.\nEstas en '{{branch}}'. Que rama quieres fusionar aqui?",
+      "selectToMerge": "Selecciona la rama a fusionar:",
+      "willExecute": "Se ejecutara:",
+      "mergeConfirm": "Fusionar la rama '{{branch}}'? Continuar?",
+      "merging": "Fusionando {{branch}}...",
+      "mergeSuccess": "Rama '{{branch}}' fusionada con exito!",
+      "mergeConflicts": "Conflictos detectados! Resuelvalos antes de continuar.",
+      "conflictedFiles": "Archivos en conflicto:"
     },
     "undo": {
       "title": "Deshacer Acciones",
@@ -356,10 +368,26 @@
     "confirm": "Estas seguro?",
     "yes": "Si",
     "no": "No",
+    "yesKey": "S",
+    "noKey": "n",
     "cancel": "Cancelar",
     "continue": "Continuar",
     "pressEnter": "Presiona Enter para continuar...",
     "select": "Selecciona una opcion",
     "enterValue": "Ingresa un valor"
+  },
+  "detachedHead": {
+    "title": "HEAD Separado",
+    "explanation": "Estas en un estado HEAD separado.\n\nEsto significa que no estas en ninguna rama. Tus commits pueden perderse si cambias de rama.\n\nEsto suele ocurrir despues de un rebase interrumpido o al hacer checkout de un commit especifico.",
+    "selectAction": "Que te gustaria hacer?",
+    "createBranch": "Crear una nueva rama",
+    "returnToMain": "Volver a la rama principal",
+    "stashAndReturn": "Guardar cambios y volver",
+    "ignore": "Ignorar y continuar",
+    "enterBranchName": "Nombre de la nueva rama:",
+    "branchCreated": "Rama '{{branch}}' creada! Tus commits ahora estan seguros.",
+    "returnedToMain": "Volviste a {{branch}}.",
+    "stashedAndReturned": "Cambios guardados y volviste a {{branch}}.",
+    "commandExecuted": "Comando ejecutado: {{command}}"
   }
 }

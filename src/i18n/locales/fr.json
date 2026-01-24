@@ -72,7 +72,9 @@
       "messageTooShort": "Le message de commit doit contenir au moins 3 caracteres",
       "copilotUnavailable": "GitHub Copilot CLI non disponible - entrez le message manuellement",
       "aiGenerationFailed": "Generation IA echouee - entrez le message manuellement",
-      "enterManually": "Entrez votre message de commit :"
+      "enterManually": "Entrez votre message de commit :",
+      "conflictsDetected": "Conflits de fusion detectes ! Resolvez-les avant de commiter.",
+      "conflictedFiles": "Fichiers en conflit :"
     },
     "push": {
       "title": "Envoyer les Modifications",
@@ -104,12 +106,22 @@
       "create": "Creer une nouvelle branche",
       "switch": "Changer de branche",
       "delete": "Supprimer une branche",
+      "merge": "Fusionner une branche",
       "enterName": "Entrez le nom de la branche :",
       "createSuccess": "Branche creee : {{branch}}",
       "switchSuccess": "Bascule vers la branche : {{branch}}",
       "deleteSuccess": "Branche supprimee : {{branch}}",
       "deleteConfirm": "Supprimer la branche '{{branch}}' ? Cette action est irreversible.",
-      "cannotDeleteCurrent": "Impossible de supprimer la branche actuelle."
+      "cannotDeleteCurrent": "Impossible de supprimer la branche actuelle.",
+      "noOtherBranches": "Aucune autre branche disponible.",
+      "mergeExplain": "Fusionner combine les modifications d'une branche dans la branche actuelle.\nVous etes sur '{{branch}}'. Quelle branche voulez-vous fusionner ici ?",
+      "selectToMerge": "Selectionnez la branche a fusionner :",
+      "willExecute": "Commande a executer :",
+      "mergeConfirm": "Fusionner la branche '{{branch}}' ? Continuer ?",
+      "merging": "Fusion de {{branch}}...",
+      "mergeSuccess": "Branche '{{branch}}' fusionnee avec succes !",
+      "mergeConflicts": "Conflits detectes ! Resolvez-les avant de continuer.",
+      "conflictedFiles": "Fichiers en conflit :"
     },
     "undo": {
       "title": "Annuler des Actions",
@@ -356,10 +368,26 @@
     "confirm": "Etes-vous sur ?",
     "yes": "Oui",
     "no": "Non",
+    "yesKey": "O",
+    "noKey": "n",
     "cancel": "Annuler",
     "continue": "Continuer",
     "pressEnter": "Appuyez sur Entree pour continuer...",
     "select": "Selectionnez une option",
     "enterValue": "Entrez une valeur"
+  },
+  "detachedHead": {
+    "title": "HEAD Detache",
+    "explanation": "Vous etes en etat HEAD detache.\n\nCela signifie que vous n'etes sur aucune branche. Vos commits risquent d'etre perdus si vous changez de branche.\n\nCela arrive souvent apres un rebase interrompu ou un checkout d'un commit specifique.",
+    "selectAction": "Que souhaitez-vous faire ?",
+    "createBranch": "Creer une nouvelle branche",
+    "returnToMain": "Revenir sur la branche principale",
+    "stashAndReturn": "Sauvegarder et revenir",
+    "ignore": "Ignorer et continuer",
+    "enterBranchName": "Nom de la nouvelle branche :",
+    "branchCreated": "Branche '{{branch}}' creee ! Vos commits sont maintenant securises.",
+    "returnedToMain": "Revenu sur {{branch}}.",
+    "stashedAndReturned": "Modifications sauvegardees et revenu sur {{branch}}.",
+    "commandExecuted": "Commande executee : {{command}}"
   }
 }

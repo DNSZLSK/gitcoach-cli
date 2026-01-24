@@ -92,6 +92,25 @@ class GitService {
     return branches;
   }
 
+  async getLocalBranches(): Promise<BranchInfo[]> {
+    const summary: BranchSummary = await this.git.branch();
+    const branches: BranchInfo[] = [];
+
+    for (const [name, data] of Object.entries(summary.branches)) {
+      // Filter out remote branches (start with remotes/ or contain /)
+      if (!name.startsWith('remotes/') && !name.includes('/')) {
+        branches.push({
+          name,
+          current: data.current,
+          commit: data.commit,
+          label: data.label
+        });
+      }
+    }
+
+    return branches;
+  }
+
   async getStagedFiles(): Promise<string[]> {
     const status = await this.git.status();
     return [...status.staged, ...status.created];
@@ -213,6 +232,20 @@ class GitService {
   async deleteBranch(name: string, force: boolean = false): Promise<void> {
     const options = force ? ['-D', name] : ['-d', name];
     await this.git.branch(options);
+  }
+
+  async merge(branch: string): Promise<void> {
+    await this.git.merge([branch]);
+  }
+
+  async hasConflicts(): Promise<boolean> {
+    const status = await this.git.status();
+    return status.conflicted.length > 0;
+  }
+
+  async getConflictedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.conflicted;
   }
 
   async getLog(maxCount: number = 10): Promise<CommitInfo[]> {

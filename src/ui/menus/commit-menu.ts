@@ -1,7 +1,7 @@
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
 import { promptInput, promptConfirm, promptSelect } from '../components/prompt.js';
-import { successBox, warningBox, infoBox } from '../components/box.js';
+import { successBox, warningBox, infoBox, errorBox } from '../components/box.js';
 import { withSpinner, createSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { copilotService } from '../../services/copilot-service.js';
@@ -22,6 +22,19 @@ export async function showCommitMenu(): Promise<CommitResult> {
   logger.raw('\n' + theme.title(t('commands.commit.title')) + '\n');
 
   try {
+    // Check for merge conflicts first
+    const hasConflicts = await gitService.hasConflicts();
+    if (hasConflicts) {
+      const conflictedFiles = await gitService.getConflictedFiles();
+      logger.raw(errorBox(
+        t('commands.commit.conflictsDetected') || 'Merge conflicts detected! Resolve them before committing.',
+        t('errors.title')
+      ));
+      logger.raw(theme.warning(t('commands.commit.conflictedFiles') || 'Conflicted files:'));
+      conflictedFiles.forEach(f => logger.raw(theme.file(f, 'conflict')));
+      return { committed: false };
+    }
+
     // Validate we can commit
     const validation = await preventionService.validateCommit();
 

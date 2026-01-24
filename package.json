@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "tsc -w",
+    "prebuild": "node scripts/inject-version.js",
     "build": "tsc && npm run copy-locales",
     "copy-locales": "node -e \"const fs=require('fs');const path=require('path');const src='src/i18n/locales';const dest='dist/i18n/locales';fs.mkdirSync(dest,{recursive:true});fs.readdirSync(src).forEach(f=>fs.copyFileSync(path.join(src,f),path.join(dest,f)));\"",
     "start": "node ./bin/run.js",

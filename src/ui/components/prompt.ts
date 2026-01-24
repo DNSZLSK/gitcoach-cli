@@ -1,11 +1,11 @@
 import {
   select,
   input,
-  confirm,
   checkbox,
   editor
 } from '@inquirer/prompts';
 import { getTheme } from '../themes/index.js';
+import { t } from '../../i18n/index.js';
 
 export interface SelectOption<T> {
   name: string;
@@ -64,11 +64,21 @@ export async function promptConfirm(
   defaultValue: boolean = false
 ): Promise<boolean> {
   const theme = getTheme();
+  const yesLabel = t('prompts.yes');
+  const noLabel = t('prompts.no');
+  const yesKey = t('prompts.yesKey');
+  const noKey = t('prompts.noKey');
 
-  return confirm({
-    message: theme.primary(message),
-    default: defaultValue
+  const result = await select({
+    message: `${theme.primary(message)} (${yesKey}/${noKey})`,
+    choices: [
+      { name: yesLabel, value: true },
+      { name: noLabel, value: false }
+    ],
+    default: defaultValue ? 0 : 1
   });
+
+  return result;
 }
 
 export async function promptCheckbox<T>(
