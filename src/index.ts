@@ -1,4 +1,4 @@
-// GitCoach - AI-Powered Git Coach CLI
+// GitCoach - Interactive Git Assistant CLI
 // Main entry point for programmatic usage
 
 export * from './config/defaults.js';
