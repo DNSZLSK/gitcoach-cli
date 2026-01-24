@@ -10,7 +10,9 @@
       "Bash(copilot --help:*)",
       "Bash(copilot --version:*)",
       "Bash(npx tsc:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(wc:*)",
+      "Bash(npm test:*)"
     ]
   }
 }
