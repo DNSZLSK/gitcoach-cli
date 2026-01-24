@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "GitCoach",
-    "tagline": "Your AI-Powered Git Coach",
+    "tagline": "Your Interactive Git Assistant",
     "version": "v{{version}}",
     "welcome": "Welcome to GitCoach!",
     "goodbye": "Goodbye! Happy coding!"
