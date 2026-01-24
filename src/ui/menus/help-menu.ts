@@ -1,5 +1,6 @@
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
+import { APP_VERSION } from '../../utils/version.js';
 import { promptSelect, promptInput } from '../components/prompt.js';
 import { infoBox, warningBox } from '../components/box.js';
 import { createSpinner } from '../components/spinner.js';
@@ -149,7 +150,7 @@ function showAbout(): void {
   const theme = getTheme();
 
   logger.raw('\n' + theme.title('About GitCoach') + '\n');
-  logger.raw(theme.textBold('GitCoach v1.0.2'));
+  logger.raw(theme.textBold(`GitCoach ${APP_VERSION}`));
   logger.raw(t('app.tagline') || 'Your AI-Powered Git Coach');
   logger.raw('');
   logger.raw(t('help.aboutDesc') || 'GitCoach is an interactive CLI tool that helps developers master Git');
@@ -162,6 +163,6 @@ function showAbout(): void {
   logger.raw('  - ' + (t('help.feature4') || 'Multilingual support (EN, FR, ES)'));
   logger.raw('  - ' + (t('help.feature5') || 'Beginner, Intermediate, and Expert modes'));
   logger.raw('');
-  logger.raw(theme.textMuted('Built for the GitHub Copilot CLI Challenge'));
+  logger.raw(theme.textMuted('Built for the GitHub Copilot CLI Challenge 2026'));
   logger.raw('');
 }
