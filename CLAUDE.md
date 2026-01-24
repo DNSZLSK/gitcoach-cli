@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**GitCoach** is an AI-powered Git coach CLI that prevents mistakes before they happen. Built for the GitHub Copilot CLI Challenge (deadline: February 15, 2025, 23:59 PST).
+**GitCoach** is an AI-powered Git coach CLI that prevents mistakes before they happen. Built for the GitHub Copilot CLI Challenge (deadline: February 15, 2026, 23:59 PST).
 
 **Core Problem:** Beginners lose work from Git mistakes; developers waste time searching for solutions; commit messages are generic.
 
