@@ -9,7 +9,7 @@
     ╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 ```
 
-**The AI-powered Git coach that prevents mistakes before they happen.**
+**Interactive Git assistant that prevents mistakes before they happen.**
 
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach-cli?style=social)](https://github.com/DNSZLSK/gitcoach-cli)
@@ -25,9 +25,9 @@ Git is powerful but brutal to beginners. Cryptic error messages, lost work from 
 
 - **Prevents mistakes BEFORE they happen** - Warns about uncommitted changes, detached HEAD, force push risks
 - **Educational** - Shows every Git command being executed so you learn while you use it
-- **AI-powered** - Uses GitHub Copilot CLI to generate smart commit messages and answer Git questions
+- **Adapts to your level** - Beginner (verbose), Intermediate (balanced), Expert (minimal)
 - **Multilingual** - Works in English, French, and Spanish
-- **Beginner-friendly** - No more cryptic error messages
+- **Optional AI features** - Can use GitHub Copilot CLI for commit messages and Git Q&A (works without it too)
 
 Built for the **GitHub Copilot CLI Challenge 2026**.
 
@@ -36,10 +36,7 @@ Built for the **GitHub Copilot CLI Challenge 2026**.
 ## Quick Start
 
 ```bash
-# Install globally
 npm install -g gitcoach-cli
-
-# Run in any Git repository
 gitcoach
 ```
 
@@ -49,14 +46,10 @@ That's it. GitCoach guides you from there.
 
 ## Prerequisites
 
-Before installing GitCoach, you need Node.js and Git installed on your system.
-
 ### 1. Node.js (version 18 or higher)
 
 **Windows:**
-1. Download the LTS version from [nodejs.org](https://nodejs.org/)
-2. Run the installer
-3. Restart your terminal
+Download from [nodejs.org](https://nodejs.org/) (LTS version)
 
 **Mac:**
 ```bash
@@ -69,18 +62,10 @@ curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-**Verify installation:**
-```bash
-node --version    # Should show v18.x.x or higher
-npm --version     # Should show 9.x.x or higher
-```
-
 ### 2. Git
 
 **Windows:**
-1. Download from [git-scm.com](https://git-scm.com/download/win)
-2. Run the installer with default options
-3. Restart your terminal
+Download from [git-scm.com](https://git-scm.com/download/win)
 
 **Mac:**
 ```bash
@@ -92,23 +77,16 @@ brew install git
 sudo apt-get install git
 ```
 
-**Verify installation:**
-```bash
-git --version    # Should show git version 2.x.x
-```
+### 3. GitHub Copilot CLI (Optional)
 
-### 3. GitHub Copilot CLI (Optional - for AI features)
-
-GitCoach works without Copilot CLI, but AI-powered commit messages and Git Q&A require it.
+For AI-powered commit messages and Git Q&A:
 
 ```bash
 npm install -g @githubnext/github-copilot-cli
-```
-
-Then authenticate:
-```bash
 github-copilot-cli auth
 ```
+
+GitCoach works perfectly fine without Copilot CLI - all core features are available.
 
 ---
 
@@ -116,7 +94,7 @@ github-copilot-cli auth
 
 ### Interactive Menus
 
-No more memorizing commands. Navigate Git with simple menus.
+Navigate Git with simple menus instead of memorizing commands.
 
 ```
 ? Main Menu
@@ -130,51 +108,49 @@ No more memorizing commands. Navigate Git with simple menus.
   [H] History  - View commit history
   [W] Stash    - Save work temporarily
   [G] Config   - Configure GitCoach
-  [T] Stats    - View your statistics
-  [?] Help     - Ask Git questions (AI)
+  [?] Help     - Ask Git questions
   [Q] Quit     - Exit GitCoach
 ```
 
-### AI-Powered Commits
+### Experience Levels
 
-GitCoach uses GitHub Copilot CLI to analyze your changes and generate meaningful commit messages following conventional commits format.
+GitCoach adapts to your skill level:
 
+| Level | Menu Labels | Confirmations | Warnings | Explanations |
+|-------|-------------|---------------|----------|--------------|
+| **Beginner** | Full descriptions | All | All | Shown |
+| **Intermediate** | Short descriptions | All | Most | Hidden |
+| **Expert** | Git commands | Destructive only | Critical only | Hidden |
+
+Example in Expert mode:
 ```
-? Generate message with AI? Yes
-  Generating...
-
-+--------------- Suggested message ---------------+
-|                                                 |
-|   feat(auth): add OAuth2 user authentication    |
-|                                                 |
-+-------------------------------------------------+
-
-? Use this message? (Y/n)
+? Main Menu
+> [S] git status
+  [A] git add
+  [C] git commit
+  [P] git push
+  [L] git pull
 ```
 
 ### Error Prevention
 
 GitCoach warns you BEFORE you make mistakes:
 
-**Uncommitted changes protection:**
+**Uncommitted changes:**
 ```
 +------------------- Warning --------------------+
 |                                                |
 |  You have uncommitted changes!                 |
 |  Switching branches will lose your work.       |
 |                                                |
-|  Recommended: Commit or stash first.           |
-|                                                |
 +------------------------------------------------+
 ```
 
-**Detached HEAD detection:**
+**Detached HEAD:**
 ```
 +--------------- Detached HEAD ------------------+
 |                                                |
 |  You are in detached HEAD state.               |
-|  This means you are not on any branch.         |
-|                                                |
 |  Your commits may be lost if you switch        |
 |  branches without creating a new branch.       |
 |                                                |
@@ -187,7 +163,7 @@ GitCoach warns you BEFORE you make mistakes:
   [I] Ignore (advanced users)
 ```
 
-**Force push confirmation:**
+**Force push:**
 ```
 ? You are about to FORCE PUSH. This rewrites remote history.
 ? Are you absolutely sure? (yes/no)
@@ -203,31 +179,33 @@ Every action shows the Git command being executed:
   5 file(s) staged successfully.
 ```
 
-You learn Git while using GitCoach. Eventually, you won't need it anymore. That's the goal.
+You learn Git while using GitCoach.
 
-### Ask Git Questions
+### Smart Commits (Optional AI)
 
-Don't know what a rebase is? Just ask.
+If you have GitHub Copilot CLI installed, GitCoach can generate commit messages:
+
+```
+? Generate message with AI? Yes
+  Generating...
+
+  Suggested: feat(auth): add OAuth2 authentication
+
+? Use this message? (Y/n)
+```
+
+Without Copilot CLI, you write commit messages manually (conventional commits format suggested).
+
+### Git Q&A (Optional AI)
+
+Ask Git questions if Copilot CLI is installed:
 
 ```
 ? Your question: What's the difference between merge and rebase?
-  Thinking...
 
-+------------------- Answer ---------------------+
-|                                                |
-|  Both integrate changes from one branch        |
-|  into another, but differently:                |
-|                                                |
-|  MERGE creates a merge commit, preserving      |
-|  history as it happened.                       |
-|                                                |
-|  REBASE rewrites history by moving your        |
-|  commits on top of the target branch.          |
-|                                                |
-|  Use merge for shared branches.                |
-|  Use rebase for local cleanup.                 |
-|                                                |
-+------------------------------------------------+
+  MERGE creates a merge commit, preserving history.
+  REBASE rewrites history by moving commits.
+  Use merge for shared branches, rebase for local cleanup.
 ```
 
 ### Branch Management
@@ -243,41 +221,9 @@ Create, switch, merge, and delete branches with guidance:
   Back
 ```
 
-**Merge with explanation:**
-```
-+--------------- What is Merge? -----------------+
-|                                                |
-|  Merging combines the changes from one branch  |
-|  into another. All commits from the source     |
-|  branch will be integrated into your current   |
-|  branch.                                       |
-|                                                |
-+------------------------------------------------+
-
-You are on 'main'. Which branch do you want to merge here?
-> feature/login
-  feature/dashboard
-  bugfix/header
-
-This will execute: git merge feature/login
-? Continue? (Y/n)
-```
-
 ### Multilingual Support
 
-Switch between English, French, and Spanish anytime.
-
-```
-? Select language:
-> English
-  Francais
-  Espanol
-
-Configuration updated.
-Bienvenue dans GitCoach !
-```
-
-Localized confirmations:
+English, French, and Spanish. Localized confirmations:
 - English: `(Y/n)`
 - French: `(O/n)`
 - Spanish: `(S/n)`
@@ -295,55 +241,25 @@ Localized confirmations:
 
 ---
 
-## Configuration
-
-GitCoach adapts to your experience level:
-
-| Level | Description |
-|-------|-------------|
-| **Beginner** | Verbose explanations, step-by-step guidance, all warnings |
-| **Intermediate** | Helpful tips, conventional commit suggestions |
-| **Expert** | Minimal output, critical warnings only |
-
-Change your level anytime:
-```bash
-gitcoach config
-```
-
----
-
 ## Tech Stack
 
 - **TypeScript** - Type-safe code
 - **Inquirer.js** - Interactive prompts
 - **simple-git** - Git operations
-- **GitHub Copilot CLI** - AI features
 - **i18next** - Internationalization
 - **Chalk** - Terminal styling
-- **Jest** - Testing
+- **Jest** - 383 tests
 
 ---
 
 ## Development
 
 ```bash
-# Clone the repository
 git clone https://github.com/DNSZLSK/gitcoach-cli.git
 cd gitcoach-cli
-
-# Install dependencies
 npm install
-
-# Build
 npm run build
-
-# Run tests
 npm test
-
-# Run locally
-./bin/run.js
-
-# Link globally for testing
 npm link
 gitcoach
 ```
@@ -365,15 +281,13 @@ gitcoach-cli/
 │   │   ├── menus/        # Interactive menus
 │   │   └── themes/       # Color themes
 │   └── utils/        # Helpers, validators
-├── test/             # Test files
+├── test/             # 383 tests
 └── docs/             # Documentation
 ```
 
 ---
 
 ## Contributing
-
-Contributions welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -393,9 +307,7 @@ Contributions welcome! Please:
 
 ## Author
 
-**DNSZLSK**
-
-CDA Student at AFPA, France.
+**DNSZLSK** - CDA Student at AFPA, France
 
 Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github).
 
