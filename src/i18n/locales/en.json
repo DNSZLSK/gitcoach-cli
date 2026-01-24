@@ -35,7 +35,59 @@
     "quit": "Quit",
     "quitDesc": "Exit GitCoach",
     "back": "Back",
-    "backDesc": "Return to previous menu"
+    "backDesc": "Return to previous menu",
+
+    "statusBeginner": "Status - See current state of your files",
+    "statusIntermediate": "Status - View changes",
+    "statusExpert": "git status",
+
+    "addBeginner": "Add - Prepare files for saving",
+    "addIntermediate": "Add - Stage files",
+    "addExpert": "git add",
+
+    "commitBeginner": "Commit - Save your changes with a message",
+    "commitIntermediate": "Commit - Save changes",
+    "commitExpert": "git commit",
+
+    "pushBeginner": "Push - Send changes to remote server",
+    "pushIntermediate": "Push - Send to remote",
+    "pushExpert": "git push",
+
+    "pullBeginner": "Pull - Download changes from server",
+    "pullIntermediate": "Pull - Download changes",
+    "pullExpert": "git pull",
+
+    "branchBeginner": "Branch - Work on separate versions",
+    "branchIntermediate": "Branch - Manage branches",
+    "branchExpert": "git branch",
+
+    "undoBeginner": "Undo - Reverse actions safely",
+    "undoIntermediate": "Undo - Reverse actions",
+    "undoExpert": "git reset/restore",
+
+    "historyBeginner": "History - See past commits",
+    "historyIntermediate": "History - View commits",
+    "historyExpert": "git log",
+
+    "stashBeginner": "Stash - Temporarily save work",
+    "stashIntermediate": "Stash - Save temporarily",
+    "stashExpert": "git stash",
+
+    "configBeginner": "Settings - Configure GitCoach",
+    "configIntermediate": "Settings - Configure",
+    "configExpert": "config",
+
+    "statsBeginner": "Statistics - View your progress",
+    "statsIntermediate": "Statistics - View stats",
+    "statsExpert": "stats",
+
+    "helpBeginner": "Help - Get assistance",
+    "helpIntermediate": "Help - Get help",
+    "helpExpert": "help",
+
+    "quitBeginner": "Quit - Exit GitCoach",
+    "quitIntermediate": "Quit - Exit",
+    "quitExpert": "quit"
   },
   "commands": {
     "status": {

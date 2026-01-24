@@ -4,6 +4,7 @@ import { promptSelect } from '../components/prompt.js';
 import { infoBox } from '../components/box.js';
 import { gitService, CommitInfo } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { shouldShowExplanation } from '../../utils/level-helper.js';
 
 export type HistoryAction = 'view_more' | 'view_details' | 'back';
 
@@ -38,9 +39,19 @@ export async function showHistoryMenu(): Promise<void> {
   const theme = getTheme();
   const pageSize = 10;
   let running = true;
+  let firstRun = true;
 
   while (running) {
     logger.raw('\n' + theme.title(t('commands.history.title')) + '\n');
+
+    // Show explanation for beginners (only on first display)
+    if (firstRun && shouldShowExplanation()) {
+      logger.raw(infoBox(
+        t('commands.history.recentCommits'),
+        t('commands.history.title')
+      ));
+      firstRun = false;
+    }
 
     try {
       logger.command(`git log --oneline -${pageSize}`);

@@ -8,6 +8,7 @@ import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { isValidBranchName } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
+import { shouldShowExplanation, shouldConfirm, shouldShowWarning } from '../../utils/level-helper.js';
 
 export type BranchAction = 'list' | 'create' | 'switch' | 'merge' | 'delete' | 'back';
 
@@ -137,17 +138,27 @@ async function switchBranch(): Promise<BranchResult> {
   const validation = await preventionService.validateCheckout(selectedBranch);
 
   if (validation.warnings.length > 0) {
+    // Filter and display warnings based on level
     for (const warning of validation.warnings) {
-      logger.raw(warningBox(warning.message, warning.title));
+      const category = warning.level === 'critical' ? 'critical' : 'warning';
+      if (shouldShowWarning(category)) {
+        logger.raw(warningBox(warning.message, warning.title));
+      }
     }
 
     if (!validation.canProceed) {
       return { action: 'switch', success: false };
     }
 
-    const proceed = await promptConfirm(t('prompts.continue'), false);
-    if (!proceed) {
-      return { action: 'switch', success: false };
+    // Only ask for confirmation if warnings were shown
+    const hasVisibleWarnings = validation.warnings.some(w =>
+      shouldShowWarning(w.level === 'critical' ? 'critical' : 'warning')
+    );
+    if (hasVisibleWarnings) {
+      const proceed = await promptConfirm(t('prompts.continue'), false);
+      if (!proceed) {
+        return { action: 'switch', success: false };
+      }
     }
   }
 
@@ -238,11 +249,13 @@ async function mergeBranch(): Promise<BranchResult> {
     return { action: 'merge', success: false };
   }
 
-  // Show educational explanation
-  logger.raw('\n' + infoBox(
-    t('commands.branch.mergeExplain', { branch: currentBranch || 'current' }),
-    t('commands.branch.merge')
-  ));
+  // Show educational explanation for beginners only
+  if (shouldShowExplanation()) {
+    logger.raw('\n' + infoBox(
+      t('commands.branch.mergeExplain', { branch: currentBranch || 'current' }),
+      t('commands.branch.merge')
+    ));
+  }
 
   const selectedBranch = await promptSelect<string>(
     t('commands.branch.selectToMerge') || 'Select branch to merge:',
@@ -252,17 +265,20 @@ async function mergeBranch(): Promise<BranchResult> {
     }))
   );
 
-  // Show command and confirm
+  // Show command preview
   const commandPreview = `git merge ${selectedBranch}`;
   logger.raw(theme.textMuted(`\n${t('commands.branch.willExecute') || 'Will execute:'} ${commandPreview}\n`));
 
-  const confirmMerge = await promptConfirm(
-    t('commands.branch.mergeConfirm', { branch: selectedBranch }),
-    true
-  );
+  // Confirm merge (level-based: merge is not destructive but impactful)
+  if (shouldConfirm(false)) {
+    const confirmMerge = await promptConfirm(
+      t('commands.branch.mergeConfirm', { branch: selectedBranch }),
+      true
+    );
 
-  if (!confirmMerge) {
-    return { action: 'merge', success: false };
+    if (!confirmMerge) {
+      return { action: 'merge', success: false };
+    }
   }
 
   logger.command(commandPreview);

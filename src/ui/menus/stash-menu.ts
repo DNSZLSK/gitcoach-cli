@@ -4,6 +4,7 @@ import { promptSelect, promptConfirm, promptInput } from '../components/prompt.j
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { shouldShowExplanation } from '../../utils/level-helper.js';
 
 export type StashAction = 'save' | 'list' | 'apply' | 'pop' | 'drop' | 'back';
 
@@ -88,11 +89,13 @@ async function handleStashSave(): Promise<void> {
     return;
   }
 
-  // Show explanation
-  logger.raw(infoBox(
-    t('commands.stash.saveExplain'),
-    t('commands.stash.whatItDoes')
-  ));
+  // Show explanation for beginners only
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(
+      t('commands.stash.saveExplain'),
+      t('commands.stash.whatItDoes')
+    ));
+  }
 
   // Ask for optional message
   const message = await promptInput(t('commands.stash.enterMessage'), '');
@@ -151,11 +154,13 @@ async function handleStashApply(): Promise<void> {
     return;
   }
 
-  // Show explanation
-  logger.raw(infoBox(
-    t('commands.stash.applyExplain'),
-    t('commands.stash.whatItDoes')
-  ));
+  // Show explanation for beginners only
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(
+      t('commands.stash.applyExplain'),
+      t('commands.stash.whatItDoes')
+    ));
+  }
 
   const choices = stashes.map((stash, index) => ({
     name: `${theme.info(`stash@{${index}}`)} ${stash}`,
@@ -184,11 +189,13 @@ async function handleStashPop(): Promise<void> {
     return;
   }
 
-  // Show explanation
-  logger.raw(infoBox(
-    t('commands.stash.popExplain'),
-    t('commands.stash.whatItDoes')
-  ));
+  // Show explanation for beginners only
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(
+      t('commands.stash.popExplain'),
+      t('commands.stash.whatItDoes')
+    ));
+  }
 
   try {
     logger.command('git stash pop');

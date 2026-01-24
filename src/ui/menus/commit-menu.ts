@@ -9,12 +9,15 @@ import { preventionService } from '../../services/prevention-service.js';
 import { userConfig } from '../../config/user-config.js';
 import { isValidCommitMessage, isConventionalCommit } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
+import { shouldShowWarning, shouldShowExplanation, shouldConfirm, isLevel } from '../../utils/level-helper.js';
 
 export interface CommitResult {
   committed: boolean;
   hash?: string;
   message?: string;
 }
+
+type CommitAction = 'ai' | 'manual' | 'back';
 
 export async function showCommitMenu(): Promise<CommitResult> {
   const theme = getTheme();
@@ -45,9 +48,11 @@ export async function showCommitMenu(): Promise<CommitResult> {
       return { committed: false };
     }
 
-    // Show warnings if any
+    // Show warnings if any (level-based filtering)
     for (const warning of validation.warnings) {
-      if (warning.level !== 'info') {
+      const category = warning.level === 'critical' ? 'critical' :
+                       warning.level === 'warning' ? 'warning' : 'info';
+      if (shouldShowWarning(category)) {
         logger.raw(warningBox(warning.message, warning.title));
       }
     }
@@ -58,78 +63,76 @@ export async function showCommitMenu(): Promise<CommitResult> {
     stagedFiles.forEach(f => logger.raw(theme.file(f, 'staged')));
     logger.raw('');
 
-    let commitMessage: string = '';
-    let copilotFailed = false;
+    // Show explanation for beginners
+    if (shouldShowExplanation()) {
+      logger.raw(infoBox(
+        t('tips.beginner.commit'),
+        t('commands.commit.title')
+      ));
+    }
 
-    // Check if Copilot CLI is available and offer AI generation
+    let commitMessage: string = '';
+
+    // Check if Copilot CLI is available
     const copilotAvailable = await copilotService.isAvailable();
     const wantsAutoGenerate = userConfig.getAutoGenerateCommitMessages();
 
-    if (wantsAutoGenerate) {
-      if (copilotAvailable) {
-        const useAI = await promptConfirm(t('commands.commit.generateAI'), true);
+    // Expert mode: show action menu
+    if (isLevel('expert')) {
+      const choices: Array<{ name: string; value: CommitAction }> = [];
 
-        if (useAI) {
-          const spinner = createSpinner({ text: t('commands.commit.generating') });
-          spinner.start();
-
-          try {
-            const diff = await gitService.getDiff(true);
-            const suggestion = await copilotService.generateCommitMessage(diff);
-
-            if (suggestion.success && suggestion.message) {
-              spinner.succeed();
-              logger.raw(infoBox(suggestion.message, t('commands.commit.suggested', { message: '' })));
-
-              const useGenerated = await promptConfirm(t('commands.commit.useGenerated'), true);
-
-              if (useGenerated) {
-                commitMessage = suggestion.message;
-                userConfig.incrementAiCommitsGenerated();
-              }
-            } else {
-              spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
-              copilotFailed = true;
-            }
-          } catch {
-            spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
-            copilotFailed = true;
-          }
-        }
-      } else {
-        // Copilot not available - show info message
-        logger.raw(theme.textMuted(t('commands.commit.copilotUnavailable') || 'GitHub Copilot CLI not available'));
+      if (copilotAvailable && wantsAutoGenerate) {
+        choices.push({
+          name: theme.menuItem('A', 'git commit (AI)'),
+          value: 'ai'
+        });
       }
-    }
+      choices.push({
+        name: theme.menuItem('M', 'git commit -m'),
+        value: 'manual'
+      });
+      choices.push({
+        name: theme.menuItem('R', t('menu.back')),
+        value: 'back'
+      });
 
-    // If no AI message, prompt for manual entry
-    if (!commitMessage) {
-      if (copilotFailed) {
-        logger.raw(theme.textMuted(t('commands.commit.enterManually') || 'Please enter your commit message manually:'));
-      }
-      logger.raw(theme.textMuted(t('commands.commit.emptyToCancel') || '(Leave empty to cancel)'));
+      const action = await promptSelect<CommitAction>(t('commands.commit.title'), choices);
 
-      const manualMessage = await promptInput(
-        t('commands.commit.enterMessage'),
-        '',
-        (value) => {
-          // Allow empty string for cancellation
-          if (value.trim().length === 0) {
-            return true;
-          }
-          if (!isValidCommitMessage(value)) {
-            return t('commands.commit.messageTooShort') || 'Commit message must be at least 3 characters';
-          }
-          return true;
-        }
-      );
-
-      if (!manualMessage || manualMessage.trim().length === 0) {
-        logger.raw(theme.textMuted(t('commands.commit.cancelled')));
+      if (action === 'back') {
         return { committed: false };
       }
 
-      commitMessage = manualMessage;
+      if (action === 'ai') {
+        commitMessage = await generateAIMessage(theme);
+        if (!commitMessage) {
+          // AI failed, fall through to manual
+        }
+      }
+
+      if (!commitMessage) {
+        commitMessage = await getManualMessage(theme);
+        if (!commitMessage) {
+          return { committed: false };
+        }
+      }
+    } else {
+      // Beginner/Intermediate mode
+      if (wantsAutoGenerate && copilotAvailable) {
+        const useAI = await promptConfirm(t('commands.commit.generateAI'), true);
+
+        if (useAI) {
+          commitMessage = await generateAIMessage(theme);
+        }
+      } else if (!copilotAvailable && wantsAutoGenerate) {
+        logger.raw(theme.textMuted(t('commands.commit.copilotUnavailable') || 'GitHub Copilot CLI not available'));
+      }
+
+      if (!commitMessage) {
+        commitMessage = await getManualMessage(theme);
+        if (!commitMessage) {
+          return { committed: false };
+        }
+      }
     }
 
     // Suggest conventional commit format for intermediate/expert users
@@ -149,6 +152,16 @@ export async function showCommitMenu(): Promise<CommitResult> {
 
       if (convertToConventional !== 'keep') {
         commitMessage = `${convertToConventional}: ${commitMessage}`;
+      }
+    }
+
+    // Confirm before commit (level-based)
+    if (shouldConfirm(false)) {
+      logger.raw(theme.info(`\n${t('commands.commit.enterMessage')}: ${commitMessage}\n`));
+      const confirm = await promptConfirm(t('prompts.confirm'), true);
+      if (!confirm) {
+        logger.raw(theme.textMuted(t('commands.commit.cancelled')));
+        return { committed: false };
       }
     }
 
@@ -179,4 +192,64 @@ export async function showCommitMenu(): Promise<CommitResult> {
     logger.error(t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' }));
     return { committed: false };
   }
+}
+
+/**
+ * Generate commit message using AI
+ */
+async function generateAIMessage(_theme: ReturnType<typeof getTheme>): Promise<string> {
+  const spinner = createSpinner({ text: t('commands.commit.generating') });
+  spinner.start();
+
+  try {
+    const diff = await gitService.getDiff(true);
+    const suggestion = await copilotService.generateCommitMessage(diff);
+
+    if (suggestion.success && suggestion.message) {
+      spinner.succeed();
+      logger.raw(infoBox(suggestion.message, t('commands.commit.suggested', { message: '' })));
+
+      const useGenerated = await promptConfirm(t('commands.commit.useGenerated'), true);
+
+      if (useGenerated) {
+        userConfig.incrementAiCommitsGenerated();
+        return suggestion.message;
+      }
+    } else {
+      spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
+    }
+  } catch {
+    spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
+  }
+
+  return '';
+}
+
+/**
+ * Get commit message manually from user
+ */
+async function getManualMessage(theme: ReturnType<typeof getTheme>): Promise<string> {
+  logger.raw(theme.textMuted(t('commands.commit.emptyToCancel') || '(Leave empty to cancel)'));
+
+  const manualMessage = await promptInput(
+    t('commands.commit.enterMessage'),
+    '',
+    (value) => {
+      // Allow empty string for cancellation
+      if (value.trim().length === 0) {
+        return true;
+      }
+      if (!isValidCommitMessage(value)) {
+        return t('commands.commit.messageTooShort') || 'Commit message must be at least 3 characters';
+      }
+      return true;
+    }
+  );
+
+  if (!manualMessage || manualMessage.trim().length === 0) {
+    logger.raw(theme.textMuted(t('commands.commit.cancelled')));
+    return '';
+  }
+
+  return manualMessage;
 }

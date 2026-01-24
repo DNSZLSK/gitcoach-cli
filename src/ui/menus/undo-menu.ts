@@ -4,6 +4,7 @@ import { promptSelect, promptConfirm, promptCheckbox } from '../components/promp
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { shouldShowExplanation, shouldConfirm } from '../../utils/level-helper.js';
 
 export type UndoAction = 'soft_reset' | 'hard_reset' | 'unstage' | 'restore' | 'back';
 
@@ -67,11 +68,13 @@ export async function showUndoMenu(): Promise<void> {
 async function handleSoftReset(): Promise<void> {
   const theme = getTheme();
 
-  // Show explanation
-  logger.raw(infoBox(
-    t('commands.undo.softResetExplain'),
-    t('commands.undo.whatItDoes')
-  ));
+  // Show explanation for beginners only
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(
+      t('commands.undo.softResetExplain'),
+      t('commands.undo.whatItDoes')
+    ));
+  }
 
   // Get last commits for context
   const commits = await gitService.getLog(3);
@@ -84,11 +87,13 @@ async function handleSoftReset(): Promise<void> {
   const lastCommit = commits[0];
   logger.raw(`  ${theme.commitHash(lastCommit.hash)} ${lastCommit.message}\n`);
 
-  const confirm = await promptConfirm(t('commands.undo.confirmSoftReset'), false);
-
-  if (!confirm) {
-    logger.raw(theme.textMuted(t('prompts.cancel')) + '\n');
-    return;
+  // Soft reset is not destructive (files are kept), so use level-based confirmation
+  if (shouldConfirm(false)) {
+    const confirm = await promptConfirm(t('commands.undo.confirmSoftReset'), false);
+    if (!confirm) {
+      logger.raw(theme.textMuted(t('prompts.cancel')) + '\n');
+      return;
+    }
   }
 
   try {
@@ -150,11 +155,13 @@ async function handleHardReset(): Promise<void> {
 async function handleUnstage(): Promise<void> {
   const theme = getTheme();
 
-  // Show explanation
-  logger.raw(infoBox(
-    t('commands.undo.unstageExplain'),
-    t('commands.undo.whatItDoes')
-  ));
+  // Show explanation for beginners only
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(
+      t('commands.undo.unstageExplain'),
+      t('commands.undo.whatItDoes')
+    ));
+  }
 
   const stagedFiles = await gitService.getStagedFiles();
 
