@@ -3,7 +3,10 @@ import { getTheme } from '../themes/index.js';
 import { banner, infoBox } from '../components/box.js';
 import { promptSelect } from '../components/prompt.js';
 import { analysisService } from '../../services/analysis-service.js';
+import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { APP_VERSION } from '../../utils/version.js';
+import { showDetachedHeadMenu, handleDetachedHead } from './detached-head-menu.js';
 
 export type MainMenuAction =
   | 'status'
@@ -23,8 +26,21 @@ export type MainMenuAction =
 export async function showMainMenu(): Promise<MainMenuAction> {
   const theme = getTheme();
 
+  // Check for detached HEAD state
+  try {
+    const isDetached = await gitService.isDetachedHead();
+    if (isDetached) {
+      const action = await showDetachedHeadMenu();
+      if (action !== 'ignore') {
+        await handleDetachedHead(action);
+      }
+    }
+  } catch {
+    // Ignore errors checking detached state
+  }
+
   // Show ASCII art banner
-  logger.raw(banner('1.0.0', t('app.tagline')));
+  logger.raw(banner(APP_VERSION, t('app.tagline')));
 
   // Show quick status if available
   try {

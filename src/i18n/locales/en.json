@@ -72,7 +72,9 @@
       "messageTooShort": "Commit message must be at least 3 characters",
       "copilotUnavailable": "GitHub Copilot CLI not available - enter message manually",
       "aiGenerationFailed": "AI generation failed - enter message manually",
-      "enterManually": "Enter your commit message:"
+      "enterManually": "Enter your commit message:",
+      "conflictsDetected": "Merge conflicts detected! Resolve them before committing.",
+      "conflictedFiles": "Conflicted files:"
     },
     "push": {
       "title": "Push Changes",
@@ -104,12 +106,22 @@
       "create": "Create new branch",
       "switch": "Switch branch",
       "delete": "Delete branch",
+      "merge": "Merge a branch",
       "enterName": "Enter branch name:",
       "createSuccess": "Created branch: {{branch}}",
       "switchSuccess": "Switched to branch: {{branch}}",
       "deleteSuccess": "Deleted branch: {{branch}}",
       "deleteConfirm": "Delete branch '{{branch}}'? This cannot be undone.",
-      "cannotDeleteCurrent": "Cannot delete the current branch."
+      "cannotDeleteCurrent": "Cannot delete the current branch.",
+      "noOtherBranches": "No other branches available.",
+      "mergeExplain": "Merge combines changes from another branch into your current branch.\nYou are on '{{branch}}'. Which branch do you want to merge here?",
+      "selectToMerge": "Select branch to merge:",
+      "willExecute": "Will execute:",
+      "mergeConfirm": "Merge branch '{{branch}}'? Continue?",
+      "merging": "Merging {{branch}}...",
+      "mergeSuccess": "Branch '{{branch}}' merged successfully!",
+      "mergeConflicts": "Merge conflicts detected! Resolve them before continuing.",
+      "conflictedFiles": "Conflicted files:"
     },
     "undo": {
       "title": "Undo Actions",
@@ -356,10 +368,26 @@
     "confirm": "Are you sure?",
     "yes": "Yes",
     "no": "No",
+    "yesKey": "Y",
+    "noKey": "n",
     "cancel": "Cancel",
     "continue": "Continue",
     "pressEnter": "Press Enter to continue...",
     "select": "Select an option",
     "enterValue": "Enter value"
+  },
+  "detachedHead": {
+    "title": "Detached HEAD",
+    "explanation": "You are in a detached HEAD state.\n\nThis means you are not on any branch. Your commits may be lost if you switch branches.\n\nThis often happens after an interrupted rebase or checking out a specific commit.",
+    "selectAction": "What would you like to do?",
+    "createBranch": "Create a new branch",
+    "returnToMain": "Return to main branch",
+    "stashAndReturn": "Save changes and return",
+    "ignore": "Ignore and continue",
+    "enterBranchName": "Enter name for the new branch:",
+    "branchCreated": "Branch '{{branch}}' created! Your commits are now safe.",
+    "returnedToMain": "Returned to {{branch}}.",
+    "stashedAndReturned": "Changes saved and returned to {{branch}}.",
+    "commandExecuted": "Command executed: {{command}}"
   }
 }

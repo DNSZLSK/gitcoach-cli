@@ -58,18 +58,20 @@ export const coloredTheme = {
     return colors[type](` ${text} `);
   },
 
-  file(name: string, status: 'staged' | 'modified' | 'deleted' | 'untracked'): string {
+  file(name: string, status: 'staged' | 'modified' | 'deleted' | 'untracked' | 'conflict'): string {
     const statusColors = {
       staged: chalk.green,
       modified: chalk.yellow,
       deleted: chalk.red,
-      untracked: chalk.cyan
+      untracked: chalk.cyan,
+      conflict: chalk.red.bold
     };
     const prefixes = {
       staged: '+',
       modified: '~',
       deleted: '-',
-      untracked: '?'
+      untracked: '?',
+      conflict: '!'
     };
     return `${statusColors[status](prefixes[status])} ${name}`;
   },

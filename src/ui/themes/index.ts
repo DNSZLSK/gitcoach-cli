@@ -29,7 +29,7 @@ export interface ThemeFunctions {
   subtitle: (text: string) => string;
   menuItem: (key: string, label: string) => string;
   statusBadge: (type: 'success' | 'warning' | 'error' | 'info', text: string) => string;
-  file: (name: string, status: 'staged' | 'modified' | 'deleted' | 'untracked') => string;
+  file: (name: string, status: 'staged' | 'modified' | 'deleted' | 'untracked' | 'conflict') => string;
   commitHash: (hash: string) => string;
   branchName: (name: string, current?: boolean) => string;
   keyHint: (key: string) => string;

@@ -59,12 +59,13 @@ export const monochromeTheme = {
     return `${labels[type]} ${text}`;
   },
 
-  file(name: string, status: 'staged' | 'modified' | 'deleted' | 'untracked'): string {
+  file(name: string, status: 'staged' | 'modified' | 'deleted' | 'untracked' | 'conflict'): string {
     const prefixes = {
       staged: '[+]',
       modified: '[~]',
       deleted: '[-]',
-      untracked: '[?]'
+      untracked: '[?]',
+      conflict: '[!]'
     };
     return `${prefixes[status]} ${name}`;
   },
