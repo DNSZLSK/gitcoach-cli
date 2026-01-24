@@ -403,4 +403,4 @@ Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/gith
 
 ## License
 
-MIT - See [LICENSE](LICENSE) for details.
+MIT
