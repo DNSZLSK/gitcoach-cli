@@ -7,6 +7,19 @@ import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
 import { APP_VERSION } from '../../utils/version.js';
 import { showDetachedHeadMenu, handleDetachedHead } from './detached-head-menu.js';
+import { getLevel } from '../../utils/level-helper.js';
+
+/**
+ * Get menu label based on user experience level
+ * - Beginner: Full description
+ * - Intermediate: Short description
+ * - Expert: Git command
+ */
+function getMenuLabel(key: string): string {
+  const level = getLevel();
+  const levelKey = `menu.${key}${level.charAt(0).toUpperCase() + level.slice(1)}`;
+  return t(levelKey);
+}
 
 export type MainMenuAction =
   | 'status'
@@ -52,55 +65,55 @@ export async function showMainMenu(): Promise<MainMenuAction> {
 
   const choices = [
     {
-      name: theme.menuItem('S', `${t('menu.status')} - ${t('menu.statusDesc')}`),
+      name: theme.menuItem('S', getMenuLabel('status')),
       value: 'status' as MainMenuAction
     },
     {
-      name: theme.menuItem('A', `${t('menu.add')} - ${t('menu.addDesc')}`),
+      name: theme.menuItem('A', getMenuLabel('add')),
       value: 'add' as MainMenuAction
     },
     {
-      name: theme.menuItem('C', `${t('menu.commit')} - ${t('menu.commitDesc')}`),
+      name: theme.menuItem('C', getMenuLabel('commit')),
       value: 'commit' as MainMenuAction
     },
     {
-      name: theme.menuItem('P', `${t('menu.push')} - ${t('menu.pushDesc')}`),
+      name: theme.menuItem('P', getMenuLabel('push')),
       value: 'push' as MainMenuAction
     },
     {
-      name: theme.menuItem('L', `${t('menu.pull')} - ${t('menu.pullDesc')}`),
+      name: theme.menuItem('L', getMenuLabel('pull')),
       value: 'pull' as MainMenuAction
     },
     {
-      name: theme.menuItem('B', `${t('menu.branch')} - ${t('menu.branchDesc')}`),
+      name: theme.menuItem('B', getMenuLabel('branch')),
       value: 'branch' as MainMenuAction
     },
     {
-      name: theme.menuItem('U', `${t('menu.undo')} - ${t('menu.undoDesc')}`),
+      name: theme.menuItem('U', getMenuLabel('undo')),
       value: 'undo' as MainMenuAction
     },
     {
-      name: theme.menuItem('H', `${t('menu.history')} - ${t('menu.historyDesc')}`),
+      name: theme.menuItem('H', getMenuLabel('history')),
       value: 'history' as MainMenuAction
     },
     {
-      name: theme.menuItem('W', `${t('menu.stash')} - ${t('menu.stashDesc')}`),
+      name: theme.menuItem('W', getMenuLabel('stash')),
       value: 'stash' as MainMenuAction
     },
     {
-      name: theme.menuItem('G', `${t('menu.config')} - ${t('menu.configDesc')}`),
+      name: theme.menuItem('G', getMenuLabel('config')),
       value: 'config' as MainMenuAction
     },
     {
-      name: theme.menuItem('T', `${t('menu.stats')} - ${t('menu.statsDesc')}`),
+      name: theme.menuItem('T', getMenuLabel('stats')),
       value: 'stats' as MainMenuAction
     },
     {
-      name: theme.menuItem('?', `${t('menu.help')} - ${t('menu.helpDesc')}`),
+      name: theme.menuItem('?', getMenuLabel('help')),
       value: 'help' as MainMenuAction
     },
     {
-      name: theme.menuItem('Q', `${t('menu.quit')} - ${t('menu.quitDesc')}`),
+      name: theme.menuItem('Q', getMenuLabel('quit')),
       value: 'quit' as MainMenuAction
     }
   ];

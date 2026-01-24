@@ -6,6 +6,7 @@ import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { logger } from '../../utils/logger.js';
+import { shouldConfirm, shouldShowWarning, shouldShowExplanation } from '../../utils/level-helper.js';
 
 // Re-export for use in other modules
 
@@ -23,6 +24,14 @@ export async function showPushMenu(): Promise<PushResult> {
   logger.raw('\n' + theme.title(t('commands.push.title')) + '\n');
 
   try {
+    // Show explanation for beginners
+    if (shouldShowExplanation()) {
+      logger.raw(infoBox(
+        t('tips.beginner.push'),
+        t('commands.push.title')
+      ));
+    }
+
     const status = await gitService.getStatus();
     const currentBranch = status.current;
     const remote = 'origin';
@@ -107,9 +116,13 @@ export async function showPushMenu(): Promise<PushResult> {
 
     if (validation.warnings.length > 0) {
       for (const warning of validation.warnings) {
+        const category = warning.level === 'critical' ? 'critical' :
+                         warning.level === 'warning' ? 'warning' : 'info';
+
+        // Critical warnings always shown
         if (warning.level === 'critical') {
           logger.raw(errorBox(warning.message, warning.title));
-        } else {
+        } else if (shouldShowWarning(category)) {
           logger.raw(warningBox(warning.message, warning.title));
         }
       }
@@ -129,11 +142,12 @@ export async function showPushMenu(): Promise<PushResult> {
       branch: currentBranch
     })) + '\n');
 
-    // Confirm push
-    const confirmPush = await promptConfirm(t('prompts.confirm'), true);
-
-    if (!confirmPush) {
-      return { pushed: false };
+    // Confirm push (level-based: experts skip confirmation for non-destructive push)
+    if (shouldConfirm(false)) {
+      const confirmPush = await promptConfirm(t('prompts.confirm'), true);
+      if (!confirmPush) {
+        return { pushed: false };
+      }
     }
 
     // Perform push (with -u flag if no upstream is set)

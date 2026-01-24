@@ -1,17 +1,20 @@
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
-import { promptConfirm } from '../components/prompt.js';
+import { promptConfirm, promptSelect } from '../components/prompt.js';
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { logger } from '../../utils/logger.js';
+import { shouldShowWarning, shouldShowExplanation, shouldConfirm, isLevel } from '../../utils/level-helper.js';
 
 export interface PullResult {
   pulled: boolean;
   remote?: string;
   branch?: string;
 }
+
+type PullAction = 'pull' | 'back';
 
 export async function showPullMenu(): Promise<PullResult> {
   const theme = getTheme();
@@ -23,28 +26,12 @@ export async function showPullMenu(): Promise<PullResult> {
     const currentBranch = status.current;
     const remote = 'origin';
 
-    // Validate pull
-    const validation = await preventionService.validatePull();
-
-    if (validation.warnings.length > 0) {
-      for (const warning of validation.warnings) {
-        if (warning.level === 'critical') {
-          logger.raw(errorBox(warning.message, warning.title));
-          return { pulled: false };
-        } else if (warning.level === 'warning') {
-          logger.raw(warningBox(warning.message, warning.title));
-        } else {
-          logger.raw(infoBox(warning.message));
-        }
-      }
-
-      // Ask to continue if there are uncommitted changes
-      if (validation.warnings.some(w => w.message.includes('uncommitted'))) {
-        const proceed = await promptConfirm(t('prompts.continue'), false);
-        if (!proceed) {
-          return { pulled: false };
-        }
-      }
+    // Show explanation for beginners
+    if (shouldShowExplanation()) {
+      logger.raw(infoBox(
+        t('tips.beginner.pull'),
+        t('commands.pull.title')
+      ));
     }
 
     // Check if there's anything to pull
@@ -54,6 +41,69 @@ export async function showPullMenu(): Promise<PullResult> {
     }
 
     logger.raw(theme.info(`${status.behind} commit(s) to download from ${remote}/${currentBranch}`) + '\n');
+
+    // Expert mode: show action menu
+    if (isLevel('expert')) {
+      const action = await promptSelect<PullAction>(t('commands.pull.title'), [
+        {
+          name: theme.menuItem('P', `git pull ${remote} ${currentBranch || ''}`),
+          value: 'pull'
+        },
+        {
+          name: theme.menuItem('R', t('menu.back')),
+          value: 'back'
+        }
+      ]);
+
+      if (action === 'back') {
+        return { pulled: false };
+      }
+    }
+
+    // Validate pull
+    const validation = await preventionService.validatePull();
+
+    if (validation.warnings.length > 0) {
+      let hasVisibleWarnings = false;
+
+      for (const warning of validation.warnings) {
+        const category = warning.level === 'critical' ? 'critical' :
+                         warning.level === 'warning' ? 'warning' : 'info';
+
+        if (warning.level === 'critical') {
+          logger.raw(errorBox(warning.message, warning.title));
+          return { pulled: false };
+        }
+
+        if (shouldShowWarning(category)) {
+          if (warning.level === 'warning') {
+            logger.raw(warningBox(warning.message, warning.title));
+          } else {
+            logger.raw(infoBox(warning.message));
+          }
+          hasVisibleWarnings = true;
+        }
+      }
+
+      // Ask to continue if there are uncommitted changes (visible warnings)
+      if (hasVisibleWarnings && validation.warnings.some(w => w.message.includes('uncommitted'))) {
+        const proceed = await promptConfirm(t('prompts.continue'), false);
+        if (!proceed) {
+          return { pulled: false };
+        }
+      }
+    }
+
+    // Confirm before pull (level-based)
+    if (shouldConfirm(false)) {
+      const confirm = await promptConfirm(
+        t('commands.pull.pulling', { remote }) + ' ?',
+        true
+      );
+      if (!confirm) {
+        return { pulled: false };
+      }
+    }
 
     // Perform pull
     logger.command(`git pull ${remote} ${currentBranch || ''}`);

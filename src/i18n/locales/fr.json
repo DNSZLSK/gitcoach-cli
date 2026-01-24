@@ -35,7 +35,59 @@
     "quit": "Quitter",
     "quitDesc": "Fermer GitCoach",
     "back": "Retour",
-    "backDesc": "Revenir au menu precedent"
+    "backDesc": "Revenir au menu precedent",
+
+    "statusBeginner": "Statut - Voir l'etat actuel de vos fichiers",
+    "statusIntermediate": "Statut - Voir les modifications",
+    "statusExpert": "git status",
+
+    "addBeginner": "Ajouter - Preparer vos fichiers pour l'enregistrement",
+    "addIntermediate": "Ajouter - Indexer les fichiers",
+    "addExpert": "git add",
+
+    "commitBeginner": "Commit - Enregistrer vos modifications avec un message",
+    "commitIntermediate": "Commit - Enregistrer",
+    "commitExpert": "git commit",
+
+    "pushBeginner": "Push - Envoyer vos modifications au serveur distant",
+    "pushIntermediate": "Push - Envoyer",
+    "pushExpert": "git push",
+
+    "pullBeginner": "Pull - Telecharger les modifications du serveur",
+    "pullIntermediate": "Pull - Telecharger",
+    "pullExpert": "git pull",
+
+    "branchBeginner": "Branche - Travailler sur des versions separees",
+    "branchIntermediate": "Branche - Gerer les branches",
+    "branchExpert": "git branch",
+
+    "undoBeginner": "Annuler - Revenir en arriere en securite",
+    "undoIntermediate": "Annuler - Revenir en arriere",
+    "undoExpert": "git reset/restore",
+
+    "historyBeginner": "Historique - Voir les commits passes",
+    "historyIntermediate": "Historique - Voir les commits",
+    "historyExpert": "git log",
+
+    "stashBeginner": "Stash - Sauvegarder temporairement votre travail",
+    "stashIntermediate": "Stash - Sauvegarder temporairement",
+    "stashExpert": "git stash",
+
+    "configBeginner": "Parametres - Configurer GitCoach",
+    "configIntermediate": "Parametres - Configurer",
+    "configExpert": "config",
+
+    "statsBeginner": "Statistiques - Voir votre progression",
+    "statsIntermediate": "Statistiques - Voir les stats",
+    "statsExpert": "stats",
+
+    "helpBeginner": "Aide - Obtenir de l'assistance",
+    "helpIntermediate": "Aide - Obtenir de l'aide",
+    "helpExpert": "help",
+
+    "quitBeginner": "Quitter - Fermer GitCoach",
+    "quitIntermediate": "Quitter - Fermer",
+    "quitExpert": "quit"
   },
   "commands": {
     "status": {

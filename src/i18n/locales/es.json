@@ -35,7 +35,59 @@
     "quit": "Salir",
     "quitDesc": "Cerrar GitCoach",
     "back": "Volver",
-    "backDesc": "Regresar al menu anterior"
+    "backDesc": "Regresar al menu anterior",
+
+    "statusBeginner": "Estado - Ver el estado actual de tus archivos",
+    "statusIntermediate": "Estado - Ver cambios",
+    "statusExpert": "git status",
+
+    "addBeginner": "Agregar - Preparar archivos para guardar",
+    "addIntermediate": "Agregar - Preparar archivos",
+    "addExpert": "git add",
+
+    "commitBeginner": "Commit - Guardar tus cambios con un mensaje",
+    "commitIntermediate": "Commit - Guardar cambios",
+    "commitExpert": "git commit",
+
+    "pushBeginner": "Push - Enviar cambios al servidor remoto",
+    "pushIntermediate": "Push - Enviar al remoto",
+    "pushExpert": "git push",
+
+    "pullBeginner": "Pull - Descargar cambios del servidor",
+    "pullIntermediate": "Pull - Descargar cambios",
+    "pullExpert": "git pull",
+
+    "branchBeginner": "Rama - Trabajar en versiones separadas",
+    "branchIntermediate": "Rama - Gestionar ramas",
+    "branchExpert": "git branch",
+
+    "undoBeginner": "Deshacer - Revertir acciones de forma segura",
+    "undoIntermediate": "Deshacer - Revertir acciones",
+    "undoExpert": "git reset/restore",
+
+    "historyBeginner": "Historial - Ver commits anteriores",
+    "historyIntermediate": "Historial - Ver commits",
+    "historyExpert": "git log",
+
+    "stashBeginner": "Stash - Guardar trabajo temporalmente",
+    "stashIntermediate": "Stash - Guardar temporalmente",
+    "stashExpert": "git stash",
+
+    "configBeginner": "Configuracion - Configurar GitCoach",
+    "configIntermediate": "Configuracion - Configurar",
+    "configExpert": "config",
+
+    "statsBeginner": "Estadisticas - Ver tu progreso",
+    "statsIntermediate": "Estadisticas - Ver stats",
+    "statsExpert": "stats",
+
+    "helpBeginner": "Ayuda - Obtener asistencia",
+    "helpIntermediate": "Ayuda - Obtener ayuda",
+    "helpExpert": "help",
+
+    "quitBeginner": "Salir - Cerrar GitCoach",
+    "quitIntermediate": "Salir - Cerrar",
+    "quitExpert": "quit"
   },
   "commands": {
     "status": {
