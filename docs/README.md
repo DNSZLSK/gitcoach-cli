@@ -195,7 +195,7 @@ Change your level anytime in Config.
 
 ```bash
 # Clone
-git clone https://github.com/DNSZLSK/gitcoach.git
+git clone https://github.com/DNSZLSK/gitcoach-cli.git
 cd gitcoach
 
 # Install
