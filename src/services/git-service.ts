@@ -235,7 +235,7 @@ class GitService {
   }
 
   async merge(branch: string): Promise<void> {
-    await this.git.merge([branch]);
+    await this.git.merge([branch, '--no-edit']);
   }
 
   async hasConflicts(): Promise<boolean> {
