@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitCoach</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 11px;
+            color: #58a6ff;
+            white-space: pre;
+            line-height: 1.15;
+            margin-bottom: 32px;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: #8b949e;
+            margin-bottom: 24px;
+            font-weight: 400;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            color: #58a6ff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-bottom: 32px;
+        }
+
+        .install {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 0.9rem;
+            margin-bottom: 32px;
+            color: #c9d1d9;
+        }
+
+        .install span {
+            color: #8b949e;
+        }
+
+        .features {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .feature {
+            color: #8b949e;
+            font-size: 0.8rem;
+        }
+
+        .feature strong {
+            color: #c9d1d9;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+
+        .btn-npm {
+            background: #cb3837;
+            color: #fff;
+        }
+
+        .btn-npm:hover {
+            background: #a32d2d;
+        }
+
+        .btn-github {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+
+        .btn-github:hover {
+            background: #30363d;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 24px;
+            color: #484f58;
+            font-size: 0.7rem;
+        }
+
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 6px;
+            }
+
+            .features {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            body {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <pre class="logo">    ██████╗ ██╗████████╗ ██████╗ ██████╗  █████╗  ██████╗██╗  ██╗
+   ██╔════╝ ██║╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██║  ██║
+   ██║  ███╗██║   ██║   ██║     ██║   ██║███████║██║     ███████║
+   ██║   ██║██║   ██║   ██║     ██║   ██║██╔══██║██║     ██╔══██║
+   ╚██████╔╝██║   ██║   ╚██████╗╚██████╔╝██║  ██║╚██████╗██║  ██║
+    ╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝</pre>
+
+    <p class="tagline">Interactive Git assistant that prevents mistakes before they happen.</p>
+
+    <span class="badge">GitHub Copilot CLI Challenge 2026</span>
+
+    <div class="install">
+        <span>$</span> npm install -g gitcoach-cli
+    </div>
+
+    <div class="features">
+        <div class="feature"><strong>383</strong> tests</div>
+        <div class="feature"><strong>3</strong> languages</div>
+        <div class="feature"><strong>3</strong> levels</div>
+    </div>
+
+    <div class="buttons">
+        <a href="https://www.npmjs.com/package/gitcoach-cli" class="btn btn-npm">npm</a>
+        <a href="https://github.com/DNSZLSK/gitcoach-cli" class="btn btn-github">GitHub</a>
+    </div>
+
+    <div class="footer">Built by DNSZLSK</div>
+</body>
+</html>
