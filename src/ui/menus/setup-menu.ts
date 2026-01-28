@@ -220,7 +220,7 @@ async function createGitignoreFile(): Promise<void> {
 
   // Check if .gitignore already exists
   if (existsSync(gitignorePath)) {
-    const overwrite = await promptConfirm('.gitignore exists. Overwrite?');
+    const overwrite = await promptConfirm(t('setup.gitignoreOverwrite'));
     if (!overwrite) {
       return;
     }

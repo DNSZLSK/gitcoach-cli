@@ -40,7 +40,7 @@ export async function handleDetachedHead(action: DetachedHeadAction): Promise<bo
           '',
           (value) => {
             if (!isValidBranchName(value)) {
-              return 'Invalid branch name';
+              return t('commands.branch.invalidName');
             }
             return true;
           }
@@ -55,7 +55,7 @@ export async function handleDetachedHead(action: DetachedHeadAction): Promise<bo
         logger.raw(theme.textMuted(t('detachedHead.commandExecuted', { command })));
 
         await withSpinner(
-          `Creating branch ${branchName}...`,
+          t('commands.branch.creating', { branch: branchName }),
           async () => {
             await gitService.createBranch(branchName, true);
           },
@@ -85,7 +85,7 @@ export async function handleDetachedHead(action: DetachedHeadAction): Promise<bo
         logger.raw(theme.textMuted(t('detachedHead.commandExecuted', { command })));
 
         await withSpinner(
-          `Switching to ${defaultBranch}...`,
+          t('commands.branch.switching', { branch: defaultBranch }),
           async () => {
             await gitService.checkout(defaultBranch);
           },
@@ -107,7 +107,7 @@ export async function handleDetachedHead(action: DetachedHeadAction): Promise<bo
           // Stash the changes
           const stashCommand = 'git stash';
           logger.command(stashCommand);
-          await gitService.stash('Detached HEAD changes');
+          await gitService.stash(t('detachedHead.stashMessage'));
         }
 
         // Checkout default branch
@@ -115,7 +115,7 @@ export async function handleDetachedHead(action: DetachedHeadAction): Promise<bo
         logger.command(checkoutCommand);
 
         await withSpinner(
-          `Switching to ${defaultBranch}...`,
+          t('commands.branch.switching', { branch: defaultBranch }),
           async () => {
             await gitService.checkout(defaultBranch);
           },

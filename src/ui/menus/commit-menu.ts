@@ -59,7 +59,7 @@ export async function showCommitMenu(): Promise<CommitResult> {
 
     // Get staged files for context
     const stagedFiles = await gitService.getStagedFiles();
-    logger.raw(theme.textMuted(`${stagedFiles.length} file(s) staged:\n`));
+    logger.raw(theme.textMuted(t('commands.commit.stagedCount', { count: stagedFiles.length }) + '\n'));
     stagedFiles.forEach(f => logger.raw(theme.file(f, 'staged')));
     logger.raw('');
 
@@ -139,14 +139,14 @@ export async function showCommitMenu(): Promise<CommitResult> {
     const level = userConfig.getExperienceLevel();
     if (level !== 'beginner' && !isConventionalCommit(commitMessage)) {
       const convertToConventional = await promptSelect(
-        'Convert to conventional commit format?',
+        t('commands.commit.convertToConventional'),
         [
-          { name: 'No, keep as is', value: 'keep' },
-          { name: 'feat: (new feature)', value: 'feat' },
-          { name: 'fix: (bug fix)', value: 'fix' },
-          { name: 'docs: (documentation)', value: 'docs' },
-          { name: 'refactor: (code refactor)', value: 'refactor' },
-          { name: 'chore: (maintenance)', value: 'chore' }
+          { name: t('commands.commit.keepAsIs'), value: 'keep' },
+          { name: t('commands.commit.typeFeature'), value: 'feat' },
+          { name: t('commands.commit.typeFix'), value: 'fix' },
+          { name: t('commands.commit.typeDocs'), value: 'docs' },
+          { name: t('commands.commit.typeRefactor'), value: 'refactor' },
+          { name: t('commands.commit.typeChore'), value: 'chore' }
         ]
       );
 
@@ -169,7 +169,7 @@ export async function showCommitMenu(): Promise<CommitResult> {
     logger.command(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`);
 
     const hash = await withSpinner(
-      'Committing changes...',
+      t('commands.commit.committing'),
       async () => {
         return gitService.commit(commitMessage);
       },

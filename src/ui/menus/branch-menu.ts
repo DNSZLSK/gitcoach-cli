@@ -80,7 +80,7 @@ async function createBranch(): Promise<BranchResult> {
     '',
     (value) => {
       if (!isValidBranchName(value)) {
-        return 'Invalid branch name';
+        return t('commands.branch.invalidName');
       }
       return true;
     }
@@ -99,7 +99,7 @@ async function createBranch(): Promise<BranchResult> {
 
   logger.command(`git checkout -b ${branchName}`);
   await withSpinner(
-    `Creating branch ${branchName}...`,
+    t('commands.branch.creating', { branch: branchName }),
     async () => {
       await gitService.createBranch(branchName, true);
     },
@@ -122,7 +122,7 @@ async function switchBranch(): Promise<BranchResult> {
   const otherBranches = branches.filter(b => !b.current);
 
   if (otherBranches.length === 0) {
-    logger.raw(warningBox('No other branches available'));
+    logger.raw(warningBox(t('commands.branch.noBranchesAvailable')));
     return { action: 'switch', success: false };
   }
 
@@ -164,7 +164,7 @@ async function switchBranch(): Promise<BranchResult> {
 
   logger.command(`git checkout ${selectedBranch}`);
   await withSpinner(
-    `Switching to ${selectedBranch}...`,
+    t('commands.branch.switching', { branch: selectedBranch }),
     async () => {
       await gitService.checkout(selectedBranch);
     },
@@ -221,7 +221,7 @@ async function deleteBranch(): Promise<BranchResult> {
 
   logger.command(`git branch -d ${selectedBranch}`);
   await withSpinner(
-    `Deleting branch ${selectedBranch}...`,
+    t('commands.branch.deleting', { branch: selectedBranch }),
     async () => {
       await gitService.deleteBranch(selectedBranch);
     },

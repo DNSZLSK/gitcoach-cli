@@ -36,7 +36,7 @@ export async function showAddMenu(): Promise<AddResult> {
     }
 
     // Show files that can be staged
-    logger.raw(theme.textMuted(`${unstaged.length} file(s) to stage:\n`));
+    logger.raw(theme.textMuted(t('commands.add.filesToStage', { count: unstaged.length }) + '\n'));
     unstaged.forEach(f => logger.raw(theme.file(f.name, f.status)));
     logger.raw('');
 
@@ -114,7 +114,7 @@ export async function showAddMenu(): Promise<AddResult> {
           return { staged: [], cancelled: true };
         }
 
-      case 'select':
+      case 'select': {
         const result = await selectFilesToStage(unstaged, theme);
         if (result.cancelled) {
           return { staged: [], cancelled: true };
@@ -125,6 +125,7 @@ export async function showAddMenu(): Promise<AddResult> {
           return { staged: [], cancelled: true };
         }
         break;
+      }
 
       default:
         return { staged: [], cancelled: true };
@@ -138,7 +139,7 @@ export async function showAddMenu(): Promise<AddResult> {
     }
 
     await withSpinner(
-      `Staging ${filesToStage.length} file(s)...`,
+      t('commands.add.staging', { count: filesToStage.length }),
       async () => {
         await gitService.add(filesToStage);
       },

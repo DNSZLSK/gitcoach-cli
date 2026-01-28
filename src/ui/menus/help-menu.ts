@@ -149,7 +149,7 @@ function showQuickReference(): void {
 function showAbout(): void {
   const theme = getTheme();
 
-  logger.raw('\n' + theme.title('About GitCoach') + '\n');
+  logger.raw('\n' + theme.title(t('help.aboutTitle')) + '\n');
   logger.raw(theme.textBold(`GitCoach ${APP_VERSION}`));
   logger.raw(t('app.tagline') || 'Your Interactive Git Assistant');
   logger.raw('');
@@ -163,6 +163,6 @@ function showAbout(): void {
   logger.raw('  - ' + (t('help.feature4') || 'Multilingual support (EN, FR, ES)'));
   logger.raw('  - ' + (t('help.feature5') || 'Beginner, Intermediate, and Expert modes'));
   logger.raw('');
-  logger.raw(theme.textMuted('Built for the GitHub Copilot CLI Challenge 2026'));
+  logger.raw(theme.textMuted(t('help.builtFor')));
   logger.raw('');
 }

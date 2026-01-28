@@ -137,16 +137,16 @@ async function showCommitDetails(hash: string): Promise<void> {
     }
 
     // Display commit info
-    logger.raw(theme.textBold('Commit: ') + theme.commitHash(commit.hash));
-    logger.raw(theme.textBold('Author: ') + commit.author);
-    logger.raw(theme.textBold('Date:   ') + commit.date);
-    logger.raw(theme.textBold('Message:'));
+    logger.raw(theme.textBold(t('commands.history.commitLabel') + ' ') + theme.commitHash(commit.hash));
+    logger.raw(theme.textBold(t('commands.history.authorLabel') + ' ') + commit.author);
+    logger.raw(theme.textBold(t('commands.history.dateLabel') + ' ') + commit.date);
+    logger.raw(theme.textBold(t('commands.history.messageLabel')));
     logger.raw('  ' + commit.message);
     logger.raw('');
 
     // Try to show changed files (this is a simplified version)
     logger.raw(theme.textMuted(t('commands.history.changedFiles')));
-    logger.raw(theme.dim('  (Use git show ' + hash.substring(0, 7) + ' for full diff)'));
+    logger.raw(theme.dim('  ' + t('commands.history.fullDiffHint', { hash: hash.substring(0, 7) })));
     logger.raw('');
 
   } catch (error) {
