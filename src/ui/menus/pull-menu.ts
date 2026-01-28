@@ -40,7 +40,7 @@ export async function showPullMenu(): Promise<PullResult> {
       return { pulled: false };
     }
 
-    logger.raw(theme.info(`${status.behind} commit(s) to download from ${remote}/${currentBranch}`) + '\n');
+    logger.raw(theme.info(t('commands.push.commitsToDownload', { count: status.behind, remote, branch: currentBranch })) + '\n');
 
     // Expert mode: show action menu
     if (isLevel('expert')) {

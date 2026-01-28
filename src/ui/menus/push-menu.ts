@@ -234,7 +234,7 @@ export async function showForcePushMenu(): Promise<PushResult> {
     return { pushed: false };
   }
 
-  const confirmSecond = await promptConfirm('Are you absolutely sure? This cannot be undone.', false);
+  const confirmSecond = await promptConfirm(t('commands.push.forceConfirmFinal'), false);
 
   if (!confirmSecond) {
     return { pushed: false };
@@ -247,7 +247,7 @@ export async function showForcePushMenu(): Promise<PushResult> {
   try {
     logger.command(`git push --force ${remote} ${currentBranch || ''}`);
     await withSpinner(
-      `Force pushing to ${remote}...`,
+      t('commands.push.forcePushing', { remote }),
       async () => {
         await gitService.push(remote, currentBranch || undefined, true);
       },

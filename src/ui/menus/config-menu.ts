@@ -79,9 +79,9 @@ async function handleConfigAction(action: ConfigAction): Promise<void> {
       const selectedTheme = await promptSelect<Theme>(
         t('setup.selectTheme'),
         THEMES.map(th => ({
-          name: th.theme,
+          name: t(`themes.${th.theme}`),
           value: th.theme,
-          description: th.description
+          description: t(`themes.${th.theme}Desc`)
         }))
       );
       userConfig.setTheme(selectedTheme);
@@ -93,9 +93,9 @@ async function handleConfigAction(action: ConfigAction): Promise<void> {
       const level = await promptSelect<ExperienceLevel>(
         t('setup.selectLevel'),
         EXPERIENCE_LEVELS.map(l => ({
-          name: l.level,
+          name: t(`levels.${l.level}`),
           value: l.level,
-          description: l.description
+          description: t(`levels.${l.level}Desc`)
         }))
       );
       userConfig.setExperienceLevel(level);

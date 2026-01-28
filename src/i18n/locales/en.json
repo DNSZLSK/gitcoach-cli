@@ -95,6 +95,20 @@
     "quitIntermediate": "Quit - Exit",
     "quitExpert": "quit"
   },
+  "levels": {
+    "beginner": "Beginner",
+    "beginnerDesc": "Verbose explanations and step-by-step guidance",
+    "intermediate": "Intermediate",
+    "intermediateDesc": "Helpful tips with moderate explanations",
+    "expert": "Expert",
+    "expertDesc": "Minimal output, only warnings and errors"
+  },
+  "themes": {
+    "colored": "Colored",
+    "coloredDesc": "Colorful output with syntax highlighting",
+    "monochrome": "Monochrome",
+    "monochromeDesc": "Plain text output without colors"
+  },
   "commands": {
     "status": {
       "title": "Repository Status",
@@ -113,7 +127,11 @@
       "noFiles": "No files to stage.",
       "allFiles": "Stage all files",
       "success": "Successfully staged {{count}} file(s).",
-      "staged": "Staged: {{file}}"
+      "staged": "Staged: {{file}}",
+      "filesToStage": "{{count}} file(s) to stage:",
+      "addAll": "git add -A",
+      "addPatch": "git add -p",
+      "staging": "Staging {{count}} file(s)..."
     },
     "commit": {
       "title": "Commit Changes",
@@ -132,7 +150,18 @@
       "aiGenerationFailed": "AI generation failed - enter message manually",
       "enterManually": "Enter your commit message:",
       "conflictsDetected": "Merge conflicts detected! Resolve them before committing.",
-      "conflictedFiles": "Conflicted files:"
+      "conflictedFiles": "Conflicted files:",
+      "stagedCount": "{{count}} file(s) staged:",
+      "committing": "Committing changes...",
+      "commitAI": "git commit (AI)",
+      "commitManual": "git commit -m",
+      "convertToConventional": "Convert to conventional commit format?",
+      "keepAsIs": "No, keep as is",
+      "typeFeature": "feat: (new feature)",
+      "typeFix": "fix: (bug fix)",
+      "typeDocs": "docs: (documentation)",
+      "typeRefactor": "refactor: (code refactor)",
+      "typeChore": "chore: (maintenance)"
     },
     "push": {
       "title": "Push Changes",
@@ -149,7 +178,10 @@
       "noUpstream": "Branch '{{branch}}' has no upstream. {{count}} commit(s) will be pushed.",
       "firstPush": "First Push",
       "noRemoteConfigured": "No remote repository configured.",
-      "addRemoteQuestion": "Would you like to add a remote origin to push to?"
+      "addRemoteQuestion": "Would you like to add a remote origin to push to?",
+      "forceConfirmFinal": "Are you absolutely sure? This cannot be undone.",
+      "forcePushing": "Force pushing to {{remote}}...",
+      "commitsToDownload": "{{count}} commit(s) to download from {{remote}}/{{branch}}"
     },
     "pull": {
       "title": "Pull Changes",
@@ -181,7 +213,12 @@
       "merging": "Merging {{branch}}...",
       "mergeSuccess": "Branch '{{branch}}' merged successfully!",
       "mergeConflicts": "Merge conflicts detected! Resolve them before continuing.",
-      "conflictedFiles": "Conflicted files:"
+      "conflictedFiles": "Conflicted files:",
+      "invalidName": "Invalid branch name",
+      "creating": "Creating branch {{branch}}...",
+      "switching": "Switching to {{branch}}...",
+      "deleting": "Deleting branch {{branch}}...",
+      "noBranchesAvailable": "No other branches available"
     },
     "remote": {
       "title": "Remote Management",
@@ -239,7 +276,12 @@
       "selectCommit": "Select a commit to view details:",
       "commitDetails": "Commit Details",
       "commitNotFound": "Commit not found.",
-      "changedFiles": "Changed files in this commit:"
+      "changedFiles": "Changed files in this commit:",
+      "commitLabel": "Commit:",
+      "authorLabel": "Author:",
+      "dateLabel": "Date:",
+      "messageLabel": "Message:",
+      "fullDiffHint": "(Use git show {{hash}} for full diff)"
     },
     "stash": {
       "title": "Stash - Save Work Temporarily",
@@ -365,7 +407,8 @@
     "copilotInstallNote": "You may need to authenticate with 'copilot auth' on first use.",
     "copilotInstallFailed": "Failed to install GitHub Copilot CLI",
     "copilotInstallFailedDetail": "The automatic installation failed. This may be due to permissions or network issues.",
-    "copilotManualInstall": "To install manually, run:\nnpm install -g @githubnext/github-copilot-cli"
+    "copilotManualInstall": "To install manually, run:\nnpm install -g @githubnext/github-copilot-cli",
+    "gitignoreOverwrite": ".gitignore exists. Overwrite?"
   },
   "config": {
     "title": "Settings",
@@ -389,6 +432,7 @@
     "aiPercentage": "AI-assisted commits: {{percentage}}%",
     "mistakesAvoided": "You've avoided {{count}} potential mistake(s)!"
   },
+  "tipTitle": "Tip",
   "tips": {
     "beginner": {
       "status": "Use 'Status' to see what files have changed before committing.",
@@ -436,7 +480,9 @@
     "feature2": "AI-generated commit messages with Copilot CLI",
     "feature3": "Error prevention and warnings",
     "feature4": "Multilingual support (EN, FR, ES)",
-    "feature5": "Beginner, Intermediate, and Expert modes"
+    "feature5": "Beginner, Intermediate, and Expert modes",
+    "aboutTitle": "About GitCoach",
+    "builtFor": "Built for the GitHub Copilot CLI Challenge 2026"
   },
   "prompts": {
     "confirm": "Are you sure?",
@@ -462,6 +508,7 @@
     "branchCreated": "Branch '{{branch}}' created! Your commits are now safe.",
     "returnedToMain": "Returned to {{branch}}.",
     "stashedAndReturned": "Changes saved and returned to {{branch}}.",
-    "commandExecuted": "Command executed: {{command}}"
+    "commandExecuted": "Command executed: {{command}}",
+    "stashMessage": "Detached HEAD changes"
   }
 }

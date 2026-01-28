@@ -185,7 +185,7 @@ export async function showStatusScreen(): Promise<void> {
 
     // Show tip if available
     if (analysis.tip) {
-      logger.raw('\n' + infoBox(analysis.tip, 'Tip'));
+      logger.raw('\n' + infoBox(analysis.tip, t('tipTitle')));
     }
 
     logger.raw('');

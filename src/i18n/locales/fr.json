@@ -95,6 +95,20 @@
     "quitIntermediate": "Quitter - Fermer",
     "quitExpert": "quit"
   },
+  "levels": {
+    "beginner": "Débutant",
+    "beginnerDesc": "Explications détaillées et guidage pas à pas",
+    "intermediate": "Intermédiaire",
+    "intermediateDesc": "Conseils utiles avec explications modérées",
+    "expert": "Expert",
+    "expertDesc": "Sortie minimale, uniquement avertissements et erreurs"
+  },
+  "themes": {
+    "colored": "Coloré",
+    "coloredDesc": "Sortie colorée avec coloration syntaxique",
+    "monochrome": "Monochrome",
+    "monochromeDesc": "Sortie en texte brut sans couleurs"
+  },
   "commands": {
     "status": {
       "title": "Statut du Depot",
@@ -113,7 +127,11 @@
       "noFiles": "Aucun fichier a indexer.",
       "allFiles": "Indexer tous les fichiers",
       "success": "{{count}} fichier(s) indexe(s) avec succes.",
-      "staged": "Indexe : {{file}}"
+      "staged": "Indexe : {{file}}",
+      "filesToStage": "{{count}} fichier(s) a indexer :",
+      "addAll": "git add -A",
+      "addPatch": "git add -p",
+      "staging": "Indexation de {{count}} fichier(s)..."
     },
     "commit": {
       "title": "Commiter les Modifications",
@@ -132,7 +150,18 @@
       "aiGenerationFailed": "Generation IA echouee - entrez le message manuellement",
       "enterManually": "Entrez votre message de commit :",
       "conflictsDetected": "Conflits de fusion detectes ! Resolvez-les avant de commiter.",
-      "conflictedFiles": "Fichiers en conflit :"
+      "conflictedFiles": "Fichiers en conflit :",
+      "stagedCount": "{{count}} fichier(s) indexe(s) :",
+      "committing": "Commit en cours...",
+      "commitAI": "git commit (IA)",
+      "commitManual": "git commit -m",
+      "convertToConventional": "Convertir en format commit conventionnel ?",
+      "keepAsIs": "Non, garder tel quel",
+      "typeFeature": "feat: (nouvelle fonctionnalite)",
+      "typeFix": "fix: (correction de bug)",
+      "typeDocs": "docs: (documentation)",
+      "typeRefactor": "refactor: (refactorisation)",
+      "typeChore": "chore: (maintenance)"
     },
     "push": {
       "title": "Envoyer les Modifications",
@@ -149,7 +178,10 @@
       "noUpstream": "La branche '{{branch}}' n'a pas d'upstream. {{count}} commit(s) seront envoyes.",
       "firstPush": "Premier Push",
       "noRemoteConfigured": "Aucun depot distant configure.",
-      "addRemoteQuestion": "Voulez-vous ajouter un remote origin pour push ?"
+      "addRemoteQuestion": "Voulez-vous ajouter un remote origin pour push ?",
+      "forceConfirmFinal": "Etes-vous absolument sur ? Cette action est irreversible.",
+      "forcePushing": "Envoi force vers {{remote}}...",
+      "commitsToDownload": "{{count}} commit(s) a telecharger depuis {{remote}}/{{branch}}"
     },
     "pull": {
       "title": "Recuperer les Modifications",
@@ -181,7 +213,12 @@
       "merging": "Fusion de {{branch}}...",
       "mergeSuccess": "Branche '{{branch}}' fusionnee avec succes !",
       "mergeConflicts": "Conflits detectes ! Resolvez-les avant de continuer.",
-      "conflictedFiles": "Fichiers en conflit :"
+      "conflictedFiles": "Fichiers en conflit :",
+      "invalidName": "Nom de branche invalide",
+      "creating": "Creation de la branche {{branch}}...",
+      "switching": "Bascule vers {{branch}}...",
+      "deleting": "Suppression de la branche {{branch}}...",
+      "noBranchesAvailable": "Aucune autre branche disponible"
     },
     "remote": {
       "title": "Gestion du Remote",
@@ -239,7 +276,12 @@
       "selectCommit": "Selectionnez un commit pour voir les details :",
       "commitDetails": "Details du Commit",
       "commitNotFound": "Commit introuvable.",
-      "changedFiles": "Fichiers modifies dans ce commit :"
+      "changedFiles": "Fichiers modifies dans ce commit :",
+      "commitLabel": "Commit :",
+      "authorLabel": "Auteur :",
+      "dateLabel": "Date :",
+      "messageLabel": "Message :",
+      "fullDiffHint": "(Utilisez git show {{hash}} pour voir le diff complet)"
     },
     "stash": {
       "title": "Stash - Mettre de Cote Temporairement",
@@ -365,7 +407,8 @@
     "copilotInstallNote": "Vous devrez peut-etre vous authentifier avec 'copilot auth' lors de la premiere utilisation.",
     "copilotInstallFailed": "Echec de l'installation de GitHub Copilot CLI",
     "copilotInstallFailedDetail": "L'installation automatique a echoue. Cela peut etre du a des problemes de permissions ou de reseau.",
-    "copilotManualInstall": "Pour installer manuellement, executez :\nnpm install -g @githubnext/github-copilot-cli"
+    "copilotManualInstall": "Pour installer manuellement, executez :\nnpm install -g @githubnext/github-copilot-cli",
+    "gitignoreOverwrite": ".gitignore existe deja. Ecraser ?"
   },
   "config": {
     "title": "Parametres",
@@ -389,6 +432,7 @@
     "aiPercentage": "Commits assistes par l'IA : {{percentage}}%",
     "mistakesAvoided": "Vous avez evite {{count}} erreur(s) potentielle(s) !"
   },
+  "tipTitle": "Astuce",
   "tips": {
     "beginner": {
       "status": "Utilisez 'Statut' pour voir les fichiers modifies avant de commiter.",
@@ -436,7 +480,9 @@
     "feature2": "Messages de commit generes par l'IA avec Copilot CLI",
     "feature3": "Prevention des erreurs et avertissements",
     "feature4": "Support multilingue (EN, FR, ES)",
-    "feature5": "Modes Debutant, Intermediaire et Expert"
+    "feature5": "Modes Debutant, Intermediaire et Expert",
+    "aboutTitle": "A propos de GitCoach",
+    "builtFor": "Concu pour le GitHub Copilot CLI Challenge 2026"
   },
   "prompts": {
     "confirm": "Etes-vous sur ?",
@@ -462,6 +508,7 @@
     "branchCreated": "Branche '{{branch}}' creee ! Vos commits sont maintenant securises.",
     "returnedToMain": "Revenu sur {{branch}}.",
     "stashedAndReturned": "Modifications sauvegardees et revenu sur {{branch}}.",
-    "commandExecuted": "Commande executee : {{command}}"
+    "commandExecuted": "Commande executee : {{command}}",
+    "stashMessage": "Modifications HEAD detache"
   }
 }
