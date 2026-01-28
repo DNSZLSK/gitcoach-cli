@@ -12,6 +12,7 @@ import {
 import { showAddMenu } from '../ui/menus/add-menu.js';
 import { showCommitMenu } from '../ui/menus/commit-menu.js';
 import { showBranchMenu } from '../ui/menus/branch-menu.js';
+import { showRemoteMenu } from '../ui/menus/remote-menu.js';
 import { showConfigMenu } from '../ui/menus/config-menu.js';
 import { showPushMenu } from '../ui/menus/push-menu.js';
 import { showPullMenu } from '../ui/menus/pull-menu.js';
@@ -152,6 +153,10 @@ export default class Index extends Command {
 
       case 'branch':
         await showBranchMenu();
+        return true;
+
+      case 'remote':
+        await showRemoteMenu();
         return true;
 
       case 'undo':

@@ -28,6 +28,7 @@ export type MainMenuAction =
   | 'push'
   | 'pull'
   | 'branch'
+  | 'remote'
   | 'undo'
   | 'history'
   | 'stash'
@@ -87,6 +88,10 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     {
       name: theme.menuItem('B', getMenuLabel('branch')),
       value: 'branch' as MainMenuAction
+    },
+    {
+      name: theme.menuItem('R', getMenuLabel('remote')),
+      value: 'remote' as MainMenuAction
     },
     {
       name: theme.menuItem('U', getMenuLabel('undo')),

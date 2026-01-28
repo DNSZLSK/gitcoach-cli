@@ -61,6 +61,12 @@
     "branchIntermediate": "Rama - Gestionar ramas",
     "branchExpert": "git branch",
 
+    "remote": "Remote",
+    "remoteDesc": "Configurar repositorio remoto",
+    "remoteBeginner": "Remote - Configurar repositorio remoto",
+    "remoteIntermediate": "Remote - Configurar remoto",
+    "remoteExpert": "git remote",
+
     "undoBeginner": "Deshacer - Revertir acciones de forma segura",
     "undoIntermediate": "Deshacer - Revertir acciones",
     "undoExpert": "git reset/restore",
@@ -141,7 +147,9 @@
       "behindAction": "Que te gustaria hacer?",
       "pullThenPush": "Hacer pull primero, luego push",
       "noUpstream": "La rama '{{branch}}' no tiene upstream. {{count}} commit(s) seran enviados.",
-      "firstPush": "Primer Push"
+      "firstPush": "Primer Push",
+      "noRemoteConfigured": "No hay repositorio remoto configurado.",
+      "addRemoteQuestion": "Te gustaria agregar un remote origin para hacer push?"
     },
     "pull": {
       "title": "Descargar Cambios",
@@ -174,6 +182,20 @@
       "mergeSuccess": "Rama '{{branch}}' fusionada con exito!",
       "mergeConflicts": "Conflictos detectados! Resuelvalos antes de continuar.",
       "conflictedFiles": "Archivos en conflicto:"
+    },
+    "remote": {
+      "title": "Gestion del Remote",
+      "selectAction": "Que te gustaria hacer?",
+      "viewCurrent": "Ver remote actual",
+      "addOrigin": "Agregar remote origin",
+      "changeUrl": "Cambiar URL del remote",
+      "removeRemote": "Eliminar remote",
+      "currentRemote": "Remote origin: {{url}}",
+      "noRemoteConfigured": "No hay remote configurado.",
+      "changeRemoteConfirm": "Cambiar la URL del remote origin?",
+      "remoteRemoved": "Remote 'origin' eliminado.",
+      "confirmRemove": "Eliminar remote 'origin'? No podras hacer push/pull.",
+      "noRemoteToRemove": "No hay remote configurado para eliminar."
     },
     "undo": {
       "title": "Deshacer Acciones",

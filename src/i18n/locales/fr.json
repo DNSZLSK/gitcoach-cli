@@ -61,6 +61,12 @@
     "branchIntermediate": "Branche - Gerer les branches",
     "branchExpert": "git branch",
 
+    "remote": "Remote",
+    "remoteDesc": "Configurer le depot distant",
+    "remoteBeginner": "Remote - Configurer le depot distant",
+    "remoteIntermediate": "Remote - Configurer le remote",
+    "remoteExpert": "git remote",
+
     "undoBeginner": "Annuler - Revenir en arriere en securite",
     "undoIntermediate": "Annuler - Revenir en arriere",
     "undoExpert": "git reset/restore",
@@ -141,7 +147,9 @@
       "behindAction": "Que souhaitez-vous faire ?",
       "pullThenPush": "Pull d'abord, puis push",
       "noUpstream": "La branche '{{branch}}' n'a pas d'upstream. {{count}} commit(s) seront envoyes.",
-      "firstPush": "Premier Push"
+      "firstPush": "Premier Push",
+      "noRemoteConfigured": "Aucun depot distant configure.",
+      "addRemoteQuestion": "Voulez-vous ajouter un remote origin pour push ?"
     },
     "pull": {
       "title": "Recuperer les Modifications",
@@ -174,6 +182,20 @@
       "mergeSuccess": "Branche '{{branch}}' fusionnee avec succes !",
       "mergeConflicts": "Conflits detectes ! Resolvez-les avant de continuer.",
       "conflictedFiles": "Fichiers en conflit :"
+    },
+    "remote": {
+      "title": "Gestion du Remote",
+      "selectAction": "Que souhaitez-vous faire ?",
+      "viewCurrent": "Voir le remote actuel",
+      "addOrigin": "Ajouter un remote origin",
+      "changeUrl": "Modifier l'URL du remote",
+      "removeRemote": "Supprimer le remote",
+      "currentRemote": "Remote origin : {{url}}",
+      "noRemoteConfigured": "Aucun remote configure.",
+      "changeRemoteConfirm": "Changer l'URL du remote origin ?",
+      "remoteRemoved": "Remote 'origin' supprime.",
+      "confirmRemove": "Supprimer le remote 'origin' ? Vous ne pourrez plus push/pull.",
+      "noRemoteToRemove": "Aucun remote configure a supprimer."
     },
     "undo": {
       "title": "Annuler des Actions",

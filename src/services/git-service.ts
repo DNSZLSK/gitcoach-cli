@@ -268,6 +268,20 @@ class GitService {
     return remotes.length > 0;
   }
 
+  async getRemoteUrl(name: string = 'origin'): Promise<string | null> {
+    try {
+      const remotes = await this.git.getRemotes(true);
+      const remote = remotes.find(r => r.name === name);
+      return remote?.refs?.push || remote?.refs?.fetch || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async removeRemote(name: string): Promise<void> {
+    await this.git.removeRemote(name);
+  }
+
   async fetch(remote: string = 'origin'): Promise<void> {
     await this.git.fetch(remote);
   }
