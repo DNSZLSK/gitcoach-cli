@@ -61,6 +61,12 @@
     "branchIntermediate": "Branch - Manage branches",
     "branchExpert": "git branch",
 
+    "remote": "Remote",
+    "remoteDesc": "Configure remote repository",
+    "remoteBeginner": "Remote - Configure remote repository",
+    "remoteIntermediate": "Remote - Configure remote",
+    "remoteExpert": "git remote",
+
     "undoBeginner": "Undo - Reverse actions safely",
     "undoIntermediate": "Undo - Reverse actions",
     "undoExpert": "git reset/restore",
@@ -141,7 +147,9 @@
       "behindAction": "What would you like to do?",
       "pullThenPush": "Pull first, then push",
       "noUpstream": "Branch '{{branch}}' has no upstream. {{count}} commit(s) will be pushed.",
-      "firstPush": "First Push"
+      "firstPush": "First Push",
+      "noRemoteConfigured": "No remote repository configured.",
+      "addRemoteQuestion": "Would you like to add a remote origin to push to?"
     },
     "pull": {
       "title": "Pull Changes",
@@ -174,6 +182,20 @@
       "mergeSuccess": "Branch '{{branch}}' merged successfully!",
       "mergeConflicts": "Merge conflicts detected! Resolve them before continuing.",
       "conflictedFiles": "Conflicted files:"
+    },
+    "remote": {
+      "title": "Remote Management",
+      "selectAction": "What would you like to do?",
+      "viewCurrent": "View current remote",
+      "addOrigin": "Add remote origin",
+      "changeUrl": "Change remote URL",
+      "removeRemote": "Remove remote",
+      "currentRemote": "Remote origin: {{url}}",
+      "noRemoteConfigured": "No remote configured.",
+      "changeRemoteConfirm": "Change the remote origin URL?",
+      "remoteRemoved": "Remote 'origin' removed.",
+      "confirmRemove": "Remove remote 'origin'? You won't be able to push/pull.",
+      "noRemoteToRemove": "No remote configured to remove."
     },
     "undo": {
       "title": "Undo Actions",

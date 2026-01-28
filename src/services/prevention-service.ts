@@ -156,11 +156,8 @@ class PreventionService {
       warnings.push(detachedWarning);
     }
 
-    // Check for no remote
-    const noRemoteWarning = await this.checkNoRemote();
-    if (noRemoteWarning) {
-      warnings.push(noRemoteWarning);
-    }
+    // Note: no remote check is handled directly by push-menu
+    // which offers to add a remote interactively before reaching this point
 
     // Check force push
     if (force) {

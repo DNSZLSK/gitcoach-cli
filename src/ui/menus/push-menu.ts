@@ -1,12 +1,13 @@
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
-import { promptConfirm, promptSelect } from '../components/prompt.js';
+import { promptConfirm, promptSelect, promptInput } from '../components/prompt.js';
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { logger } from '../../utils/logger.js';
 import { shouldConfirm, shouldShowWarning, shouldShowExplanation } from '../../utils/level-helper.js';
+import { isValidRemoteUrl } from '../../utils/validators.js';
 
 // Re-export for use in other modules
 
@@ -30,6 +31,38 @@ export async function showPushMenu(): Promise<PushResult> {
         t('tips.beginner.push'),
         t('commands.push.title')
       ));
+    }
+
+    // Check if remote exists, offer to add one if not
+    const hasRemote = await gitService.hasRemote();
+    if (!hasRemote) {
+      logger.raw(warningBox(t('commands.push.noRemoteConfigured'), t('warnings.title')));
+
+      const addRemote = await promptConfirm(t('commands.push.addRemoteQuestion'), true);
+      if (!addRemote) {
+        return { pushed: false };
+      }
+
+      const url = await promptInput(
+        t('setup.remoteUrlPrompt'),
+        undefined,
+        (value: string) => {
+          if (!value || value.trim().length === 0) {
+            return t('setup.remoteUrlRequired');
+          }
+          if (!isValidRemoteUrl(value)) {
+            return t('setup.remoteUrlInvalid');
+          }
+          return true;
+        }
+      );
+
+      if (!url || url.trim().length === 0) {
+        return { pushed: false };
+      }
+
+      await gitService.addRemote('origin', url);
+      logger.raw(successBox(t('setup.remoteAdded', { url })));
     }
 
     const status = await gitService.getStatus();
