@@ -1,5 +1,20 @@
-import { executeCommand } from '../utils/helpers.js';
+import { executeCommand, sleep } from '../utils/helpers.js';
 import { logger } from '../utils/logger.js';
+import { t } from '../i18n/index.js';
+
+const COPILOT_TIMEOUT_MS = 30000;
+const COPILOT_RETRY_DELAY_MS = 1000;
+const COPILOT_MAX_RETRIES = 1;
+const COPILOT_INSTALL_TIMEOUT_MS = 120000;
+const MAX_DIFF_FILES = 5;
+const MAX_COMMIT_MSG_LENGTH = 100;
+const MIN_COMMIT_MSG_LENGTH = 10;
+const MIN_LINE_LENGTH = 5;
+const MAX_SUGGESTION_LENGTH = 500;
+
+function getCopilotCommand(): string {
+  return process.env.COPILOT_CLI_PATH || 'copilot';
+}
 
 export interface CopilotSuggestion {
   success: boolean;
@@ -17,7 +32,7 @@ class CopilotService {
 
     try {
       // Use the new GitHub Copilot CLI (not gh copilot extension)
-      const { stdout, stderr } = await executeCommand('copilot --version');
+      const { stdout, stderr } = await executeCommand(`${getCopilotCommand()} --version`);
 
       // Check for version number in output (e.g., "0.0.393")
       const hasVersion = /\d+\.\d+/.test(stdout);
@@ -47,7 +62,7 @@ class CopilotService {
       // Install the GitHub Copilot CLI package globally
       const { stdout, stderr } = await executeCommand(
         'npm install -g @githubnext/github-copilot-cli',
-        120000 // 2 minute timeout for installation
+        COPILOT_INSTALL_TIMEOUT_MS
       );
 
       logger.debug('Copilot CLI installation output:', { stdout, stderr });
@@ -73,7 +88,7 @@ class CopilotService {
       logger.debug('Copilot CLI installation failed:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Installation failed'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
   }
@@ -103,11 +118,16 @@ class CopilotService {
       logger.debug('Copilot prompt:', prompt);
 
       // Use copilot CLI in non-interactive mode with silent output
-      const { stdout, stderr } = await executeCommand(
-        `copilot -p "${this.escapeForShell(prompt)}" -s`,
-        60000 // 60 second timeout for AI response
+      const result = await this.executeWithRetry(
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
       );
 
+      if (!result) {
+        return { success: false, message: 'Could not generate a commit message' };
+      }
+
+      const { stdout, stderr } = result;
       logger.debug('Copilot CLI response:', { stdout: stdout.substring(0, 500), stderr });
 
       // Parse the response to extract the suggested commit message
@@ -128,7 +148,7 @@ class CopilotService {
       logger.debug('Copilot CLI suggestion failed:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
   }
@@ -161,7 +181,7 @@ class CopilotService {
 
     if (files.length > 0) {
       // Clean file names (remove special chars)
-      const cleanFiles = files.slice(0, 5).map(f => f.replace(/[^a-zA-Z0-9._/-]/g, ''));
+      const cleanFiles = files.slice(0, MAX_DIFF_FILES).map(f => f.replace(/[^a-zA-Z0-9._/-]/g, ''));
       parts.push(`Files: ${cleanFiles.join(', ')}`);
     }
 
@@ -199,8 +219,8 @@ class CopilotService {
       const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion in one sentence.`;
 
       const { stdout, stderr } = await executeCommand(
-        `copilot -p "${this.escapeForShell(prompt)}" -s`,
-        30000
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
       );
 
       const suggestion = this.parseSuggestion(stdout, stderr);
@@ -212,7 +232,7 @@ class CopilotService {
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
   }
@@ -234,8 +254,8 @@ class CopilotService {
       const prompt = `Will this git action cause problems? ${context} Reply briefly in one sentence.`;
 
       const { stdout, stderr } = await executeCommand(
-        `copilot -p "${this.escapeForShell(prompt)}" -s`,
-        30000
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
       );
 
       const prediction = this.parseSuggestion(stdout, stderr);
@@ -247,7 +267,7 @@ class CopilotService {
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
   }
@@ -264,8 +284,8 @@ class CopilotService {
       const prompt = `Explain this Git concept briefly for a beginner in 2-3 sentences: ${concept}`;
 
       const { stdout, stderr } = await executeCommand(
-        `copilot -p "${this.escapeForShell(prompt)}" -s`,
-        30000
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
       );
 
       const explanation = this.parseSuggestion(stdout, stderr);
@@ -277,7 +297,7 @@ class CopilotService {
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
   }
@@ -308,8 +328,8 @@ Question: ${question}
 Provide a helpful answer in 2-4 sentences. If relevant, include the Git command.`;
 
       const { stdout, stderr } = await executeCommand(
-        `copilot -p "${this.escapeForShell(prompt)}" -s`,
-        45000
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
       );
 
       const answer = this.parseAnswer(stdout, stderr);
@@ -322,7 +342,7 @@ Provide a helpful answer in 2-4 sentences. If relevant, include the Git command.
       logger.debug('askGitQuestion failed:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
   }
@@ -357,8 +377,8 @@ ${commandContext}Error message: ${errorMessage}
 Be concise and practical.`;
 
       const { stdout, stderr } = await executeCommand(
-        `copilot -p "${this.escapeForShell(prompt)}" -s`,
-        45000
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
       );
 
       const explanation = this.parseAnswer(stdout, stderr);
@@ -371,9 +391,26 @@ Be concise and practical.`;
       logger.debug('explainGitError failed:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : t('errors.unknownError')
       };
     }
+  }
+
+  private async executeWithRetry(
+    command: string,
+    timeout: number
+  ): Promise<{ stdout: string; stderr: string } | null> {
+    for (let attempt = 0; attempt <= COPILOT_MAX_RETRIES; attempt++) {
+      try {
+        return await executeCommand(command, timeout);
+      } catch (error) {
+        logger.debug(`Copilot attempt ${attempt + 1} failed:`, error);
+        if (attempt < COPILOT_MAX_RETRIES) {
+          await sleep(COPILOT_RETRY_DELAY_MS);
+        }
+      }
+    }
+    return null;
   }
 
   private parseAnswer(output: string, stderr?: string): string | null {
@@ -403,7 +440,7 @@ Be concise and practical.`;
         continue;
       }
 
-      if (trimmed.length >= 5) {
+      if (trimmed.length >= MIN_LINE_LENGTH) {
         meaningfulLines.push(trimmed);
       }
     }
@@ -448,7 +485,7 @@ Be concise and practical.`;
       // Match conventional commit format
       if (/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?:\s*.+/i.test(trimmed)) {
         // Clean up the message (remove quotes, backticks)
-        return trimmed.replace(/^["'`]|["'`]$/g, '').substring(0, 100);
+        return trimmed.replace(/^["'`]|["'`]$/g, '').substring(0, MAX_COMMIT_MSG_LENGTH);
       }
     }
 
@@ -462,7 +499,7 @@ Be concise and practical.`;
       }
 
       // Accept lines that look like commit messages (start with verb, reasonable length)
-      if (trimmed.length >= 10 && trimmed.length <= 100) {
+      if (trimmed.length >= MIN_COMMIT_MSG_LENGTH && trimmed.length <= MAX_COMMIT_MSG_LENGTH) {
         // Check if it starts with a common commit verb
         if (/^(add|update|fix|remove|refactor|implement|create|delete|change|improve|move|rename)/i.test(trimmed)) {
           return trimmed.replace(/^["'`]|["'`]$/g, '');
@@ -478,7 +515,7 @@ Be concise and practical.`;
         continue;
       }
 
-      if (trimmed.length >= 5 && trimmed.length <= 100) {
+      if (trimmed.length >= MIN_LINE_LENGTH && trimmed.length <= MAX_COMMIT_MSG_LENGTH) {
         return trimmed.replace(/^["'`]|["'`]$/g, '');
       }
     }
@@ -512,7 +549,7 @@ Be concise and practical.`;
         continue;
       }
 
-      if (trimmed.length >= 10 && trimmed.length <= 500) {
+      if (trimmed.length >= MIN_COMMIT_MSG_LENGTH && trimmed.length <= MAX_SUGGESTION_LENGTH) {
         return trimmed;
       }
     }

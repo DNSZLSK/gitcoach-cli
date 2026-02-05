@@ -4,14 +4,16 @@ import { promptSelect, promptConfirm, promptInput } from '../components/prompt.j
 import { successBox, warningBox, infoBox } from '../components/box.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { isValidRemoteUrl } from '../../utils/validators.js';
 
 type RemoteAction = 'view' | 'add' | 'change' | 'remove' | 'back';
 
 export async function showRemoteMenu(): Promise<void> {
   const theme = getTheme();
+  let running = true;
 
-  while (true) {
+  while (running) {
     logger.raw('\n' + theme.title(t('commands.remote.title')) + '\n');
 
     const remoteUrl = await gitService.getRemoteUrl('origin');
@@ -47,7 +49,8 @@ export async function showRemoteMenu(): Promise<void> {
     );
 
     if (action === 'back') {
-      break;
+      running = false;
+      continue;
     }
 
     await handleRemoteAction(action);
@@ -124,7 +127,6 @@ async function promptAndAddRemote(): Promise<void> {
     await gitService.addRemote('origin', url);
     logger.raw(successBox(t('setup.remoteAdded', { url })));
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.raw(warningBox(t('errors.generic', { message: errorMessage })));
+    logger.raw(warningBox(mapGitError(error)));
   }
 }

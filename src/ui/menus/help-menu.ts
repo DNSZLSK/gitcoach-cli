@@ -107,6 +107,7 @@ async function askGitQuestion(): Promise<void> {
       spinner.warn(t('help.noAnswer') || 'Could not get an answer');
     }
   } catch {
+    logger.debug('AI question failed');
     spinner.warn(t('help.errorAsking') || 'Error getting answer');
   }
 

@@ -3,6 +3,7 @@ import { initI18n, t } from '../i18n/index.js';
 import { userConfig } from '../config/user-config.js';
 import { gitService } from '../services/git-service.js';
 import { logger } from '../utils/logger.js';
+import { mapGitError } from '../utils/error-mapper.js';
 import { getTheme } from '../ui/themes/index.js';
 import {
   showMainMenu,
@@ -75,9 +76,7 @@ export default class Index extends Command {
         if (error instanceof Error && error.message.includes('User force closed')) {
           running = false;
         } else {
-          logger.error(t('errors.generic', {
-            message: error instanceof Error ? error.message : 'Unknown error'
-          }));
+          logger.error(mapGitError(error));
         }
       }
     }
@@ -119,9 +118,7 @@ export default class Index extends Command {
         if (error instanceof Error && error.message.includes('User force closed')) {
           running = false;
         } else {
-          logger.error(t('errors.generic', {
-            message: error instanceof Error ? error.message : 'Unknown error'
-          }));
+          logger.error(mapGitError(error));
         }
       }
     }

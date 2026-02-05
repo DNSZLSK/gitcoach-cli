@@ -2,7 +2,9 @@ import { t, changeLanguage } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
 import { promptSelect, promptConfirm } from '../components/prompt.js';
 import { successBox, infoBox } from '../components/box.js';
+import { withSpinner } from '../components/spinner.js';
 import { userConfig } from '../../config/user-config.js';
+import { copilotService } from '../../services/copilot-service.js';
 import {
   SUPPORTED_LANGUAGES,
   EXPERIENCE_LEVELS,
@@ -20,13 +22,15 @@ export type ConfigAction =
   | 'tips'
   | 'confirmActions'
   | 'autoCommit'
+  | 'copilotRefresh'
   | 'reset'
   | 'back';
 
 export async function showConfigMenu(): Promise<void> {
   const theme = getTheme();
+  let running = true;
 
-  while (true) {
+  while (running) {
     logger.raw('\n' + theme.title(t('config.title')) + '\n');
 
     // Show current settings
@@ -48,12 +52,14 @@ export async function showConfigMenu(): Promise<void> {
       { name: t('config.showTips'), value: 'tips' },
       { name: t('config.confirmDestructive'), value: 'confirmActions' },
       { name: t('config.autoCommitMsg'), value: 'autoCommit' },
+      { name: t('config.copilotRefresh'), value: 'copilotRefresh' },
       { name: theme.warning(t('config.reset')), value: 'reset' },
       { name: t('menu.back'), value: 'back' }
     ]);
 
     if (action === 'back') {
-      break;
+      running = false;
+      continue;
     }
 
     await handleConfigAction(action);
@@ -130,6 +136,21 @@ async function handleConfigAction(action: ConfigAction): Promise<void> {
       );
       userConfig.setAutoGenerateCommitMessages(autoCommit);
       logger.raw(successBox(t('success.configUpdated')));
+      break;
+    }
+
+    case 'copilotRefresh': {
+      copilotService.resetAvailability();
+      const available = await withSpinner(
+        t('config.copilotChecking'),
+        () => copilotService.isAvailable(),
+        ''
+      );
+      if (available) {
+        logger.raw(successBox(t('config.copilotAvailable')));
+      } else {
+        logger.raw(infoBox(t('config.copilotNotAvailable')));
+      }
       break;
     }
 

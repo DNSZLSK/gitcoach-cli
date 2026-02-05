@@ -4,30 +4,40 @@ import { promptSelect } from '../components/prompt.js';
 import { infoBox } from '../components/box.js';
 import { gitService, CommitInfo } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowExplanation } from '../../utils/level-helper.js';
 
 export type HistoryAction = 'view_more' | 'view_details' | 'back';
+
+const MS_PER_MINUTE = 60000;
+const MS_PER_HOUR = 3600000;
+const MS_PER_DAY = 86400000;
+const DAYS_PER_WEEK = 7;
+const DAYS_PER_MONTH = 30;
+const COMMIT_MSG_DISPLAY_LENGTH = 50;
+const SHORT_HASH_LENGTH = 7;
+const COMMIT_LOOKUP_LIMIT = 50;
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
+  const diffMins = Math.floor(diffMs / MS_PER_MINUTE);
+  const diffHours = Math.floor(diffMs / MS_PER_HOUR);
+  const diffDays = Math.floor(diffMs / MS_PER_DAY);
 
   if (diffMins < 1) return t('time.justNow');
   if (diffMins < 60) return t('time.minutesAgo', { count: diffMins });
   if (diffHours < 24) return t('time.hoursAgo', { count: diffHours });
-  if (diffDays < 7) return t('time.daysAgo', { count: diffDays });
-  if (diffDays < 30) return t('time.weeksAgo', { count: Math.floor(diffDays / 7) });
-  return t('time.monthsAgo', { count: Math.floor(diffDays / 30) });
+  if (diffDays < DAYS_PER_WEEK) return t('time.daysAgo', { count: diffDays });
+  if (diffDays < DAYS_PER_MONTH) return t('time.weeksAgo', { count: Math.floor(diffDays / DAYS_PER_WEEK) });
+  return t('time.monthsAgo', { count: Math.floor(diffDays / DAYS_PER_MONTH) });
 }
 
 function displayCommit(commit: CommitInfo, theme: ReturnType<typeof getTheme>): string {
   const hash = theme.commitHash(commit.hash);
-  const message = commit.message.length > 50
-    ? commit.message.substring(0, 47) + '...'
+  const message = commit.message.length > COMMIT_MSG_DISPLAY_LENGTH
+    ? commit.message.substring(0, COMMIT_MSG_DISPLAY_LENGTH - 3) + '...'
     : commit.message;
   const time = formatRelativeTime(commit.date);
   const author = theme.textMuted(`(${commit.author})`);
@@ -113,9 +123,7 @@ export async function showHistoryMenu(): Promise<void> {
         await showCommitDetails(action);
       }
     } catch (error) {
-      logger.raw(theme.error(t('errors.generic', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      })));
+      logger.raw(theme.error(mapGitError(error)));
       running = false;
     }
   }
@@ -127,8 +135,8 @@ async function showCommitDetails(hash: string): Promise<void> {
   logger.raw('\n' + theme.title(t('commands.history.commitDetails')) + '\n');
 
   try {
-    logger.command(`git show ${hash.substring(0, 7)}`);
-    const commits = await gitService.getLog(50);
+    logger.command(`git show ${hash.substring(0, SHORT_HASH_LENGTH)}`);
+    const commits = await gitService.getLog(COMMIT_LOOKUP_LIMIT);
     const commit = commits.find(c => c.hash.startsWith(hash));
 
     if (!commit) {
@@ -146,12 +154,10 @@ async function showCommitDetails(hash: string): Promise<void> {
 
     // Try to show changed files (this is a simplified version)
     logger.raw(theme.textMuted(t('commands.history.changedFiles')));
-    logger.raw(theme.dim('  ' + t('commands.history.fullDiffHint', { hash: hash.substring(0, 7) })));
+    logger.raw(theme.dim('  ' + t('commands.history.fullDiffHint', { hash: hash.substring(0, SHORT_HASH_LENGTH) })));
     logger.raw('');
 
   } catch (error) {
-    logger.raw(theme.error(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(theme.error(mapGitError(error)));
   }
 }

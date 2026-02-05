@@ -9,6 +9,7 @@ import { getTheme } from '../ui/themes/index.js';
 import { successBox, errorBox, warningBox } from '../ui/components/box.js';
 import { withSpinner } from '../ui/components/spinner.js';
 import { promptConfirm, promptInput } from '../ui/components/prompt.js';
+import { mapGitError } from '../utils/error-mapper.js';
 
 export default class Quick extends Command {
   static override description = 'Quick commit and push (expert mode)';
@@ -138,9 +139,7 @@ export default class Quick extends Command {
 
       logger.raw('\n' + successBox('Quick commit complete!'));
     } catch (error) {
-      logger.raw(errorBox(
-        t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' })
-      ));
+      logger.raw(errorBox(mapGitError(error)));
     }
   }
 }

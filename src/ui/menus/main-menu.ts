@@ -5,6 +5,7 @@ import { promptSelect } from '../components/prompt.js';
 import { analysisService } from '../../services/analysis-service.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { APP_VERSION } from '../../utils/version.js';
 import { showDetachedHeadMenu, handleDetachedHead } from './detached-head-menu.js';
 import { getLevel } from '../../utils/level-helper.js';
@@ -50,7 +51,7 @@ export async function showMainMenu(): Promise<MainMenuAction> {
       }
     }
   } catch {
-    // Ignore errors checking detached state
+    logger.debug('Error checking detached HEAD state');
   }
 
   // Show ASCII art banner
@@ -61,7 +62,7 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     const quickStatus = await analysisService.getQuickStatus();
     logger.raw(theme.textMuted(`  ${quickStatus}\n`));
   } catch {
-    // Ignore status errors
+    logger.debug('Error fetching quick status');
   }
 
   const choices = [
@@ -190,6 +191,6 @@ export async function showStatusScreen(): Promise<void> {
 
     logger.raw('');
   } catch (error) {
-    logger.error(t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' }));
+    logger.error(mapGitError(error));
   }
 }

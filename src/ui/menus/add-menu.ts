@@ -5,6 +5,7 @@ import { successBox, infoBox } from '../components/box.js';
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { isLevel } from '../../utils/level-helper.js';
 import { execSync } from 'child_process';
 
@@ -111,6 +112,7 @@ export async function showAddMenu(): Promise<AddResult> {
           ));
           return { staged: stagedFiles, cancelled: false };
         } catch {
+          logger.debug('git add -p cancelled or failed');
           return { staged: [], cancelled: true };
         }
 
@@ -154,7 +156,7 @@ export async function showAddMenu(): Promise<AddResult> {
 
     return { staged: filesToStage, cancelled: false };
   } catch (error) {
-    logger.error(t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' }));
+    logger.error(mapGitError(error));
     return { staged: [], cancelled: true };
   }
 }

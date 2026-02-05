@@ -1,6 +1,7 @@
 import { gitService } from './git-service.js';
 import { userConfig } from '../config/user-config.js';
 import { t } from '../i18n/index.js';
+import { logger } from '../utils/logger.js';
 
 export type WarningLevel = 'info' | 'warning' | 'critical';
 
@@ -34,6 +35,7 @@ class PreventionService {
 
       return null;
     } catch {
+      logger.debug('Failed to check uncommitted changes');
       return null;
     }
   }
@@ -64,6 +66,7 @@ class PreventionService {
 
       return null;
     } catch {
+      logger.debug('Failed to check wrong branch');
       return null;
     }
   }
@@ -84,6 +87,7 @@ class PreventionService {
 
       return null;
     } catch {
+      logger.debug('Failed to check detached HEAD');
       return null;
     }
   }
@@ -103,6 +107,7 @@ class PreventionService {
 
       return null;
     } catch {
+      logger.debug('Failed to check for remote');
       return null;
     }
   }
@@ -122,6 +127,7 @@ class PreventionService {
 
       return null;
     } catch {
+      logger.debug('Failed to check if directory is a git repo');
       return {
         level: 'critical',
         title: t('warnings.title'),
@@ -201,16 +207,110 @@ class PreventionService {
     };
   }
 
+  async checkMergeInProgress(): Promise<Warning | null> {
+    try {
+      const inProgress = await gitService.isMergeInProgress();
+      if (inProgress) {
+        userConfig.incrementErrorsPrevented();
+        return {
+          level: 'critical',
+          title: t('warnings.title'),
+          message: t('warnings.mergeInProgress'),
+          action: t('warnings.mergeInProgressAction')
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async checkRebaseInProgress(): Promise<Warning | null> {
+    try {
+      const inProgress = await gitService.isRebaseInProgress();
+      if (inProgress) {
+        userConfig.incrementErrorsPrevented();
+        return {
+          level: 'critical',
+          title: t('warnings.title'),
+          message: t('warnings.rebaseInProgress'),
+          action: t('warnings.rebaseInProgressAction')
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async checkCherryPickInProgress(): Promise<Warning | null> {
+    try {
+      const inProgress = await gitService.isCherryPickInProgress();
+      if (inProgress) {
+        userConfig.incrementErrorsPrevented();
+        return {
+          level: 'warning',
+          title: t('warnings.title'),
+          message: t('warnings.cherryPickInProgress'),
+          action: t('warnings.cherryPickInProgressAction')
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async checkBisectInProgress(): Promise<Warning | null> {
+    try {
+      const inProgress = await gitService.isBisectInProgress();
+      if (inProgress) {
+        userConfig.incrementErrorsPrevented();
+        return {
+          level: 'warning',
+          title: t('warnings.title'),
+          message: t('warnings.bisectInProgress'),
+          action: t('warnings.bisectInProgressAction')
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async checkRepoState(): Promise<Warning[]> {
+    const warnings: Warning[] = [];
+
+    const mergeWarning = await this.checkMergeInProgress();
+    if (mergeWarning) warnings.push(mergeWarning);
+
+    const rebaseWarning = await this.checkRebaseInProgress();
+    if (rebaseWarning) warnings.push(rebaseWarning);
+
+    const cherryPickWarning = await this.checkCherryPickInProgress();
+    if (cherryPickWarning) warnings.push(cherryPickWarning);
+
+    const bisectWarning = await this.checkBisectInProgress();
+    if (bisectWarning) warnings.push(bisectWarning);
+
+    return warnings;
+  }
+
   async validatePull(): Promise<ValidationResult> {
     const warnings: Warning[] = [];
 
-    // Check for uncommitted changes (could cause merge conflicts)
+    // Check for merge/rebase in progress
+    const mergeWarning = await this.checkMergeInProgress();
+    if (mergeWarning) warnings.push(mergeWarning);
+
+    const rebaseWarning = await this.checkRebaseInProgress();
+    if (rebaseWarning) warnings.push(rebaseWarning);
+
+    // Check for uncommitted changes (WARNING level, not info)
     const uncommittedWarning = await this.checkUncommittedChanges();
     if (uncommittedWarning) {
-      warnings.push({
-        ...uncommittedWarning,
-        level: 'info' // Downgrade to info for pull
-      });
+      warnings.push(uncommittedWarning); // Keep as warning level
     }
 
     // Check for no remote

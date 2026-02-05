@@ -6,6 +6,7 @@ import { banner } from '../components/box.js';
 import { promptSelect, promptConfirm, promptInput } from '../components/prompt.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 
 export type SetupMenuAction = 'init' | 'clone' | 'quit';
 
@@ -196,9 +197,7 @@ export async function handleGitInit(): Promise<boolean> {
     logger.raw('\n' + theme.success(t('setup.repoReady')) + '\n');
     return true;
   } catch (error) {
-    logger.raw(theme.error(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })) + '\n');
+    logger.raw(theme.error(mapGitError(error)) + '\n');
     return false;
   }
 }
@@ -261,9 +260,7 @@ export async function handleGitClone(): Promise<boolean> {
 
     return true;
   } catch (error) {
-    logger.raw(theme.error(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })) + '\n');
+    logger.raw(theme.error(mapGitError(error)) + '\n');
     return false;
   }
 }

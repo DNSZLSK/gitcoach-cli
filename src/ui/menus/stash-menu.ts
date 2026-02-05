@@ -4,6 +4,7 @@ import { promptSelect, promptConfirm, promptInput } from '../components/prompt.j
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowExplanation } from '../../utils/level-helper.js';
 
 export type StashAction = 'save' | 'list' | 'apply' | 'pop' | 'drop' | 'back';
@@ -112,9 +113,7 @@ async function handleStashSave(): Promise<void> {
     logger.raw('\n' + successBox(t('commands.stash.saveSuccess')));
     logger.raw(theme.info(t('commands.stash.workingTreeClean')) + '\n');
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -138,9 +137,7 @@ async function handleStashList(): Promise<void> {
 
     logger.raw('');
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -175,9 +172,7 @@ async function handleStashApply(): Promise<void> {
     logger.raw('\n' + successBox(t('commands.stash.applySuccess')));
     logger.raw(theme.info(t('commands.stash.stashKept')) + '\n');
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -202,9 +197,7 @@ async function handleStashPop(): Promise<void> {
     await gitService.stashPop();
     logger.raw('\n' + successBox(t('commands.stash.popSuccess')));
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -243,9 +236,7 @@ async function handleStashDrop(): Promise<void> {
     await gitService.stashDrop(selectedIndex);
     logger.raw('\n' + successBox(t('commands.stash.dropSuccess')));
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 

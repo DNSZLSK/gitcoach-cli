@@ -1,4 +1,7 @@
 import { simpleGit, SimpleGit, StatusResult, BranchSummary, LogResult, DiffResult } from 'simple-git';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import { logger } from '../utils/logger.js';
 
 export interface GitStatus {
   isClean: boolean;
@@ -26,8 +29,11 @@ export interface CommitInfo {
   author: string;
 }
 
+const STATUS_CACHE_TTL_MS = 2000;
+
 class GitService {
   private git: SimpleGit;
+  private statusCache: { data: GitStatus; timestamp: number } | null = null;
 
   constructor(basePath?: string) {
     this.git = simpleGit(basePath || process.cwd());
@@ -35,6 +41,11 @@ class GitService {
 
   setWorkingDirectory(path: string): void {
     this.git = simpleGit(path);
+    this.invalidateCache();
+  }
+
+  invalidateCache(): void {
+    this.statusCache = null;
   }
 
   async isGitRepo(): Promise<boolean> {
@@ -42,14 +53,19 @@ class GitService {
       await this.git.status();
       return true;
     } catch {
+      logger.debug('Not a git repository or git status failed');
       return false;
     }
   }
 
-  async getStatus(): Promise<GitStatus> {
+  async getStatus(useCache: boolean = true): Promise<GitStatus> {
+    if (useCache && this.statusCache && (Date.now() - this.statusCache.timestamp) < STATUS_CACHE_TTL_MS) {
+      return this.statusCache.data;
+    }
+
     const status: StatusResult = await this.git.status();
 
-    return {
+    const result: GitStatus = {
       isClean: status.isClean(),
       current: status.current,
       tracking: status.tracking,
@@ -60,6 +76,9 @@ class GitService {
       ahead: status.ahead,
       behind: status.behind
     };
+
+    this.statusCache = { data: result, timestamp: Date.now() };
+    return result;
   }
 
   async getRawStatus(): Promise<StatusResult> {
@@ -143,14 +162,17 @@ class GitService {
   async add(files: string | string[]): Promise<void> {
     const fileList = Array.isArray(files) ? files : [files];
     await this.git.add(fileList);
+    this.invalidateCache();
   }
 
   async addAll(): Promise<void> {
     await this.git.add('-A');
+    this.invalidateCache();
   }
 
   async commit(message: string): Promise<string> {
     const result = await this.git.commit(message);
+    this.invalidateCache();
     return result.commit;
   }
 
@@ -164,6 +186,7 @@ class GitService {
     if (force) options.push('--force');
     if (setUpstream) options.push('-u');
     await this.git.push(remote, currentBranch, options);
+    this.invalidateCache();
   }
 
   /**
@@ -183,6 +206,7 @@ class GitService {
       const log = await this.git.log({ maxCount: 1 });
       return log.total > 0;
     } catch {
+      logger.debug('Failed to check for unpushed commits');
       return false;
     }
   }
@@ -204,6 +228,7 @@ class GitService {
       const log = await this.git.log();
       return log.total;
     } catch {
+      logger.debug('Failed to get unpushed commit count');
       return 0;
     }
   }
@@ -215,10 +240,12 @@ class GitService {
     }
 
     await this.git.pull(remote, currentBranch);
+    this.invalidateCache();
   }
 
   async checkout(branch: string): Promise<void> {
     await this.git.checkout(branch);
+    this.invalidateCache();
   }
 
   async createBranch(name: string, checkout: boolean = true): Promise<void> {
@@ -236,6 +263,7 @@ class GitService {
 
   async merge(branch: string): Promise<void> {
     await this.git.merge([branch, '--no-edit']);
+    this.invalidateCache();
   }
 
   async hasConflicts(): Promise<boolean> {
@@ -274,6 +302,7 @@ class GitService {
       const remote = remotes.find(r => r.name === name);
       return remote?.refs?.push || remote?.refs?.fetch || null;
     } catch {
+      logger.debug('Failed to get remote URL');
       return null;
     }
   }
@@ -288,6 +317,7 @@ class GitService {
 
   async reset(mode: 'soft' | 'mixed' | 'hard' = 'mixed', ref: string = 'HEAD'): Promise<void> {
     await this.git.reset([`--${mode}`, ref]);
+    this.invalidateCache();
   }
 
   async stash(message?: string): Promise<void> {
@@ -296,10 +326,12 @@ class GitService {
     } else {
       await this.git.stash();
     }
+    this.invalidateCache();
   }
 
   async stashPop(): Promise<void> {
     await this.git.stash(['pop']);
+    this.invalidateCache();
   }
 
   async stashApply(index: number = 0): Promise<void> {
@@ -326,6 +358,71 @@ class GitService {
 
   async addRemote(name: string, url: string): Promise<void> {
     await this.git.addRemote(name, url);
+  }
+
+  async isMergeInProgress(): Promise<boolean> {
+    try {
+      const gitDir = join(process.cwd(), '.git', 'MERGE_HEAD');
+      return existsSync(gitDir);
+    } catch {
+      logger.debug('Failed to check merge-in-progress state');
+      return false;
+    }
+  }
+
+  async isRebaseInProgress(): Promise<boolean> {
+    try {
+      const cwd = process.cwd();
+      return existsSync(join(cwd, '.git', 'rebase-merge')) ||
+             existsSync(join(cwd, '.git', 'rebase-apply'));
+    } catch {
+      logger.debug('Failed to check rebase-in-progress state');
+      return false;
+    }
+  }
+
+  async isCherryPickInProgress(): Promise<boolean> {
+    try {
+      return existsSync(join(process.cwd(), '.git', 'CHERRY_PICK_HEAD'));
+    } catch {
+      logger.debug('Failed to check cherry-pick-in-progress state');
+      return false;
+    }
+  }
+
+  async isBisectInProgress(): Promise<boolean> {
+    try {
+      return existsSync(join(process.cwd(), '.git', 'BISECT_LOG'));
+    } catch {
+      logger.debug('Failed to check bisect-in-progress state');
+      return false;
+    }
+  }
+
+  async abortMerge(): Promise<void> {
+    await this.git.merge(['--abort']);
+    this.invalidateCache();
+  }
+
+  async abortRebase(): Promise<void> {
+    await this.git.rebase(['--abort']);
+    this.invalidateCache();
+  }
+
+  async hasUpstream(branch?: string): Promise<boolean> {
+    try {
+      const status = await this.git.status();
+      if (branch && branch !== status.current) {
+        // Check specific branch tracking
+        const branchSummary = await this.git.branch(['-vv']);
+        const branchInfo = branchSummary.branches[branch];
+        return branchInfo?.label?.includes('[') ?? false;
+      }
+      return !!status.tracking;
+    } catch {
+      logger.debug('Failed to check upstream status');
+      return false;
+    }
   }
 
   async clone(repoUrl: string, directory?: string): Promise<void> {
