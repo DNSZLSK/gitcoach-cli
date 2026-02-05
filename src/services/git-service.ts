@@ -176,6 +176,21 @@ class GitService {
     return result.commit;
   }
 
+  async commitNoEdit(): Promise<string> {
+    try {
+      const result = await this.git.raw(['commit', '--no-edit']);
+      this.invalidateCache();
+      // Extract commit hash from output (e.g., "[main abc1234] Merge ...")
+      const match = result.match(/\[[\w/.-]+\s+([a-f0-9]+)\]/);
+      return match ? match[1] : 'unknown';
+    } catch {
+      // Fallback: commit with explicit merge message
+      const result = await this.git.commit('Merge remote changes');
+      this.invalidateCache();
+      return result.commit;
+    }
+  }
+
   async push(remote: string = 'origin', branch?: string, force: boolean = false, setUpstream: boolean = false): Promise<void> {
     const currentBranch = branch || (await this.getCurrentBranch());
     if (!currentBranch) {

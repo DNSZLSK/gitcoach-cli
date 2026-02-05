@@ -19,9 +19,19 @@ type ResolutionChoice = 'local' | 'remote' | 'both' | 'edit' | 'back';
 const CONFLICT_START = '<<<<<<<';
 const CONFLICT_SEPARATOR = '=======';
 const CONFLICT_END = '>>>>>>>';
+const UTF8_BOM = '\uFEFF';
+
+function normalizeContent(content: string): string {
+  // Strip UTF-8 BOM
+  if (content.startsWith(UTF8_BOM)) {
+    content = content.slice(1);
+  }
+  // Normalize CRLF to LF
+  return content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
 
 export function parseConflictBlocks(fileContent: string): ConflictBlock[] {
-  const lines = fileContent.split('\n');
+  const lines = normalizeContent(fileContent).split('\n');
   const blocks: ConflictBlock[] = [];
 
   let inConflict = false;
@@ -67,7 +77,7 @@ export function resolveConflictBlock(
   block: ConflictBlock,
   choice: 'local' | 'remote' | 'both'
 ): string {
-  const lines = fileContent.split('\n');
+  const lines = normalizeContent(fileContent).split('\n');
 
   let replacement: string;
   switch (choice) {
@@ -90,13 +100,14 @@ export function resolveConflictBlock(
 }
 
 export function hasConflictMarkers(content: string): boolean {
-  return content.includes(CONFLICT_START) && content.includes(CONFLICT_END);
+  const normalized = normalizeContent(content);
+  return normalized.includes(CONFLICT_START) && normalized.includes(CONFLICT_END);
 }
 
 export async function showConflictResolutionMenu(): Promise<{ resolved: boolean }> {
   const theme = getTheme();
 
-  logger.raw('\n' + theme.title(t('conflicts.title')) + '\n');
+  logger.raw('\n' + theme.title(t('commands.conflicts.title')) + '\n');
 
   try {
     const conflictedFiles = await gitService.getConflictedFiles();
@@ -114,7 +125,7 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
       const current = i + 1;
 
       logger.raw('\n' + theme.textBold(
-        t('conflicts.fileProgress', { current, total })
+        t('commands.conflicts.fileProgress', { current, total })
       ));
       logger.raw(theme.file(file, 'conflict') + '\n');
 
@@ -141,20 +152,20 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
 
       for (const block of blocksReversed) {
         // Display the two versions
-        logger.raw(theme.info(t('conflicts.localVersion')));
+        logger.raw(theme.info(t('commands.conflicts.localVersion')));
         logger.raw(theme.dim('  ' + (block.localContent || '(empty)').split('\n').join('\n  ')));
         logger.raw('');
-        logger.raw(theme.warning(t('conflicts.remoteVersion')));
+        logger.raw(theme.warning(t('commands.conflicts.remoteVersion')));
         logger.raw(theme.dim('  ' + (block.remoteContent || '(empty)').split('\n').join('\n  ')));
         logger.raw('');
 
         const choice = await promptSelect<ResolutionChoice>(
-          t('conflicts.chooseResolution'),
+          t('commands.conflicts.chooseResolution'),
           [
-            { name: t('conflicts.keepLocal'), value: 'local' },
-            { name: t('conflicts.keepRemote'), value: 'remote' },
-            { name: t('conflicts.keepBoth'), value: 'both' },
-            { name: t('conflicts.editManually'), value: 'edit' },
+            { name: t('commands.conflicts.keepLocal'), value: 'local' },
+            { name: t('commands.conflicts.keepRemote'), value: 'remote' },
+            { name: t('commands.conflicts.keepBoth'), value: 'both' },
+            { name: t('commands.conflicts.editManually'), value: 'edit' },
             { name: t('menu.back'), value: 'back' }
           ]
         );
@@ -166,11 +177,11 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
         if (choice === 'edit') {
           // Manual editing flow
           logger.raw(infoBox(
-            t('conflicts.editInstructions', { file }),
-            t('conflicts.title')
+            t('commands.conflicts.editInstructions', { file }),
+            t('commands.conflicts.title')
           ));
 
-          await promptInput(t('conflicts.pressEnterWhenDone'), '');
+          await promptInput(t('commands.conflicts.pressEnterWhenDone'), '');
 
           // Re-read the file and check for remaining markers
           try {
@@ -182,7 +193,7 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
 
           if (hasConflictMarkers(fileContent)) {
             logger.raw(warningBox(
-              t('conflicts.markersRemaining', { file }),
+              t('commands.conflicts.markersRemaining', { file }),
               t('warnings.title')
             ));
             // Don't mark as resolved, let the user fix it
@@ -204,7 +215,7 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
           await gitService.add(file);
           resolvedCount++;
           logger.raw(successBox(
-            t('conflicts.fileResolved', { file, current, total }),
+            t('commands.conflicts.fileResolved', { file, current, total }),
             t('success.title')
           ));
         } catch (writeError) {
@@ -216,18 +227,18 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
     // Summary
     if (resolvedCount === total) {
       logger.raw('\n' + successBox(
-        t('conflicts.allResolved', { count: total }),
-        t('conflicts.title')
+        t('commands.conflicts.allResolved', { count: total }),
+        t('commands.conflicts.title')
       ));
 
       // Offer to finalize merge commit
       const { promptConfirm } = await import('../components/prompt.js');
-      const finalize = await promptConfirm(t('conflicts.finalizeCommit'), true);
+      const finalize = await promptConfirm(t('commands.conflicts.finalizeCommit'), true);
 
       if (finalize) {
         try {
           logger.command('git commit --no-edit');
-          const hash = await gitService.commit('');
+          const hash = await gitService.commitNoEdit();
           logger.raw(successBox(
             `Merge commit: ${theme.commitHash(hash)}`,
             t('success.title')
@@ -242,7 +253,7 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
     } else {
       logger.raw(warningBox(
         `${resolvedCount}/${total} files resolved. Remaining files need manual resolution.`,
-        t('conflicts.title')
+        t('commands.conflicts.title')
       ));
       return { resolved: false };
     }

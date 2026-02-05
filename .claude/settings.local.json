@@ -21,7 +21,12 @@
       "Bash(ls:*)",
       "Bash(npx jest:*)",
       "Bash(find:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git merge:*)",
+      "Bash(xxd:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
