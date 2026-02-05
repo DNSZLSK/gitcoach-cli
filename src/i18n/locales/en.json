@@ -201,7 +201,7 @@
       "optionRebase": "Rebase (replay your commits on top)",
       "conflictsDetected": "{{count}} file(s) have merge conflicts that need to be resolved.",
       "conflictedFiles": "Files with conflicts:",
-      "resolveInstructions": "To resolve: edit the conflicted files, then run 'git add' and 'git commit'.",
+      "resolveInstructions": "To resolve conflicts:\n1. Open each conflicted file in your editor\n2. Look for conflict markers: <<<<<<< (your changes), ======= (separator), >>>>>>> (remote changes)\n3. Choose which version to keep (or combine both), then delete ALL markers\n4. Save the file\n5. Run 'git add' on each resolved file\n6. Run 'git commit' to finalize the merge",
       "resolveOptions": "What would you like to do?",
       "abortMerge": "Abort merge and restore previous state",
       "abortSuccess": "Merge aborted successfully. Your branch is back to its previous state.",
@@ -212,7 +212,25 @@
       "uncommittedOptions": "What would you like to do with your uncommitted changes?",
       "optionCommit": "Commit changes first",
       "optionStash": "Stash changes temporarily",
-      "optionContinue": "Continue anyway (risky)"
+      "optionContinue": "Continue anyway (risky)",
+      "guidedResolution": "Resolve conflicts step by step (guided)"
+    },
+    "conflicts": {
+      "title": "Conflict Resolution",
+      "fileProgress": "File {{current}}/{{total}}:",
+      "localVersion": "Your version (local):",
+      "remoteVersion": "Remote version:",
+      "chooseResolution": "What do you want to keep?",
+      "keepLocal": "Keep my version (local)",
+      "keepRemote": "Keep the remote version",
+      "keepBoth": "Keep both (combine)",
+      "editManually": "Edit manually in my editor",
+      "fileResolved": "{{file}} resolved ({{current}}/{{total}})",
+      "allResolved": "All {{count}} conflict(s) resolved!",
+      "finalizeCommit": "Finalize the merge with git commit?",
+      "markersRemaining": "Conflict markers still found in {{file}}. Please remove all <<<<<<< ======= >>>>>>> markers.",
+      "pressEnterWhenDone": "Press Enter when you are done editing...",
+      "editInstructions": "Open {{file}} in your editor, resolve the conflicts, save, then come back here."
     },
     "branch": {
       "title": "Branch Management",
