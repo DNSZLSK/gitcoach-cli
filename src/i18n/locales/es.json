@@ -201,7 +201,7 @@
       "optionRebase": "Rebase (reaplica tus commits encima)",
       "conflictsDetected": "{{count}} archivo(s) tienen conflictos de fusion que necesitan ser resueltos.",
       "conflictedFiles": "Archivos con conflictos:",
-      "resolveInstructions": "Para resolver: edita los archivos en conflicto, luego ejecuta 'git add' y 'git commit'.",
+      "resolveInstructions": "Para resolver los conflictos:\n1. Abra cada archivo en conflicto en su editor\n2. Busque los marcadores de conflicto: <<<<<<< (sus cambios), ======= (separador), >>>>>>> (cambios remotos)\n3. Elija que version conservar (o combine ambas), luego elimine TODOS los marcadores\n4. Guarde el archivo\n5. Ejecute 'git add' en cada archivo resuelto\n6. Ejecute 'git commit' para finalizar el merge",
       "resolveOptions": "Que te gustaria hacer?",
       "abortMerge": "Abortar merge y restaurar el estado anterior",
       "abortSuccess": "Merge abortado exitosamente. Tu rama volvio a su estado anterior.",
@@ -212,7 +212,25 @@
       "uncommittedOptions": "Que quieres hacer con tus cambios sin commitear?",
       "optionCommit": "Commitear primero",
       "optionStash": "Guardar temporalmente (stash)",
-      "optionContinue": "Continuar de todos modos (riesgoso)"
+      "optionContinue": "Continuar de todos modos (riesgoso)",
+      "guidedResolution": "Resolver conflictos paso a paso (guiado)"
+    },
+    "conflicts": {
+      "title": "Resolucion de Conflictos",
+      "fileProgress": "Archivo {{current}}/{{total}}:",
+      "localVersion": "Tu version (local):",
+      "remoteVersion": "Version remota:",
+      "chooseResolution": "Que quieres conservar?",
+      "keepLocal": "Conservar mi version (local)",
+      "keepRemote": "Conservar la version remota",
+      "keepBoth": "Conservar ambas (combinar)",
+      "editManually": "Editar manualmente en mi editor",
+      "fileResolved": "{{file}} resuelto ({{current}}/{{total}})",
+      "allResolved": "Los {{count}} conflicto(s) han sido resueltos!",
+      "finalizeCommit": "Finalizar el merge con git commit?",
+      "markersRemaining": "Aun se encuentran marcadores de conflicto en {{file}}. Elimine todos los marcadores <<<<<<< ======= >>>>>>>.",
+      "pressEnterWhenDone": "Presione Enter cuando haya terminado de editar...",
+      "editInstructions": "Abra {{file}} en su editor, resuelva los conflictos, guarde y vuelva aqui."
     },
     "branch": {
       "title": "Gestion de Ramas",

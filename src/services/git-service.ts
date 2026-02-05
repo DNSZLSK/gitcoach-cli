@@ -233,13 +233,18 @@ class GitService {
     }
   }
 
-  async pull(remote: string = 'origin', branch?: string): Promise<void> {
+  async pull(remote: string = 'origin', branch?: string, options?: Record<string, null>): Promise<void> {
     const currentBranch = branch || (await this.getCurrentBranch());
     if (!currentBranch) {
       throw new Error('Cannot pull: no branch specified and detached HEAD');
     }
 
-    await this.git.pull(remote, currentBranch);
+    if (options) {
+      const optionFlags = Object.keys(options);
+      await this.git.pull(remote, currentBranch, optionFlags);
+    } else {
+      await this.git.pull(remote, currentBranch);
+    }
     this.invalidateCache();
   }
 

@@ -8,7 +8,8 @@ const MENUS_DIR = path.join(__dirname, '../../src/ui/menus');
 const EXEMPT_MENUS = [
   'main-menu.ts',      // Point d'entree principal, a 'quit' pour sortir
   'setup-menu.ts',     // Flux de configuration initial, obligatoire
-  'detached-head-menu.ts' // Menu d'urgence, doit choisir une action
+  'detached-head-menu.ts', // Menu d'urgence, doit choisir une action
+  'conflict-resolution-menu.ts' // Guided wizard flow, resolves file by file
 ];
 
 describe('Menu Navigation - Back Options', () => {

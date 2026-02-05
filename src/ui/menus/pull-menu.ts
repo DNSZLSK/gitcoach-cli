@@ -18,7 +18,7 @@ export interface PullResult {
 type PullAction = 'pull' | 'back';
 type UncommittedAction = 'commit' | 'stash' | 'continue';
 type DivergenceAction = 'merge' | 'rebase' | 'cancel';
-type ConflictAction = 'abort' | 'manual';
+type ConflictAction = 'guided' | 'abort' | 'manual';
 
 export async function showPullMenu(): Promise<PullResult> {
   const theme = getTheme();
@@ -131,15 +131,17 @@ export async function showPullMenu(): Promise<PullResult> {
       const uncommittedAction = await promptSelect<UncommittedAction>(
         t('commands.pull.uncommittedOptions'),
         [
+          { name: t('commands.pull.optionCommit'), value: 'commit' },
           { name: t('commands.pull.optionStash'), value: 'stash' },
-          { name: t('commands.pull.optionContinue'), value: 'continue' },
-          { name: theme.menuItem('R', t('menu.back')), value: 'commit' as UncommittedAction }
+          { name: t('commands.pull.optionContinue'), value: 'continue' }
         ]
       );
 
       if (uncommittedAction === 'commit') {
-        // User wants to go back and commit first
-        return { pulled: false };
+        // Redirect to commit-menu, then re-run pull
+        const { showCommitMenu } = await import('./commit-menu.js');
+        await showCommitMenu();
+        return showPullMenu();
       }
 
       if (uncommittedAction === 'stash') {
@@ -190,7 +192,7 @@ export async function showPullMenu(): Promise<PullResult> {
           await withSpinner(
             t('commands.pull.pulling', { remote }),
             async () => {
-              await gitService.pull(remote, currentBranch || undefined);
+              await gitService.pull(remote, currentBranch || undefined, { '--rebase': null });
             },
             t('commands.pull.success', { count: updatedStatus.behind })
           );
@@ -304,17 +306,27 @@ async function handlePostPullConflicts(
     const action = await promptSelect<ConflictAction>(
       t('commands.pull.resolveOptions'),
       [
+        { name: t('commands.pull.guidedResolution'), value: 'guided' },
         { name: t('commands.pull.abortMerge'), value: 'abort' },
         { name: t('commands.pull.continueMerge'), value: 'manual' }
       ]
     );
 
+    if (action === 'guided') {
+      const { showConflictResolutionMenu } = await import('./conflict-resolution-menu.js');
+      const result = await showConflictResolutionMenu();
+      if (result.resolved) {
+        return { pulled: true };
+      }
+      return { pulled: false };
+    }
+
     if (action === 'abort') {
       try {
         await gitService.abortMerge();
         logger.raw(successBox(t('commands.pull.abortSuccess')));
-      } catch {
-        logger.raw(warningBox(mapGitError(error)));
+      } catch (abortError) {
+        logger.raw(warningBox(mapGitError(abortError)));
       }
     }
 

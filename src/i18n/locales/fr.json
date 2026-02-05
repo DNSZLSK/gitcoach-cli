@@ -201,7 +201,7 @@
       "optionRebase": "Rebase (rejoue vos commits par-dessus)",
       "conflictsDetected": "{{count}} fichier(s) ont des conflits de fusion a resoudre.",
       "conflictedFiles": "Fichiers en conflit :",
-      "resolveInstructions": "Pour resoudre : editez les fichiers en conflit, puis lancez 'git add' et 'git commit'.",
+      "resolveInstructions": "Pour resoudre les conflits :\n1. Ouvrez chaque fichier en conflit dans votre editeur\n2. Cherchez les marqueurs de conflit : <<<<<<< (vos modifications), ======= (separateur), >>>>>>> (modifications distantes)\n3. Choisissez la version a garder (ou combinez les deux), puis supprimez TOUS les marqueurs\n4. Sauvegardez le fichier\n5. Lancez 'git add' sur chaque fichier resolu\n6. Lancez 'git commit' pour finaliser le merge",
       "resolveOptions": "Que souhaitez-vous faire ?",
       "abortMerge": "Annuler le merge et restaurer l'etat precedent",
       "abortSuccess": "Merge annule avec succes. Votre branche est revenue a son etat precedent.",
@@ -212,7 +212,25 @@
       "uncommittedOptions": "Que faire de vos modifications non commitees ?",
       "optionCommit": "Commiter d'abord",
       "optionStash": "Mettre de cote temporairement (stash)",
-      "optionContinue": "Continuer quand meme (risque)"
+      "optionContinue": "Continuer quand meme (risque)",
+      "guidedResolution": "Resoudre les conflits pas a pas (guide)"
+    },
+    "conflicts": {
+      "title": "Resolution des Conflits",
+      "fileProgress": "Fichier {{current}}/{{total}} :",
+      "localVersion": "Votre version (locale) :",
+      "remoteVersion": "Version distante :",
+      "chooseResolution": "Que voulez-vous garder ?",
+      "keepLocal": "Garder ma version (locale)",
+      "keepRemote": "Garder la version distante",
+      "keepBoth": "Garder les deux (combiner)",
+      "editManually": "Editer manuellement dans mon editeur",
+      "fileResolved": "{{file}} resolu ({{current}}/{{total}})",
+      "allResolved": "Les {{count}} conflit(s) ont ete resolus !",
+      "finalizeCommit": "Finaliser le merge avec git commit ?",
+      "markersRemaining": "Des marqueurs de conflit sont encore presents dans {{file}}. Supprimez tous les marqueurs <<<<<<< ======= >>>>>>>.",
+      "pressEnterWhenDone": "Appuyez sur Entree quand vous avez fini d'editer...",
+      "editInstructions": "Ouvrez {{file}} dans votre editeur, resolvez les conflits, sauvegardez, puis revenez ici."
     },
     "branch": {
       "title": "Gestion des Branches",
