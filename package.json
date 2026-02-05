@@ -1,6 +1,6 @@
 {
   "name": "gitcoach-cli",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "AI-powered Git coach CLI that prevents mistakes before they happen",
   "type": "module",
   "main": "dist/index.js",
