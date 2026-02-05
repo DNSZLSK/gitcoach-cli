@@ -27,7 +27,7 @@ Git is powerful but brutal to beginners. Cryptic error messages, lost work from 
 - **Educational** - Shows every Git command being executed so you learn while you use it
 - **Adapts to your level** - Beginner (verbose), Intermediate (balanced), Expert (minimal)
 - **Multilingual** - Works in English, French, and Spanish
-- **Optional AI features** - Can use GitHub Copilot CLI for commit messages and Git Q&A (works without it too)
+- **5 Copilot CLI integrations** - AI commit messages, Git Q&A, error explanations, diff summaries, conflict resolution (works without it too)
 
 Built for the **GitHub Copilot CLI Challenge 2026**.
 
@@ -79,7 +79,7 @@ sudo apt-get install git
 
 ### 3. GitHub Copilot CLI (Optional)
 
-For AI-powered commit messages and Git Q&A:
+For 5 AI-powered integrations (commit messages, Git Q&A, error explanations, diff summaries, conflict resolution):
 
 ```bash
 npm install -g @github/copilot
@@ -208,6 +208,59 @@ Ask Git questions if Copilot CLI is installed:
   Use merge for shared branches, rebase for local cleanup.
 ```
 
+### Staged Diff Summary (Optional AI)
+
+Before committing, Copilot summarizes your staged changes in plain language:
+
+```
+  Analyzing changes...
+
+  +-------------- Changes summary ---------------+
+  |                                               |
+  |  auth.ts: Added OAuth2 login flow             |
+  |  config.ts: New env variable for API key      |
+  |  utils.ts: Refactored error handling          |
+  |                                               |
+  +-----------------------------------------------+
+```
+
+### Contextual Error Explanation (Optional AI)
+
+When a Git command fails, Copilot explains the error and suggests a fix:
+
+```
+  +----------------- Error ----------------------+
+  |  fatal: not a git repository                  |
+  +-----------------------------------------------+
+
+  Copilot explains:
+  You are not inside a Git repository. Navigate to
+  a folder that contains a .git directory, or run
+  "git init" to create a new repository here.
+```
+
+### AI-Assisted Conflict Resolution (Optional AI)
+
+During merge conflicts, ask Copilot to analyze both versions and suggest a resolution:
+
+```
+  ? How to resolve conflict in auth.ts?
+  > Keep local version
+    Keep remote version
+    Keep both versions
+    Edit manually
+    Ask Copilot AI        <-- NEW
+    Back
+
+  Copilot suggests: LOCAL
+  The local version has the latest bug fix that
+  should be kept.
+
+  ? Accept this suggestion? (Y/n)
+```
+
+Copilot returns a structured recommendation (LOCAL / REMOTE / BOTH / CUSTOM) with an explanation.
+
 ### Branch Management
 
 Create, switch, merge, and delete branches with guidance:
@@ -248,7 +301,7 @@ English, French, and Spanish. Localized confirmations:
 - **simple-git** - Git operations
 - **i18next** - Internationalization
 - **Chalk** - Terminal styling
-- **Jest** - 383 tests
+- **Jest** - 522 tests
 
 ---
 
@@ -281,7 +334,7 @@ gitcoach-cli/
 │   │   ├── menus/        # Interactive menus
 │   │   └── themes/       # Color themes
 │   └── utils/        # Helpers, validators
-├── test/             # 383 tests
+├── test/             # 522 tests
 └── docs/             # Documentation
 ```
 
