@@ -8,6 +8,7 @@ import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { isValidBranchName } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowExplanation, shouldConfirm, shouldShowWarning } from '../../utils/level-helper.js';
 
 export type BranchAction = 'list' | 'create' | 'switch' | 'merge' | 'delete' | 'back';
@@ -57,7 +58,7 @@ export async function showBranchMenu(): Promise<BranchResult> {
         return { action: 'back', success: true };
     }
   } catch (error) {
-    logger.error(t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' }));
+    logger.error(mapGitError(error));
     return { action: 'back', success: false };
   }
 }

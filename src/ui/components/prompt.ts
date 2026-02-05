@@ -110,14 +110,3 @@ export async function promptEditor(
   });
 }
 
-export async function promptPassword(
-  message: string
-): Promise<string> {
-  const theme = getTheme();
-
-  // Use input with a workaround since @inquirer/prompts doesn't have password
-  // The actual password masking would need additional implementation
-  return input({
-    message: theme.primary(message)
-  });
-}

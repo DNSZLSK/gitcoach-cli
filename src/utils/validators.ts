@@ -32,19 +32,22 @@ export function isValidBranchName(name: string): boolean {
   return true;
 }
 
+const MIN_COMMIT_MESSAGE_LENGTH = 3;
+const MAX_COMMIT_FIRST_LINE_LENGTH = 100;
+
 export function isValidCommitMessage(message: string): boolean {
   if (!message || message.trim().length === 0) {
     return false;
   }
 
   // Minimum length check
-  if (message.trim().length < 3) {
+  if (message.trim().length < MIN_COMMIT_MESSAGE_LENGTH) {
     return false;
   }
 
   // Maximum length for first line (conventional commits)
   const firstLine = message.split('\n')[0];
-  if (firstLine.length > 100) {
+  if (firstLine.length > MAX_COMMIT_FIRST_LINE_LENGTH) {
     return false;
   }
 

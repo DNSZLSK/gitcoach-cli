@@ -9,6 +9,7 @@ import { preventionService } from '../../services/prevention-service.js';
 import { userConfig } from '../../config/user-config.js';
 import { isValidCommitMessage, isConventionalCommit } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowWarning, shouldShowExplanation, shouldConfirm, isLevel } from '../../utils/level-helper.js';
 
 export interface CommitResult {
@@ -189,7 +190,7 @@ export async function showCommitMenu(): Promise<CommitResult> {
       message: commitMessage
     };
   } catch (error) {
-    logger.error(t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' }));
+    logger.error(mapGitError(error));
     return { committed: false };
   }
 }
@@ -219,6 +220,7 @@ async function generateAIMessage(_theme: ReturnType<typeof getTheme>): Promise<s
       spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
     }
   } catch {
+    logger.debug('AI commit message generation failed');
     spinner.warn(t('commands.commit.aiGenerationFailed') || 'AI generation failed');
   }
 

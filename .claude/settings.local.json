@@ -14,7 +14,13 @@
       "Bash(wc:*)",
       "Bash(npm test:*)",
       "Bash(cd:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(dir /b \"C:\\\\Users\\\\kposz\\\\PyCharmMiscProject\\\\CDA 2025 - 2026\\\\gitcoach\\\\jest*\")",
+      "Bash(ls:*)",
+      "Bash(npx jest:*)",
+      "Bash(find:*)"
     ]
   }
 }

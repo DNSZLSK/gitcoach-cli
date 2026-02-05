@@ -4,6 +4,7 @@ import { promptSelect, promptConfirm, promptCheckbox } from '../components/promp
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowExplanation, shouldConfirm } from '../../utils/level-helper.js';
 
 export type UndoAction = 'soft_reset' | 'hard_reset' | 'unstage' | 'restore' | 'back';
@@ -102,9 +103,7 @@ async function handleSoftReset(): Promise<void> {
     logger.raw('\n' + successBox(t('commands.undo.softResetSuccess')));
     logger.raw(theme.info(t('commands.undo.filesKept')) + '\n');
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -146,9 +145,7 @@ async function handleHardReset(): Promise<void> {
     await gitService.reset('hard', 'HEAD~1');
     logger.raw('\n' + successBox(t('commands.undo.hardResetSuccess')));
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -195,9 +192,7 @@ async function handleUnstage(): Promise<void> {
     }
     logger.raw('\n' + successBox(t('commands.undo.unstageSuccess', { count: selectedFiles.length })));
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }
 
@@ -254,8 +249,6 @@ async function handleRestore(): Promise<void> {
     }
     logger.raw('\n' + successBox(t('commands.undo.restoreSuccess', { count: selectedFiles.length })));
   } catch (error) {
-    logger.raw(errorBox(t('errors.generic', {
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })));
+    logger.raw(errorBox(mapGitError(error)));
   }
 }

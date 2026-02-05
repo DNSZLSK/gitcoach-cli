@@ -10,6 +10,30 @@ export enum LogLevel {
 
 let currentLogLevel: LogLevel = LogLevel.INFO;
 
+type OutputFn = (message: string, ...args: unknown[]) => void;
+
+// eslint-disable-next-line no-console
+let stdoutFn: OutputFn = console.log;
+// eslint-disable-next-line no-console
+let stderrFn: OutputFn = console.error;
+// eslint-disable-next-line no-console
+let warnFn: OutputFn = console.warn;
+
+export function setOutput(fn: OutputFn): void {
+  stdoutFn = fn;
+  stderrFn = fn;
+  warnFn = fn;
+}
+
+export function resetOutput(): void {
+  // eslint-disable-next-line no-console
+  stdoutFn = console.log;
+  // eslint-disable-next-line no-console
+  stderrFn = console.error;
+  // eslint-disable-next-line no-console
+  warnFn = console.warn;
+}
+
 export function setLogLevel(level: LogLevel): void {
   currentLogLevel = level;
 }
@@ -27,46 +51,40 @@ export const logger = {
   debug(message: string, ...args: unknown[]): void {
     if (currentLogLevel <= LogLevel.DEBUG) {
       const formatted = formatMessage(chalk.gray('DEBUG'), message);
-      // eslint-disable-next-line no-console
-      console.log(formatted, ...args);
+      stdoutFn(formatted, ...args);
     }
   },
 
   info(message: string, ...args: unknown[]): void {
     if (currentLogLevel <= LogLevel.INFO) {
       const formatted = formatMessage(chalk.blue('INFO'), message);
-      // eslint-disable-next-line no-console
-      console.log(formatted, ...args);
+      stdoutFn(formatted, ...args);
     }
   },
 
   success(message: string, ...args: unknown[]): void {
     if (currentLogLevel <= LogLevel.INFO) {
       const formatted = formatMessage(chalk.green('SUCCESS'), message);
-      // eslint-disable-next-line no-console
-      console.log(formatted, ...args);
+      stdoutFn(formatted, ...args);
     }
   },
 
   warn(message: string, ...args: unknown[]): void {
     if (currentLogLevel <= LogLevel.WARN) {
       const formatted = formatMessage(chalk.yellow('WARN'), message);
-      // eslint-disable-next-line no-console
-      console.warn(formatted, ...args);
+      warnFn(formatted, ...args);
     }
   },
 
   error(message: string, ...args: unknown[]): void {
     if (currentLogLevel <= LogLevel.ERROR) {
       const formatted = formatMessage(chalk.red('ERROR'), message);
-      // eslint-disable-next-line no-console
-      console.error(formatted, ...args);
+      stderrFn(formatted, ...args);
     }
   },
 
   raw(message: string): void {
-    // eslint-disable-next-line no-console
-    console.log(message);
+    stdoutFn(message);
   },
 
   /**
@@ -74,8 +92,7 @@ export const logger = {
    * Shows the command in dim gray with a > prefix
    */
   command(cmd: string): void {
-    // eslint-disable-next-line no-console
-    console.log(chalk.dim(`  > ${cmd}`));
+    stdoutFn(chalk.dim(`  > ${cmd}`));
   }
 };
 

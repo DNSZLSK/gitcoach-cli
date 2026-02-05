@@ -7,6 +7,7 @@ import { gitService } from '../../services/git-service.js';
 import { userConfig } from '../../config/user-config.js';
 import { isValidBranchName } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
+import { mapGitError } from '../../utils/error-mapper.js';
 
 export type DetachedHeadAction = 'createBranch' | 'returnToMain' | 'stashAndReturn' | 'ignore';
 
@@ -140,7 +141,7 @@ export async function handleDetachedHead(action: DetachedHeadAction): Promise<bo
         return true;
     }
   } catch (error) {
-    logger.error(t('errors.generic', { message: error instanceof Error ? error.message : 'Unknown error' }));
+    logger.error(mapGitError(error));
     return false;
   }
 }

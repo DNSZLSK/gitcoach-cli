@@ -46,9 +46,9 @@ export default class Init extends Command {
     const selectedTheme = await promptSelect<Theme>(
       t('setup.selectTheme'),
       THEMES.map(th => ({
-        name: th.theme === 'colored' ? 'Colored (with syntax highlighting)' : 'Monochrome (plain text)',
+        name: t(`themes.${th.theme}`),
         value: th.theme,
-        description: th.description
+        description: t(`themes.${th.theme}Desc`)
       }))
     );
 
@@ -58,9 +58,9 @@ export default class Init extends Command {
     const level = await promptSelect<ExperienceLevel>(
       t('setup.selectLevel'),
       EXPERIENCE_LEVELS.map(l => ({
-        name: l.level.charAt(0).toUpperCase() + l.level.slice(1),
+        name: t(`levels.${l.level}`),
         value: l.level,
-        description: l.description
+        description: t(`levels.${l.level}Desc`)
       }))
     );
 
