@@ -64,6 +64,24 @@ jest.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (e: unknown) => String(e)
 }));
 
+jest.mock('../../src/ui/components/spinner.js', () => ({
+  createSpinner: () => ({
+    start: jest.fn(),
+    stop: jest.fn(),
+    succeed: jest.fn(),
+    warn: jest.fn(),
+    fail: jest.fn()
+  }),
+  withSpinner: jest.fn((_text: string, fn: () => Promise<unknown>) => fn())
+}));
+
+jest.mock('../../src/services/copilot-service.js', () => ({
+  copilotService: {
+    isAvailable: jest.fn().mockResolvedValue(false),
+    suggestConflictResolution: jest.fn().mockResolvedValue(null)
+  }
+}));
+
 describe('Conflict Resolution', () => {
   describe('parseConflictBlocks', () => {
     it('should parse a single conflict block', () => {

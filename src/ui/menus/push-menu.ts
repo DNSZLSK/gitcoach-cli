@@ -6,7 +6,7 @@ import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { logger } from '../../utils/logger.js';
-import { mapGitError } from '../../utils/error-mapper.js';
+import { mapGitErrorWithAI } from '../../utils/error-mapper.js';
 import { shouldConfirm, shouldShowWarning, shouldShowExplanation } from '../../utils/level-helper.js';
 import { isValidRemoteUrl } from '../../utils/validators.js';
 
@@ -210,7 +210,8 @@ export async function showPushMenu(): Promise<PushResult> {
       branch: currentBranch || undefined
     };
   } catch (error) {
-    logger.raw(errorBox(mapGitError(error)));
+    const message = await mapGitErrorWithAI(error, { command: 'git push' });
+    logger.raw(errorBox(message));
     return { pushed: false };
   }
 }
@@ -265,7 +266,8 @@ export async function showForcePushMenu(): Promise<PushResult> {
       branch: currentBranch || undefined
     };
   } catch (error) {
-    logger.raw(errorBox(mapGitError(error)));
+    const message = await mapGitErrorWithAI(error, { command: 'git push --force' });
+    logger.raw(errorBox(message));
     return { pushed: false };
   }
 }
