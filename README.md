@@ -334,7 +334,7 @@ gitcoach-cli/
 
 ## Author
 
-**Kéwin Poszalski** — CDA Student at AFPA, France
+**DNSZLSK** — CDA Student at AFPA, France
 
 Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github-2026-01-21).
 
