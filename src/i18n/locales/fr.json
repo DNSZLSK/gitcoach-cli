@@ -466,10 +466,10 @@
     "copilotSkipped": "Continuer sans Copilot CLI. Vous pourrez l'installer plus tard.",
     "copilotInstalling": "Installation de GitHub Copilot CLI...",
     "copilotInstallSuccess": "GitHub Copilot CLI installe avec succes !",
-    "copilotInstallNote": "Vous devrez peut-etre vous authentifier avec 'copilot auth' lors de la premiere utilisation.",
+    "copilotInstallNote": "Vous devrez peut-etre vous authentifier avec 'copilot login' lors de la premiere utilisation.",
     "copilotInstallFailed": "Echec de l'installation de GitHub Copilot CLI",
     "copilotInstallFailedDetail": "L'installation automatique a echoue. Cela peut etre du a des problemes de permissions ou de reseau.",
-    "copilotManualInstall": "Pour installer manuellement, executez :\nnpm install -g @githubnext/github-copilot-cli",
+    "copilotManualInstall": "Pour installer manuellement, executez :\nnpm install -g @github/copilot",
     "gitignoreOverwrite": ".gitignore existe deja. Ecraser ?"
   },
   "config": {

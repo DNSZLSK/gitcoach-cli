@@ -34,37 +34,29 @@ The key idea: GitCoach should make itself obsolete. You use it to learn, and eve
 
 ## Demo
 
-<!-- Replace these placeholders with your actual screenshots/GIFs -->
-
 ### Main Menu & Status Bar
 
-![GitCoach main menu](YOUR_SCREENSHOT_URL_HERE)
+![GitCoach main menu](MenuBeginner.png)
 
-*GitCoach launches with a real-time status bar showing branch, sync state, and pending changes. Every menu option maps to a Git workflow.*
+GitCoach launches with a real-time status bar showing branch, sync state, and pending changes. Every menu option maps to a Git workflow. The `~1 ?1` indicators tell you at a glance: 1 modified file, 1 untracked file.
 
-### AI Diff Summary Before Commit
+### Commit Flow
 
-![Diff summary](YOUR_SCREENSHOT_URL_HERE)
+![Commit flow](commit.png)
 
-*Before you write a commit message, Copilot CLI analyzes your staged changes and shows a human-readable summary of what you're about to commit. No more guessing.*
+When committing, GitCoach lists staged files, shows educational tips about writing good commit messages, and integrates with Copilot CLI to generate or summarize changes before you commit.
 
 ### Copilot-Assisted Conflict Resolution
 
-![Conflict resolution with Copilot](YOUR_SCREENSHOT_URL_HERE)
+![Conflict resolution with Copilot](mergeConflict.png)
 
-*When a merge conflict hits, GitCoach lists each conflicting file and offers 5 options — including "Ask Copilot AI." Copilot reads both versions of the conflicting file and recommends a resolution strategy (keep local, keep remote, or a custom merge) with an explanation of why.*
-
-### AI Commit Message Generation
-
-![Commit message generation](YOUR_SCREENSHOT_URL_HERE)
-
-*Copilot CLI analyzes your diff and generates a conventional commit message. You can accept, edit, or write your own.*
+This is the flagship feature. When a merge conflict occurs, GitCoach detects it, shows both versions side by side (local vs remote), and offers 5 resolution options — including **"Ask Copilot AI."** In this example, Copilot analyzed both versions and recommended a CUSTOM merge, explaining that neither version alone was correct and suggesting a merged version that maintains backward compatibility while accommodating the feature branch changes.
 
 ### Git Q&A — Ask Anything
 
-![Git Q&A](YOUR_SCREENSHOT_URL_HERE)
+![Git Q&A](question.png)
 
-*Don't know what `rebase` does? Ask directly from the menu. Copilot CLI answers in your configured language.*
+Don't know what `rebase` does? Ask directly from the Help menu. Copilot CLI answers in detail with examples and rules of thumb — all without leaving the terminal, and in your configured language.
 
 ## My Experience with GitHub Copilot CLI
 
@@ -76,19 +68,19 @@ When a user stages changes and chooses to commit, GitCoach runs `git diff --cach
 
 ### 2. Git Q&A
 
-From the main menu, users can type any Git-related question in natural language. Copilot CLI answers directly in the terminal, in the user's configured language. I found this particularly useful for concepts like "what's the difference between merge and rebase?" — questions that beginners need answered in context, not in a browser tab.
+From the Help menu, users can type any Git-related question in natural language. Copilot CLI answers directly in the terminal, in the user's configured language. I found this particularly useful for concepts like "what's the difference between merge and rebase?" — questions that beginners need answered in context, not in a browser tab.
 
-### 3. Staged Diff Summary (new in v1.1.0)
+### 3. Staged Diff Summary
 
-Before committing, GitCoach now shows a Copilot-generated summary of all staged changes. This is the feature I'm most proud of from a UX perspective — it gives the user a "second pair of eyes" moment before they commit. Copilot receives the full diff and returns a structured summary: files changed, what was added/modified/removed, and the overall intent of the changes.
+Before committing, GitCoach can show a Copilot-generated summary of all staged changes. This gives the user a "second pair of eyes" moment before they commit. Copilot receives the full diff and returns a structured summary: files changed, what was added/modified/removed, and the overall intent of the changes.
 
-### 4. Contextual Error Explanation (new in v1.1.0)
+### 4. Contextual Error Explanation
 
 When a Git operation fails (push rejected, merge conflict, authentication error), GitCoach catches the error and sends it to Copilot CLI for a plain-language explanation. The user sees both the static, pre-written explanation from GitCoach AND an AI-generated one specific to their exact error. This two-layer approach means the tool works without internet (static messages) but provides richer context when Copilot is available.
 
-### 5. AI-Assisted Conflict Resolution (new in v1.1.0)
+### 5. AI-Assisted Conflict Resolution
 
-This is the flagship integration. When merge conflicts occur, GitCoach already provides a guided resolution menu with options like "Accept local changes," "Accept remote changes," or "Open in editor." The v1.1.0 update adds a 5th option: **"Ask Copilot AI."**
+This is the flagship integration. When merge conflicts occur, GitCoach already provides a guided resolution menu with options like "Accept local changes," "Accept remote changes," or "Open in editor." The 5th option is **"Ask Copilot AI."**
 
 When selected, GitCoach reads both the local and remote versions of the conflicting file and sends them to Copilot CLI with context about the conflict. Copilot responds with:
 - A **recommendation** (LOCAL, REMOTE, BOTH, or CUSTOM)
@@ -107,7 +99,7 @@ One real challenge was parsing Copilot CLI's output reliably. Copilot sometimes 
 
 ### Copilot CLI Version Gotcha
 
-During development I hit a compatibility issue: the version of `@githubnext/github-copilot-cli` bundled in my environment (0.0.393) had breaking changes compared to 0.0.404. The newer version changed how interactive payloads work. Upgrading manually fixed the issue, but it's worth noting for anyone building on top of Copilot CLI — pin your versions.
+During development I hit a compatibility issue with the deprecated `gh copilot` extension vs the newer standalone `copilot` CLI. The migration required updating all command invocations and install instructions. It's worth noting for anyone building on top of Copilot CLI — make sure you're using the current `copilot` command, not the deprecated `gh copilot` extension.
 
 ---
 

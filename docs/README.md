@@ -82,8 +82,8 @@ sudo apt-get install git
 For AI-powered commit messages and Git Q&A:
 
 ```bash
-npm install -g @githubnext/github-copilot-cli
-github-copilot-cli auth
+npm install -g @github/copilot
+copilot login
 ```
 
 GitCoach works perfectly fine without Copilot CLI - all core features are available.
