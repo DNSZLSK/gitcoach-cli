@@ -315,4 +315,5 @@ Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/gith
 
 ## License
 
-MIT
+MIT/ /   G i t C o a c h   D e m o  
+ 
