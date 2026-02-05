@@ -78,7 +78,7 @@ class CopilotService {
     try {
       // Install the GitHub Copilot CLI package globally
       const { stdout, stderr } = await executeCommand(
-        'npm install -g @githubnext/github-copilot-cli',
+        'npm install -g @github/copilot',
         COPILOT_INSTALL_TIMEOUT_MS
       );
 

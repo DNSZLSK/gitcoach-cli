@@ -66,12 +66,12 @@ gh auth login
 
 3. Install Copilot CLI extension:
 ```bash
-gh extension install github/gh-copilot
+npm install -g @github/copilot
 ```
 
 4. Verify Copilot CLI:
 ```bash
-gh copilot --version
+copilot --version
 ```
 
 ## First Run
