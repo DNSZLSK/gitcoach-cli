@@ -26,7 +26,8 @@ jest.mock('../../src/services/git-service.js', () => ({
   gitService: {
     getConflictedFiles: jest.fn(),
     add: jest.fn(),
-    commit: jest.fn()
+    commit: jest.fn(),
+    commitNoEdit: jest.fn()
   }
 }));
 
@@ -169,6 +170,37 @@ describe('Conflict Resolution', () => {
       expect(blocks[0].localContent).toBe('only local');
       expect(blocks[0].remoteContent).toBe('');
     });
+
+    it('should handle CRLF line endings', () => {
+      const content =
+        'line before\r\n<<<<<<< HEAD\r\nlocal change\r\n=======\r\nremote change\r\n>>>>>>> origin/main\r\nline after';
+
+      const blocks = parseConflictBlocks(content);
+
+      expect(blocks).toHaveLength(1);
+      expect(blocks[0].localContent).toBe('local change');
+      expect(blocks[0].remoteContent).toBe('remote change');
+    });
+
+    it('should handle UTF-8 BOM', () => {
+      const content = '\uFEFF<<<<<<< HEAD\nlocal\n=======\nremote\n>>>>>>> origin/main';
+
+      const blocks = parseConflictBlocks(content);
+
+      expect(blocks).toHaveLength(1);
+      expect(blocks[0].localContent).toBe('local');
+      expect(blocks[0].remoteContent).toBe('remote');
+    });
+
+    it('should handle BOM + CRLF combined', () => {
+      const content = '\uFEFFline before\r\n<<<<<<< HEAD\r\nlocal\r\n=======\r\nremote\r\n>>>>>>> main\r\nline after';
+
+      const blocks = parseConflictBlocks(content);
+
+      expect(blocks).toHaveLength(1);
+      expect(blocks[0].localContent).toBe('local');
+      expect(blocks[0].remoteContent).toBe('remote');
+    });
   });
 
   describe('resolveConflictBlock', () => {
@@ -269,6 +301,16 @@ describe('Conflict Resolution', () => {
     it('should return false for partial markers', () => {
       expect(hasConflictMarkers('<<<<<<< HEAD only start')).toBe(false);
       expect(hasConflictMarkers('>>>>>>> only end')).toBe(false);
+    });
+
+    it('should detect markers with CRLF', () => {
+      const content = '<<<<<<< HEAD\r\nlocal\r\n=======\r\nremote\r\n>>>>>>> main';
+      expect(hasConflictMarkers(content)).toBe(true);
+    });
+
+    it('should detect markers with BOM', () => {
+      const content = '\uFEFF<<<<<<< HEAD\nlocal\n=======\nremote\n>>>>>>> main';
+      expect(hasConflictMarkers(content)).toBe(true);
     });
   });
 });
