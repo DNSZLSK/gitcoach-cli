@@ -1,19 +1,21 @@
 # GitCoach
-
-```
-    ██████╗ ██╗████████╗ ██████╗ ██████╗  █████╗  ██████╗██╗  ██╗
-   ██╔════╝ ██║╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██║  ██║
-   ██║  ███╗██║   ██║   ██║     ██║   ██║███████║██║     ███████║
-   ██║   ██║██║   ██║   ██║     ██║   ██║██╔══██║██║     ██╔══██║
-   ╚██████╔╝██║   ██║   ╚██████╗╚██████╔╝██║  ██║╚██████╗██║  ██║
-    ╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-```
+                                                                                 
+                                                                                                         
+                                                                                                      
+           ██████╗ ██╗████████╗ ██████╗ ██████╗  █████╗  ██████╗██╗  ██╗                               
+          ██╔════╝ ██║╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██║  ██║                               
+          ██║  ███╗██║   ██║   ██║     ██║   ██║███████║██║     ███████║                               
+          ██║   ██║██║   ██║   ██║     ██║   ██║██╔══██║██║     ██╔══██║                               
+          ╚██████╔╝██║   ██║   ╚██████╗╚██████╔╝██║  ██║╚██████╗██║  ██║                               
+           ╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝                               
+                                                       
 
 **Interactive Git assistant that prevents mistakes before they happen.**
 
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach-cli?style=social)](https://github.com/DNSZLSK/gitcoach-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-522%20passing-brightgreen)](https://github.com/DNSZLSK/gitcoach-cli)
 
 ---
 
@@ -27,9 +29,9 @@ Git is powerful but brutal to beginners. Cryptic error messages, lost work from 
 - **Educational** - Shows every Git command being executed so you learn while you use it
 - **Adapts to your level** - Beginner (verbose), Intermediate (balanced), Expert (minimal)
 - **Multilingual** - Works in English, French, and Spanish
-- **Optional AI features** - Can use GitHub Copilot CLI for commit messages and Git Q&A (works without it too)
+- **5 AI integrations** - Uses GitHub Copilot CLI for commit messages, Git Q&A, diff summaries, error explanations, and conflict resolution (works without it too)
 
-Built for the **GitHub Copilot CLI Challenge 2026**.
+Built for the **[GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github-2026-01-21)**.
 
 ---
 
@@ -79,14 +81,14 @@ sudo apt-get install git
 
 ### 3. GitHub Copilot CLI (Optional)
 
-For AI-powered commit messages and Git Q&A:
+For AI-powered features (commit messages, Q&A, diff summaries, error explanations, conflict resolution):
 
 ```bash
-npm install -g @githubnext/github-copilot-cli
-github-copilot-cli auth
+npm install -g @github/copilot
+copilot login
 ```
 
-GitCoach works perfectly fine without Copilot CLI - all core features are available.
+GitCoach works perfectly fine without Copilot CLI — all core features are available without it.
 
 ---
 
@@ -122,52 +124,14 @@ GitCoach adapts to your skill level:
 | **Intermediate** | Short descriptions | All | Most | Hidden |
 | **Expert** | Git commands | Destructive only | Critical only | Hidden |
 
-Example in Expert mode:
-```
-? Main Menu
-> [S] git status
-  [A] git add
-  [C] git commit
-  [P] git push
-  [L] git pull
-```
-
 ### Error Prevention
 
 GitCoach warns you BEFORE you make mistakes:
 
-**Uncommitted changes:**
-```
-+------------------- Warning --------------------+
-|                                                |
-|  You have uncommitted changes!                 |
-|  Switching branches will lose your work.       |
-|                                                |
-+------------------------------------------------+
-```
-
-**Detached HEAD:**
-```
-+--------------- Detached HEAD ------------------+
-|                                                |
-|  You are in detached HEAD state.               |
-|  Your commits may be lost if you switch        |
-|  branches without creating a new branch.       |
-|                                                |
-+------------------------------------------------+
-
-? How do you want to resolve this?
-> [C] Create a new branch
-  [M] Return to main branch
-  [S] Stash changes and return
-  [I] Ignore (advanced users)
-```
-
-**Force push:**
-```
-? You are about to FORCE PUSH. This rewrites remote history.
-? Are you absolutely sure? (yes/no)
-```
+- **Uncommitted changes** — warns before branch switching
+- **Detached HEAD** — detects and offers recovery options (create branch, return to main, stash)
+- **Force push** — requires explicit confirmation
+- **Merge conflicts** — guides you through resolution step by step
 
 ### Educational Mode
 
@@ -179,26 +143,26 @@ Every action shows the Git command being executed:
   5 file(s) staged successfully.
 ```
 
-You learn Git while using GitCoach.
+You learn Git while using GitCoach. Eventually, you won't need it anymore. That's the goal.
 
-### Smart Commits (Optional AI)
+---
 
-If you have GitHub Copilot CLI installed, GitCoach can generate commit messages:
+## GitHub Copilot CLI Integrations
+
+GitCoach uses Copilot CLI in **5 distinct ways**. All are optional — the tool works without Copilot.
+
+### 1. Smart Commit Messages
+
+Copilot analyzes your staged diff and suggests a conventional commit message:
 
 ```
-? Generate message with AI? Yes
-  Generating...
-
   Suggested: feat(auth): add OAuth2 authentication
-
 ? Use this message? (Y/n)
 ```
 
-Without Copilot CLI, you write commit messages manually (conventional commits format suggested).
+### 2. Git Q&A
 
-### Git Q&A (Optional AI)
-
-Ask Git questions if Copilot CLI is installed:
+Ask any Git question in natural language from the Help menu:
 
 ```
 ? Your question: What's the difference between merge and rebase?
@@ -207,6 +171,66 @@ Ask Git questions if Copilot CLI is installed:
   REBASE rewrites history by moving commits.
   Use merge for shared branches, rebase for local cleanup.
 ```
+
+### 3. Staged Diff Summary
+
+Before committing, Copilot summarizes your staged changes so you can review the intent of your work before saving it:
+
+```
++-------------- Summary of Changes ---------------+
+|                                                  |
+|  Modified auth module: added OAuth2 flow with    |
+|  token refresh. Updated user model to store      |
+|  refresh tokens.                                 |
+|                                                  |
++--------------------------------------------------+
+```
+
+### 4. Contextual Error Explanation
+
+When a Git operation fails, Copilot explains the error in plain language alongside GitCoach's built-in help:
+
+```
+  Error: failed to push some refs to 'origin/main'
+
++--------------- AI Explanation ------------------+
+|                                                 |
+|  Your local branch is behind the remote. Pull   |
+|  the latest changes first with 'git pull', then |
+|  try pushing again.                             |
+|                                                 |
++-------------------------------------------------+
+```
+
+### 5. AI-Assisted Conflict Resolution
+
+When merge conflicts occur, GitCoach shows both versions and offers 5 options — including asking Copilot for a recommendation:
+
+```
+  Your version (local):
+    name: master-version
+
+  Remote version:
+    name: feature-version
+
+? What do you want to keep?
+> Keep my version (local)
+  Keep the remote version
+  Keep both (combine)
+  Edit manually in my editor
+  Ask Copilot AI              <-- Copilot analyzes both versions
+
+  Copilot suggests: CUSTOM
+  Neither version alone is correct. The optimal solution
+  is to keep a merged version that maintains backward
+  compatibility while accommodating the feature.
+
+? Accept this suggestion? (Y/n)
+```
+
+All Copilot responses respect your language configuration (English, French, or Spanish).
+
+---
 
 ### Branch Management
 
@@ -248,7 +272,7 @@ English, French, and Spanish. Localized confirmations:
 - **simple-git** - Git operations
 - **i18next** - Internationalization
 - **Chalk** - Terminal styling
-- **Jest** - 383 tests
+- **Jest** - 522 tests
 
 ---
 
@@ -281,7 +305,7 @@ gitcoach-cli/
 │   │   ├── menus/        # Interactive menus
 │   │   └── themes/       # Color themes
 │   └── utils/        # Helpers, validators
-├── test/             # 383 tests
+├── test/             # 522 tests
 └── docs/             # Documentation
 ```
 
@@ -301,19 +325,21 @@ gitcoach-cli/
 
 - **npm:** [npmjs.com/package/gitcoach-cli](https://www.npmjs.com/package/gitcoach-cli)
 - **GitHub:** [github.com/DNSZLSK/gitcoach-cli](https://github.com/DNSZLSK/gitcoach-cli)
+- **DEV.to:** [GitCoach — GitHub Copilot CLI Challenge](https://dev.to/dnszlsk/gitcoach-the-git-mentor-that-teaches-you-while-you-work-github-copilot-cli-challenge-1708)
 - **Issues:** [github.com/DNSZLSK/gitcoach-cli/issues](https://github.com/DNSZLSK/gitcoach-cli/issues)
 
 ---
 
 ## Author
 
-**DNSZLSK** - CDA Student at AFPA, France
+**Kéwin Poszalski** — CDA Student at AFPA, France
 
-Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github).
+Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github-2026-01-21).
 
 ---
 
 ## License
 
-MIT/ /   G i t C o a c h   D e m o  
+MIT
  
+
