@@ -1,6 +1,5 @@
+
 # GitCoach
-
-
 ```
    ██████╗ ██╗████████╗ ██████╗ ██████╗  █████╗  ██████╗██╗  ██╗
   ██╔════╝ ██║╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██║  ██║
@@ -9,9 +8,6 @@
   ╚██████╔╝██║   ██║   ╚██████╗╚██████╔╝██║  ██║╚██████╗██║  ██║
    ╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 ```
-
- 
-
 **Interactive Git assistant that prevents mistakes before they happen.**
 
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
@@ -220,7 +216,7 @@ When merge conflicts occur, GitCoach shows both versions and offers 5 options �
   Keep the remote version
   Keep both (combine)
   Edit manually in my editor
-  Ask Copilot AI              <-- Copilot analyzes both versions
+  Ask Copilot AI
 
   Copilot suggests: CUSTOM
   Neither version alone is correct. The optimal solution
@@ -334,7 +330,7 @@ gitcoach-cli/
 
 ## Author
 
-**DNSZLSK** — CDA Student at AFPA, France
+**Kéwin Poszalski** — CDA Student at AFPA, France
 
 Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github-2026-01-21).
 
@@ -343,11 +339,4 @@ Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/gith
 ## License
 
 MIT
- 
-
-
-
-
-
-
-
+```
