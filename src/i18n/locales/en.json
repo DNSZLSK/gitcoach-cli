@@ -225,6 +225,9 @@
       "keepRemote": "Keep the remote version",
       "keepBoth": "Keep both (combine)",
       "editManually": "Edit manually in my editor",
+    "askCopilot": "Ask Copilot AI",
+    "acceptSuggestion": "Accept this suggestion?",
+    "copilotSuggests": "Copilot suggests",
       "fileResolved": "{{file}} resolved ({{current}}/{{total}})",
       "allResolved": "All {{count}} conflict(s) resolved!",
       "finalizeCommit": "Finalize the merge with git commit?",
@@ -558,6 +561,12 @@
     "pressEnter": "Press Enter to continue...",
     "select": "Select an option",
     "enterValue": "Enter value"
+  },
+  "copilot": {
+    "aiExplanation": "Copilot explains",
+    "analyzing": "Analyzing error...",
+    "analyzingChanges": "Analyzing changes...",
+    "diffSummary": "Changes summary"
   },
   "detachedHead": {
     "title": "Detached HEAD",

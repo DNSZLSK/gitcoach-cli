@@ -41,7 +41,7 @@ export async function handleGitError(
     spinner.start();
 
     try {
-      const explanation = await copilotService.explainGitError(errorMessage, command);
+      const explanation = await copilotService.explainGitError(errorMessage, command ? { command } : undefined);
 
       if (explanation.success && explanation.message) {
         spinner.succeed();

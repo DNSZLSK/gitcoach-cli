@@ -225,6 +225,9 @@
       "keepRemote": "Garder la version distante",
       "keepBoth": "Garder les deux (combiner)",
       "editManually": "Editer manuellement dans mon editeur",
+    "askCopilot": "Demander a Copilot IA",
+    "acceptSuggestion": "Accepter cette suggestion ?",
+    "copilotSuggests": "Copilot suggere",
       "fileResolved": "{{file}} resolu ({{current}}/{{total}})",
       "allResolved": "Les {{count}} conflit(s) ont ete resolus !",
       "finalizeCommit": "Finaliser le merge avec git commit ?",
@@ -558,6 +561,12 @@
     "pressEnter": "Appuyez sur Entree pour continuer...",
     "select": "Selectionnez une option",
     "enterValue": "Entrez une valeur"
+  },
+  "copilot": {
+    "aiExplanation": "Copilot explique",
+    "analyzing": "Analyse de l'erreur...",
+    "analyzingChanges": "Analyse des changements...",
+    "diffSummary": "Resume des changements"
   },
   "detachedHead": {
     "title": "HEAD Detache",

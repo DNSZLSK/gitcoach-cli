@@ -1,5 +1,6 @@
 import { t } from '../i18n/index.js';
 import { logger } from './logger.js';
+import { copilotService } from '../services/copilot-service.js';
 
 interface ErrorPattern {
   patterns: RegExp[];
@@ -105,4 +106,29 @@ export function mapGitError(error: unknown): string {
 
   // Fallback: generic error with cleaned message
   return t('errors.generic', { message: cleaned });
+}
+
+/**
+ * Maps a Git error with optional AI-powered contextual explanation.
+ * Returns the static message immediately, enriched with Copilot explanation if available.
+ */
+export async function mapGitErrorWithAI(
+  error: unknown,
+  context?: { command?: string; branch?: string; hasUncommitted?: boolean }
+): Promise<string> {
+  const staticMessage = mapGitError(error);
+
+  try {
+    if (await copilotService.isAvailable()) {
+      const rawMessage = extractErrorMessage(error);
+      const aiResult = await copilotService.explainGitError(rawMessage, context);
+      if (aiResult.success && aiResult.message) {
+        return `${staticMessage}\n\n${t('copilot.aiExplanation')}:\n${aiResult.message}`;
+      }
+    }
+  } catch {
+    logger.debug('AI error explanation failed, using static message');
+  }
+
+  return staticMessage;
 }

@@ -1,6 +1,7 @@
 import { executeCommand, sleep } from '../utils/helpers.js';
 import { logger } from '../utils/logger.js';
 import { t } from '../i18n/index.js';
+import i18next from 'i18next';
 
 const COPILOT_TIMEOUT_MS = 30000;
 const COPILOT_RETRY_DELAY_MS = 1000;
@@ -22,8 +23,24 @@ export interface CopilotSuggestion {
   command?: string;
 }
 
+export interface ConflictResolutionSuggestion {
+  recommendation: 'local' | 'remote' | 'both' | 'custom';
+  explanation: string;
+  customContent?: string;
+}
+
 class CopilotService {
   private available: boolean | null = null;
+
+  private getLanguageInstruction(): string {
+    const lang = i18next.language || 'en';
+    const langMap: Record<string, string> = {
+      en: 'English',
+      fr: 'French',
+      es: 'Spanish'
+    };
+    return `Reply in ${langMap[lang] || 'English'}.`;
+  }
 
   async isAvailable(): Promise<boolean> {
     if (this.available !== null) {
@@ -113,7 +130,7 @@ class CopilotService {
       const diffSummary = this.summarizeDiff(diff);
 
       // Build a simple prompt - keep it clean with only alphanumeric chars
-      const prompt = `Generate a conventional commit message for these file changes: ${diffSummary}. Use format type: description where type is feat fix docs refactor test or chore. Reply with only the commit message.`;
+      const prompt = `Generate a conventional commit message for these file changes: ${diffSummary}. Use format type: description where type is feat fix docs refactor test or chore. Reply with only the commit message. ${this.getLanguageInstruction()}`;
 
       logger.debug('Copilot prompt:', prompt);
 
@@ -216,7 +233,7 @@ class CopilotService {
 
     try {
       const context = `Branch: ${branch}. Staged files: ${stagedFiles.join(', ') || 'none'}. Modified files: ${modifiedFiles.join(', ') || 'none'}.`;
-      const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion in one sentence.`;
+      const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion in one sentence. ${this.getLanguageInstruction()}`;
 
       const { stdout, stderr } = await executeCommand(
         `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
@@ -251,7 +268,7 @@ class CopilotService {
 
     try {
       const context = `Action: ${action}. Branch: ${currentBranch}. Uncommitted changes: ${hasUncommitted}.`;
-      const prompt = `Will this git action cause problems? ${context} Reply briefly in one sentence.`;
+      const prompt = `Will this git action cause problems? ${context} Reply briefly in one sentence. ${this.getLanguageInstruction()}`;
 
       const { stdout, stderr } = await executeCommand(
         `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
@@ -281,7 +298,7 @@ class CopilotService {
     }
 
     try {
-      const prompt = `Explain this Git concept briefly for a beginner in 2-3 sentences: ${concept}`;
+      const prompt = `Explain this Git concept briefly for a beginner in 2-3 sentences: ${concept} ${this.getLanguageInstruction()}`;
 
       const { stdout, stderr } = await executeCommand(
         `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
@@ -325,7 +342,7 @@ class CopilotService {
 
 Question: ${question}
 
-Provide a helpful answer in 2-4 sentences. If relevant, include the Git command.`;
+Provide a helpful answer in 2-4 sentences. If relevant, include the Git command. ${this.getLanguageInstruction()}`;
 
       const { stdout, stderr } = await executeCommand(
         `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
@@ -350,7 +367,11 @@ Provide a helpful answer in 2-4 sentences. If relevant, include the Git command.
   /**
    * Explain a Git error and suggest solutions
    */
-  async explainGitError(errorMessage: string, command?: string): Promise<CopilotSuggestion> {
+  async explainGitError(errorMessage: string, context?: {
+    command?: string;
+    branch?: string;
+    hasUncommitted?: boolean;
+  }): Promise<CopilotSuggestion> {
     if (!(await this.isAvailable())) {
       return {
         success: false,
@@ -366,15 +387,14 @@ Provide a helpful answer in 2-4 sentences. If relevant, include the Git command.
     }
 
     try {
-      const commandContext = command ? `Command executed: ${command}\n` : '';
-      const prompt = `You are a Git expert. Explain this Git error simply and provide a solution.
+      const commandLine = context?.command ? `This Git command failed: "${context.command}"\n` : '';
+      const branchLine = context?.branch ? `Current branch: ${context.branch}\n` : '';
+      const uncommittedLine = context?.hasUncommitted !== undefined ? `Has uncommitted changes: ${context.hasUncommitted}\n` : '';
 
-${commandContext}Error message: ${errorMessage}
-
-1. Explain what this error means in simple terms (1 sentence)
-2. Provide the solution or command to fix it (1-2 sentences)
-
-Be concise and practical.`;
+      const prompt = `${commandLine}Error: "${errorMessage}"
+${branchLine}${uncommittedLine}
+Explain this error in simple terms for a beginner. What happened, why, and how to fix it.
+Reply in 3-4 sentences maximum. No code blocks. ${this.getLanguageInstruction()}`;
 
       const { stdout, stderr } = await executeCommand(
         `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
@@ -383,17 +403,190 @@ Be concise and practical.`;
 
       const explanation = this.parseAnswer(stdout, stderr);
 
-      return {
-        success: !!explanation,
-        message: explanation || 'Could not explain the error'
-      };
+      if (!explanation || this.looksLikeError(explanation)) {
+        return { success: false, message: 'Could not explain the error' };
+      }
+
+      return { success: true, message: explanation };
     } catch (error) {
       logger.debug('explainGitError failed:', error);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : t('errors.unknownError')
-      };
+      return { success: false, message: 'Could not explain the error' };
     }
+  }
+
+  /**
+   * Suggest how to resolve a merge conflict
+   */
+  async suggestConflictResolution(
+    fileName: string,
+    localVersion: string,
+    remoteVersion: string,
+    context?: { branch?: string; remoteBranch?: string }
+  ): Promise<ConflictResolutionSuggestion | null> {
+    if (!(await this.isAvailable())) {
+      return null;
+    }
+
+    try {
+      const branchInfo = context?.branch ? `current branch ${context.branch}` : 'current branch';
+      const remoteBranchInfo = context?.remoteBranch ? `from ${context.remoteBranch}` : 'from remote';
+
+      const prompt = `Merge conflict in file: ${fileName}
+
+LOCAL version (${branchInfo}):
+${localVersion}
+
+REMOTE version (${remoteBranchInfo}):
+${remoteVersion}
+
+Which version should be kept and why? Options: keep LOCAL, keep REMOTE, keep BOTH, or suggest a MERGED version.
+Reply with format:
+RECOMMENDATION: LOCAL|REMOTE|BOTH|CUSTOM
+EXPLANATION: (1-2 sentences why)
+MERGED: (only if CUSTOM, the merged content)
+${this.getLanguageInstruction()}`;
+
+      const { stdout, stderr } = await executeCommand(
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
+      );
+
+      const combined = `${stdout}\n${stderr || ''}`;
+      if (this.looksLikeError(combined)) {
+        return null;
+      }
+
+      return this.parseConflictSuggestion(stdout, stderr);
+    } catch (error) {
+      logger.debug('suggestConflictResolution failed:', error);
+      return null;
+    }
+  }
+
+  private parseConflictSuggestion(output: string, stderr?: string): ConflictResolutionSuggestion | null {
+    const combined = `${output}\n${stderr || ''}`.trim();
+    const lines = combined.split('\n');
+
+    let recommendation: ConflictResolutionSuggestion['recommendation'] = 'local';
+    let explanation = '';
+    let customContent: string | undefined;
+    let foundRecommendation = false;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const recMatch = trimmed.match(/^\*{0,2}RECOMMENDATION:?\*{0,2}\s*(LOCAL|REMOTE|BOTH|CUSTOM)/i);
+      if (recMatch) {
+        recommendation = recMatch[1].toLowerCase() as ConflictResolutionSuggestion['recommendation'];
+        foundRecommendation = true;
+        continue;
+      }
+      const explMatch = trimmed.match(/^\*{0,2}EXPLANATION:?\*{0,2}\s*(.+)/i);
+      if (explMatch) {
+        explanation = explMatch[1];
+        continue;
+      }
+      const mergedMatch = trimmed.match(/^\*{0,2}MERGED:?\*{0,2}\s*(.+)/i);
+      if (mergedMatch) {
+        customContent = mergedMatch[1];
+        continue;
+      }
+    }
+
+    if (!foundRecommendation) {
+      // Try to infer from free-text response.
+      // Order matters: check "custom/merge" BEFORE "both/combine" because
+      // a custom-merge suggestion often contains words like "combine both".
+      const lowerCombined = combined.toLowerCase();
+      if (lowerCombined.includes('merged version') || lowerCombined.includes('suggest a merge') || lowerCombined.includes('custom merge') || /\bmerged?\b.*\bboth\b/.test(lowerCombined)) {
+        recommendation = 'custom';
+      } else if (lowerCombined.includes('keep remote') || lowerCombined.includes('remote version')) {
+        recommendation = 'remote';
+      } else if (lowerCombined.includes('keep both') || lowerCombined.includes('combine')) {
+        recommendation = 'both';
+      }
+      explanation = this.parseAnswer(output, stderr) || '';
+    }
+
+    if (!explanation && !foundRecommendation) {
+      return null;
+    }
+
+    return {
+      recommendation,
+      explanation: explanation || `Recommended: ${recommendation}`,
+      customContent: recommendation === 'custom' ? customContent : undefined
+    };
+  }
+
+  /**
+   * Summarize staged diff in plain language
+   */
+  async summarizeStagedDiff(diff: string): Promise<string | null> {
+    if (!(await this.isAvailable())) {
+      return null;
+    }
+
+    if (!diff || diff.trim().length === 0) {
+      return null;
+    }
+
+    try {
+      const prompt = `Summarize these staged Git changes in plain language for a developer.
+List each modified file with a short description of what changed.
+Format: one line per file, max 60 chars per line.
+No markdown, no code blocks. Keep it concise.
+${this.getLanguageInstruction()}
+
+Changes:
+${diff}`;
+
+      const result = await this.executeWithRetry(
+        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        COPILOT_TIMEOUT_MS
+      );
+
+      if (!result) {
+        return null;
+      }
+
+      const combined = `${result.stdout}\n${result.stderr || ''}`;
+      if (this.looksLikeError(combined)) {
+        return null;
+      }
+
+      return this.parseAnswer(result.stdout, result.stderr);
+    } catch (error) {
+      logger.debug('summarizeStagedDiff failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Checks if parsed output looks like a CLI error rather than a real answer.
+   * Returns true when the content should be discarded.
+   */
+  private looksLikeError(text: string): boolean {
+    const errorPatterns = [
+      /command failed/i,
+      /not compatible/i,
+      /ENOENT/i,
+      /EPERM/i,
+      /spawn.*failed/i,
+      /is not recognized/i,
+      /not found/i,
+      /no such file/i,
+      /permission denied/i,
+      /timed?\s*out/i,
+      /exit code/i,
+      /errno/i,
+      /^error:/im,
+      /^fatal:/im,
+      /version.*not supported/i,
+      /unexpected token/i,
+      /syntax error/i,
+      /cannot execute/i,
+    ];
+    return errorPatterns.some(p => p.test(text));
   }
 
   private async executeWithRetry(

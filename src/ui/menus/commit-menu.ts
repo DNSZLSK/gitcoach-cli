@@ -9,7 +9,7 @@ import { preventionService } from '../../services/prevention-service.js';
 import { userConfig } from '../../config/user-config.js';
 import { isValidCommitMessage, isConventionalCommit } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
-import { mapGitError } from '../../utils/error-mapper.js';
+import { mapGitErrorWithAI } from '../../utils/error-mapper.js';
 import { shouldShowWarning, shouldShowExplanation, shouldConfirm, isLevel } from '../../utils/level-helper.js';
 
 export interface CommitResult {
@@ -70,6 +70,24 @@ export async function showCommitMenu(): Promise<CommitResult> {
         t('tips.beginner.commit'),
         t('commands.commit.title')
       ));
+    }
+
+    // Show AI diff summary if Copilot is available
+    if (await copilotService.isAvailable()) {
+      try {
+        const diff = await gitService.getDiff(true);
+        if (diff) {
+          const spinner = createSpinner({ text: t('copilot.analyzingChanges') });
+          spinner.start();
+          const summary = await copilotService.summarizeStagedDiff(diff);
+          spinner.stop();
+          if (summary) {
+            logger.raw(infoBox(`${t('copilot.diffSummary')}:\n\n${summary}`));
+          }
+        }
+      } catch {
+        logger.debug('Diff summary failed, continuing normally');
+      }
     }
 
     let commitMessage: string = '';
@@ -190,7 +208,8 @@ export async function showCommitMenu(): Promise<CommitResult> {
       message: commitMessage
     };
   } catch (error) {
-    logger.error(mapGitError(error));
+    const message = await mapGitErrorWithAI(error, { command: 'git commit' });
+    logger.error(message);
     return { committed: false };
   }
 }

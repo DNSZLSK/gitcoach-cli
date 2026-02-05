@@ -5,7 +5,7 @@ import { successBox, warningBox, errorBox, infoBox } from '../components/box.js'
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
-import { mapGitError } from '../../utils/error-mapper.js';
+import { mapGitError, mapGitErrorWithAI } from '../../utils/error-mapper.js';
 import { isValidRemoteUrl } from '../../utils/validators.js';
 import { shouldShowExplanation, shouldConfirm, isLevel } from '../../utils/level-helper.js';
 
@@ -274,7 +274,8 @@ export async function showPullMenu(): Promise<PullResult> {
       branch: currentBranch || undefined
     };
   } catch (error) {
-    logger.raw(errorBox(mapGitError(error)));
+    const message = await mapGitErrorWithAI(error, { command: 'git pull' });
+    logger.raw(errorBox(message));
     return { pulled: false };
   }
 }
@@ -333,7 +334,8 @@ async function handlePostPullConflicts(
     return { pulled: false };
   }
 
-  // Not a conflict error - show generic mapped error
-  logger.raw(errorBox(mapGitError(error)));
+  // Not a conflict error - show generic mapped error with AI explanation
+  const message = await mapGitErrorWithAI(error, { command: 'git pull' });
+  logger.raw(errorBox(message));
   return { pulled: false };
 }

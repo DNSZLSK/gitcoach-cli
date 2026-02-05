@@ -1,9 +1,11 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
-import { promptSelect, promptInput } from '../components/prompt.js';
+import { promptSelect, promptInput, promptConfirm } from '../components/prompt.js';
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
+import { createSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
+import { copilotService } from '../../services/copilot-service.js';
 import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
 
@@ -14,7 +16,7 @@ export interface ConflictBlock {
   endLine: number;
 }
 
-type ResolutionChoice = 'local' | 'remote' | 'both' | 'edit' | 'back';
+type ResolutionChoice = 'local' | 'remote' | 'both' | 'edit' | 'copilot' | 'back';
 
 const CONFLICT_START = '<<<<<<<';
 const CONFLICT_SEPARATOR = '=======';
@@ -159,19 +161,60 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
         logger.raw(theme.dim('  ' + (block.remoteContent || '(empty)').split('\n').join('\n  ')));
         logger.raw('');
 
+        const choices: Array<{ name: string; value: ResolutionChoice }> = [
+          { name: t('commands.conflicts.keepLocal'), value: 'local' },
+          { name: t('commands.conflicts.keepRemote'), value: 'remote' },
+          { name: t('commands.conflicts.keepBoth'), value: 'both' },
+          { name: t('commands.conflicts.editManually'), value: 'edit' },
+        ];
+
+        if (await copilotService.isAvailable()) {
+          choices.push({ name: t('commands.conflicts.askCopilot'), value: 'copilot' });
+        }
+
+        choices.push({ name: t('menu.back'), value: 'back' });
+
         const choice = await promptSelect<ResolutionChoice>(
           t('commands.conflicts.chooseResolution'),
-          [
-            { name: t('commands.conflicts.keepLocal'), value: 'local' },
-            { name: t('commands.conflicts.keepRemote'), value: 'remote' },
-            { name: t('commands.conflicts.keepBoth'), value: 'both' },
-            { name: t('commands.conflicts.editManually'), value: 'edit' },
-            { name: t('menu.back'), value: 'back' }
-          ]
+          choices
         );
 
         if (choice === 'back') {
           return { resolved: false };
+        }
+
+        if (choice === 'copilot') {
+          const spinner = createSpinner({ text: t('copilot.analyzing') });
+          spinner.start();
+          const suggestion = await copilotService.suggestConflictResolution(
+            file, block.localContent, block.remoteContent
+          );
+          spinner.stop();
+
+          if (suggestion) {
+            logger.raw(infoBox(
+              `${t('commands.conflicts.copilotSuggests')}: ${suggestion.recommendation.toUpperCase()}\n\n${suggestion.explanation}`
+            ));
+
+            const accept = await promptConfirm(t('commands.conflicts.acceptSuggestion'), true);
+
+            if (accept) {
+              if (suggestion.recommendation === 'custom' && suggestion.customContent) {
+                // Replace the block with custom content
+                const lines = normalizeContent(fileContent).split('\n');
+                const before = lines.slice(0, block.startLine);
+                const after = lines.slice(block.endLine + 1);
+                fileContent = [...before, suggestion.customContent, ...after].join('\n');
+              } else if (suggestion.recommendation === 'local' || suggestion.recommendation === 'remote' || suggestion.recommendation === 'both') {
+                fileContent = resolveConflictBlock(fileContent, block, suggestion.recommendation);
+              }
+              continue; // Move to next block
+            }
+            // If not accepted, fall through to re-show menu (loop will re-iterate)
+            continue;
+          }
+          // If suggestion is null, fall through to re-show menu
+          continue;
         }
 
         if (choice === 'edit') {
