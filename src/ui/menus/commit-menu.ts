@@ -36,7 +36,14 @@ export async function showCommitMenu(): Promise<CommitResult> {
       ));
       logger.raw(theme.warning(t('commands.commit.conflictedFiles') || 'Conflicted files:'));
       conflictedFiles.forEach(f => logger.raw(theme.file(f, 'conflict')));
-      return { committed: false };
+
+      // Auto-launch conflict resolution menu
+      const { showConflictResolutionMenu } = await import('./conflict-resolution-menu.js');
+      const result = await showConflictResolutionMenu();
+      if (!result.resolved) {
+        return { committed: false };
+      }
+      // Conflicts resolved - continue with commit flow
     }
 
     // Validate we can commit
