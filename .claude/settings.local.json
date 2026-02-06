@@ -28,7 +28,10 @@
       "Bash(git remote add:*)",
       "Bash(git pull:*)",
       "Bash(where:*)",
-      "Bash(copilot login:*)"
+      "Bash(copilot login:*)",
+      "Bash(git status:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
