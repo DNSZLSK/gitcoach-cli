@@ -134,6 +134,8 @@ export default class Quick extends Command {
             },
             'Pushed successfully'
           );
+        } else {
+          userConfig.incrementErrorsPrevented();
         }
       }
 

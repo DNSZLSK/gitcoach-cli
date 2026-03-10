@@ -6,7 +6,10 @@ import {
   AppConfig,
   Language,
   Theme,
-  ExperienceLevel
+  ExperienceLevel,
+  VALID_LANGUAGES,
+  VALID_THEMES,
+  VALID_LEVELS
 } from './defaults.js';
 
 interface ConfigSchema {
@@ -58,14 +61,17 @@ export const userConfig = {
 
   // Preferences setters
   setLanguage(language: Language): void {
+    if (!VALID_LANGUAGES.has(language)) return;
     config.set('preferences.language', language);
   },
 
   setTheme(theme: Theme): void {
+    if (!VALID_THEMES.has(theme)) return;
     config.set('preferences.theme', theme);
   },
 
   setExperienceLevel(level: ExperienceLevel): void {
+    if (!VALID_LEVELS.has(level)) return;
     config.set('preferences.experienceLevel', level);
   },
 

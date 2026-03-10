@@ -5,6 +5,7 @@ import { successBox, warningBox, errorBox, infoBox } from '../components/box.js'
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
+import { userConfig } from '../../config/user-config.js';
 import { logger } from '../../utils/logger.js';
 import { mapGitErrorWithAI } from '../../utils/error-mapper.js';
 import { shouldConfirm, shouldShowWarning, shouldShowExplanation } from '../../utils/level-helper.js';
@@ -162,6 +163,7 @@ export async function showPushMenu(): Promise<PushResult> {
       }
 
       if (!validation.canProceed) {
+        userConfig.incrementErrorsPrevented();
         return { pushed: false };
       }
     }
@@ -232,12 +234,14 @@ export async function showForcePushMenu(): Promise<PushResult> {
   const confirmFirst = await promptConfirm(t('commands.push.forcePushWarning'), false);
 
   if (!confirmFirst) {
+    userConfig.incrementErrorsPrevented();
     return { pushed: false };
   }
 
   const confirmSecond = await promptConfirm(t('commands.push.forceConfirmFinal'), false);
 
   if (!confirmSecond) {
+    userConfig.incrementErrorsPrevented();
     return { pushed: false };
   }
 

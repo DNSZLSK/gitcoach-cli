@@ -92,7 +92,15 @@ export default class Init extends Command {
       return;
     }
 
-    // Copilot CLI not found - show info and offer installation
+    // Copilot CLI not found or not authenticated
+    if (copilotService.isNotAuthenticated) {
+      logger.raw('\n' + warningBox(
+        t('setup.copilotNotAuthenticated'),
+        t('setup.copilotTitle')
+      ));
+      return;
+    }
+
     logger.raw('\n' + infoBox(
       t('setup.copilotNotInstalled') + '\n\n' + t('setup.copilotBenefits'),
       t('setup.copilotTitle')

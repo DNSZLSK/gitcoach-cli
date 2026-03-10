@@ -31,6 +31,11 @@ export interface ConflictResolutionSuggestion {
 
 class CopilotService {
   private available: boolean | null = null;
+  private _notAuthenticated = false;
+
+  get isNotAuthenticated(): boolean {
+    return this._notAuthenticated;
+  }
 
   private getLanguageInstruction(): string {
     const lang = i18next.language || 'en';
@@ -55,11 +60,25 @@ class CopilotService {
       const hasVersion = /\d+\.\d+/.test(stdout);
       const hasError = stderr.includes('not found') || stderr.includes('not recognized');
 
+      // Detect authentication issues
+      const combined = `${stdout}\n${stderr}`.toLowerCase();
+      if (combined.includes('not logged in') || combined.includes('authentication') ||
+          combined.includes('unauthorized') || combined.includes('login required') ||
+          combined.includes('auth')) {
+        this._notAuthenticated = true;
+      }
+
       this.available = hasVersion && !hasError;
       logger.debug('Copilot CLI availability check:', { stdout, stderr, available: this.available });
       return this.available;
     } catch (error) {
       logger.debug('Copilot CLI availability check failed:', error);
+      // Check error message for auth-related issues (installed but not logged in)
+      const errMsg = error instanceof Error ? error.message.toLowerCase() : '';
+      if (errMsg.includes('not logged in') || errMsg.includes('authentication') ||
+          errMsg.includes('unauthorized') || errMsg.includes('login required')) {
+        this._notAuthenticated = true;
+      }
       this.available = false;
       return false;
     }
@@ -68,6 +87,7 @@ class CopilotService {
   // Reset cached availability (useful for testing or after installation)
   resetAvailability(): void {
     this.available = null;
+    this._notAuthenticated = false;
   }
 
   /**

@@ -30,5 +30,7 @@ export default {
         useESM: true
       }
     ]
-  }
+  },
+  // Prevent worker process leak warnings from timers/handles in ora/spinner
+  forceExit: true
 };

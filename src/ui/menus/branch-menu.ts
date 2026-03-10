@@ -6,6 +6,7 @@ import { branchTable } from '../components/table.js';
 import { withSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
 import { preventionService } from '../../services/prevention-service.js';
+import { userConfig } from '../../config/user-config.js';
 import { isValidBranchName } from '../../utils/validators.js';
 import { logger } from '../../utils/logger.js';
 import { mapGitErrorWithAI } from '../../utils/error-mapper.js';
@@ -149,6 +150,7 @@ async function switchBranch(): Promise<BranchResult> {
     }
 
     if (!validation.canProceed) {
+      userConfig.incrementErrorsPrevented();
       return { action: 'switch', success: false };
     }
 
@@ -159,6 +161,7 @@ async function switchBranch(): Promise<BranchResult> {
     if (hasVisibleWarnings) {
       const proceed = await promptConfirm(t('prompts.continue'), false);
       if (!proceed) {
+        userConfig.incrementErrorsPrevented();
         return { action: 'switch', success: false };
       }
     }
