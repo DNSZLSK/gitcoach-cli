@@ -24,7 +24,6 @@ class PreventionService {
       const hasChanges = await gitService.hasUncommittedChanges();
 
       if (hasChanges) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'warning',
           title: t('warnings.title'),
@@ -41,7 +40,6 @@ class PreventionService {
   }
 
   async checkForcePush(): Promise<Warning | null> {
-    userConfig.incrementErrorsPrevented();
     return {
       level: 'critical',
       title: t('warnings.title'),
@@ -55,7 +53,6 @@ class PreventionService {
       const currentBranch = await gitService.getCurrentBranch();
 
       if (currentBranch && currentBranch !== expectedBranch) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'warning',
           title: t('warnings.title'),
@@ -76,7 +73,6 @@ class PreventionService {
       const isDetached = await gitService.isDetachedHead();
 
       if (isDetached) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'warning',
           title: t('warnings.title'),
@@ -211,7 +207,6 @@ class PreventionService {
     try {
       const inProgress = await gitService.isMergeInProgress();
       if (inProgress) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'critical',
           title: t('warnings.title'),
@@ -229,7 +224,6 @@ class PreventionService {
     try {
       const inProgress = await gitService.isRebaseInProgress();
       if (inProgress) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'critical',
           title: t('warnings.title'),
@@ -247,7 +241,6 @@ class PreventionService {
     try {
       const inProgress = await gitService.isCherryPickInProgress();
       if (inProgress) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'warning',
           title: t('warnings.title'),
@@ -265,7 +258,6 @@ class PreventionService {
     try {
       const inProgress = await gitService.isBisectInProgress();
       if (inProgress) {
-        userConfig.incrementErrorsPrevented();
         return {
           level: 'warning',
           title: t('warnings.title'),

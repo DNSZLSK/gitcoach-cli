@@ -27,7 +27,7 @@ class AnalysisService {
     if (status.untracked.length > 0) {
       suggestions.push({
         action: t('commands.add.title'),
-        description: `${status.untracked.length} untracked file(s) found`,
+        description: t('analysis.untrackedFiles', { count: status.untracked.length }),
         priority: 'medium',
         command: 'add'
       });
@@ -36,7 +36,7 @@ class AnalysisService {
     if (status.modified.length > 0) {
       suggestions.push({
         action: t('commands.add.title'),
-        description: `${status.modified.length} modified file(s) not staged`,
+        description: t('analysis.modifiedNotStaged', { count: status.modified.length }),
         priority: 'high',
         command: 'add'
       });
@@ -45,7 +45,7 @@ class AnalysisService {
     if (status.staged.length > 0) {
       suggestions.push({
         action: t('commands.commit.title'),
-        description: `${status.staged.length} file(s) ready to commit`,
+        description: t('analysis.readyToCommit', { count: status.staged.length }),
         priority: 'high',
         command: 'commit'
       });
@@ -54,7 +54,7 @@ class AnalysisService {
     if (status.ahead > 0 && status.staged.length === 0 && status.modified.length === 0) {
       suggestions.push({
         action: t('commands.push.title'),
-        description: `${status.ahead} commit(s) ahead of remote`,
+        description: t('analysis.aheadOfRemote', { count: status.ahead }),
         priority: 'medium',
         command: 'push'
       });
@@ -63,7 +63,7 @@ class AnalysisService {
     if (status.behind > 0) {
       suggestions.push({
         action: t('commands.pull.title'),
-        description: `${status.behind} commit(s) behind remote`,
+        description: t('analysis.behindRemote', { count: status.behind }),
         priority: 'high',
         command: 'pull'
       });
@@ -71,8 +71,8 @@ class AnalysisService {
 
     if (status.isClean && status.ahead === 0) {
       suggestions.push({
-        action: 'Start coding',
-        description: 'Working tree is clean and up to date',
+        action: t('analysis.startCoding'),
+        description: t('analysis.cleanAndUpToDate'),
         priority: 'low'
       });
     }

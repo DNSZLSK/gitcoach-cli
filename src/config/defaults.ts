@@ -10,7 +10,6 @@ export interface UserPreferences {
   confirmDestructiveActions: boolean;
   autoGenerateCommitMessages: boolean;
   defaultBranch: string;
-  editorCommand: string;
 }
 
 export interface AppConfig {
@@ -29,8 +28,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   showTips: true,
   confirmDestructiveActions: true,
   autoGenerateCommitMessages: true,
-  defaultBranch: 'main',
-  editorCommand: 'code'
+  defaultBranch: 'main'
 };
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
@@ -58,3 +56,7 @@ export const THEMES: { theme: Theme; description: string }[] = [
   { theme: 'colored', description: 'Colorful output with syntax highlighting' },
   { theme: 'monochrome', description: 'Plain text output without colors' }
 ];
+
+export const VALID_LANGUAGES: ReadonlySet<string> = new Set(['en', 'fr', 'es']);
+export const VALID_THEMES: ReadonlySet<string> = new Set(['colored', 'monochrome']);
+export const VALID_LEVELS: ReadonlySet<string> = new Set(['beginner', 'intermediate', 'expert']);

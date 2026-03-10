@@ -467,6 +467,7 @@
     "copilotInstalling": "Installing GitHub Copilot CLI...",
     "copilotInstallSuccess": "GitHub Copilot CLI installed successfully!",
     "copilotInstallNote": "You may need to authenticate with 'copilot login' on first use.",
+    "copilotNotAuthenticated": "GitHub Copilot CLI is installed but you are not logged in. Run 'copilot login' to authenticate.",
     "copilotInstallFailed": "Failed to install GitHub Copilot CLI",
     "copilotInstallFailedDetail": "The automatic installation failed. This may be due to permissions or network issues.",
     "copilotManualInstall": "To install manually, run:\nnpm install -g @github/copilot",
@@ -561,6 +562,15 @@
     "pressEnter": "Press Enter to continue...",
     "select": "Select an option",
     "enterValue": "Enter value"
+  },
+  "analysis": {
+    "untrackedFiles": "{{count}} untracked file(s) found",
+    "modifiedNotStaged": "{{count}} modified file(s) not staged",
+    "readyToCommit": "{{count}} file(s) ready to commit",
+    "aheadOfRemote": "{{count}} commit(s) ahead of remote",
+    "behindRemote": "{{count}} commit(s) behind remote",
+    "startCoding": "Start coding",
+    "cleanAndUpToDate": "Working tree is clean and up to date"
   },
   "copilot": {
     "aiExplanation": "Copilot explains",
