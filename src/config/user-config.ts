@@ -7,9 +7,11 @@ import {
   Language,
   Theme,
   ExperienceLevel,
+  AiProviderId,
   VALID_LANGUAGES,
   VALID_THEMES,
-  VALID_LEVELS
+  VALID_LEVELS,
+  VALID_AI_PROVIDERS
 } from './defaults.js';
 
 interface ConfigSchema {
@@ -55,6 +57,18 @@ export const userConfig = {
     return config.get('preferences.defaultBranch', DEFAULT_PREFERENCES.defaultBranch);
   },
 
+  getAiProvider(): AiProviderId {
+    return config.get('preferences.aiProvider', DEFAULT_PREFERENCES.aiProvider);
+  },
+
+  getAiModel(): string {
+    return config.get('preferences.aiModel', DEFAULT_PREFERENCES.aiModel);
+  },
+
+  getAiEndpoint(): string {
+    return config.get('preferences.aiEndpoint', DEFAULT_PREFERENCES.aiEndpoint);
+  },
+
   getAllPreferences(): UserPreferences {
     return config.get('preferences', DEFAULT_PREFERENCES);
   },
@@ -89,6 +103,19 @@ export const userConfig = {
 
   setDefaultBranch(branch: string): void {
     config.set('preferences.defaultBranch', branch);
+  },
+
+  setAiProvider(provider: AiProviderId): void {
+    if (!VALID_AI_PROVIDERS.has(provider)) return;
+    config.set('preferences.aiProvider', provider);
+  },
+
+  setAiModel(model: string): void {
+    config.set('preferences.aiModel', model);
+  },
+
+  setAiEndpoint(endpoint: string): void {
+    config.set('preferences.aiEndpoint', endpoint);
   },
 
   setPreferences(preferences: Partial<UserPreferences>): void {

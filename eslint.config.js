@@ -22,7 +22,12 @@ export default [
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
-        clearInterval: 'readonly'
+        clearInterval: 'readonly',
+        URL: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        RequestInit: 'readonly',
+        AbortController: 'readonly'
       }
     },
     plugins: {

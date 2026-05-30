@@ -6,8 +6,9 @@ import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowExplanation, shouldConfirm } from '../../utils/level-helper.js';
+import { showRecoveryMenu } from './recovery-menu.js';
 
-export type UndoAction = 'soft_reset' | 'hard_reset' | 'unstage' | 'restore' | 'back';
+export type UndoAction = 'soft_reset' | 'hard_reset' | 'unstage' | 'restore' | 'recover' | 'back';
 
 export async function showUndoMenu(): Promise<void> {
   const theme = getTheme();
@@ -36,6 +37,11 @@ export async function showUndoMenu(): Promise<void> {
       description: t('commands.undo.restoreDesc')
     },
     {
+      name: theme.menuItem('F', t('commands.recovery.menuItem')),
+      value: 'recover' as UndoAction,
+      description: t('commands.recovery.menuItemDesc')
+    },
+    {
       name: theme.dim('─'.repeat(40)),
       value: 'separator' as UndoAction,
       disabled: true
@@ -60,6 +66,9 @@ export async function showUndoMenu(): Promise<void> {
       break;
     case 'restore':
       await handleRestore();
+      break;
+    case 'recover':
+      await showRecoveryMenu();
       break;
     case 'back':
       return;

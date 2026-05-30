@@ -78,17 +78,27 @@ export function isValidRemoteUrl(url: string): boolean {
   if (!url || url.trim().length === 0) {
     return false;
   }
+  const trimmed = url.trim();
 
-  // HTTPS URL pattern
-  const httpsPattern = /^https:\/\/.+\/.+\.git$/;
+  // SCP-like SSH syntax (git@host:owner/repo[.git]) is not a standard URL,
+  // so it must be validated separately. The `.git` suffix is optional.
+  const scpLikePattern = /^[^\s@]+@[^\s:]+:[^\s]+$/;
+  if (scpLikePattern.test(trimmed)) {
+    return true;
+  }
 
-  // SSH URL pattern
-  const sshPattern = /^git@.+:.+\/.+\.git$/;
-
-  // Alternative SSH pattern
-  const sshAltPattern = /^ssh:\/\/.+\/.+\.git$/;
-
-  return httpsPattern.test(url) || sshPattern.test(url) || sshAltPattern.test(url);
+  // Standard URLs: only secure/known git transports. `.git` suffix is optional
+  // (GitHub & co. accept URLs without it). Plain http is rejected on purpose.
+  try {
+    const parsed = new URL(trimmed);
+    const allowedProtocols = ['https:', 'ssh:', 'git:'];
+    if (!allowedProtocols.includes(parsed.protocol)) {
+      return false;
+    }
+    return parsed.hostname.length > 0 && parsed.pathname.replace(/^\/+/, '').length > 0;
+  } catch {
+    return false;
+  }
 }
 
 export function sanitizeInput(input: string): string {

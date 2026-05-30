@@ -1,7 +1,7 @@
 import { Command, Flags } from '@oclif/core';
 import { initI18n, t } from '../i18n/index.js';
 import { gitService } from '../services/git-service.js';
-import { copilotService } from '../services/copilot-service.js';
+import { aiService } from '../services/ai/index.js';
 import { preventionService } from '../services/prevention-service.js';
 import { userConfig } from '../config/user-config.js';
 import { logger } from '../utils/logger.js';
@@ -81,7 +81,7 @@ export default class Quick extends Command {
       if (!commitMessage) {
         // Try to generate with AI
         const diff = await gitService.getDiff(true);
-        const suggestion = await copilotService.generateCommitMessage(diff);
+        const suggestion = await aiService.generateCommitMessage(diff);
 
         if (suggestion.success) {
           logger.raw(theme.info(`Suggested: ${suggestion.message}`));

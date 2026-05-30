@@ -1,6 +1,6 @@
 import { t, changeLanguage } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
-import { promptSelect, promptConfirm } from '../components/prompt.js';
+import { promptSelect, promptConfirm, promptInput } from '../components/prompt.js';
 import { successBox, infoBox } from '../components/box.js';
 import { withSpinner } from '../components/spinner.js';
 import { userConfig } from '../../config/user-config.js';
@@ -11,7 +11,8 @@ import {
   THEMES,
   Language,
   Theme,
-  ExperienceLevel
+  ExperienceLevel,
+  AiProviderId
 } from '../../config/defaults.js';
 import { logger } from '../../utils/logger.js';
 
@@ -22,6 +23,7 @@ export type ConfigAction =
   | 'tips'
   | 'confirmActions'
   | 'autoCommit'
+  | 'aiProvider'
   | 'copilotRefresh'
   | 'reset'
   | 'back';
@@ -40,7 +42,8 @@ export async function showConfigMenu(): Promise<void> {
       `${t('config.experienceLevel')}: ${userConfig.getExperienceLevel()}`,
       `${t('config.showTips')}: ${userConfig.getShowTips() ? '✓' : '✗'}`,
       `${t('config.confirmDestructive')}: ${userConfig.getConfirmDestructiveActions() ? '✓' : '✗'}`,
-      `${t('config.autoCommitMsg')}: ${userConfig.getAutoGenerateCommitMessages() ? '✓' : '✗'}`
+      `${t('config.autoCommitMsg')}: ${userConfig.getAutoGenerateCommitMessages() ? '✓' : '✗'}`,
+      `${t('config.aiProvider')}: ${userConfig.getAiProvider()}`
     ];
 
     logger.raw(infoBox(currentSettings.join('\n')));
@@ -52,6 +55,7 @@ export async function showConfigMenu(): Promise<void> {
       { name: t('config.showTips'), value: 'tips' },
       { name: t('config.confirmDestructive'), value: 'confirmActions' },
       { name: t('config.autoCommitMsg'), value: 'autoCommit' },
+      { name: t('config.aiProvider'), value: 'aiProvider' },
       { name: t('config.copilotRefresh'), value: 'copilotRefresh' },
       { name: theme.warning(t('config.reset')), value: 'reset' },
       { name: t('menu.back'), value: 'back' }
@@ -135,6 +139,25 @@ async function handleConfigAction(action: ConfigAction): Promise<void> {
         userConfig.getAutoGenerateCommitMessages()
       );
       userConfig.setAutoGenerateCommitMessages(autoCommit);
+      logger.raw(successBox(t('success.configUpdated')));
+      break;
+    }
+
+    case 'aiProvider': {
+      const provider = await promptSelect<AiProviderId>(
+        t('config.aiProviderSelect'),
+        [
+          { name: 'GitHub Copilot CLI', value: 'copilot' },
+          { name: 'Ollama (local)', value: 'ollama' }
+        ]
+      );
+      userConfig.setAiProvider(provider);
+      if (provider === 'ollama') {
+        const model = await promptInput(t('config.aiModelPrompt'), userConfig.getAiModel());
+        if (model && model.trim()) {
+          userConfig.setAiModel(model.trim());
+        }
+      }
       logger.raw(successBox(t('success.configUpdated')));
       break;
     }

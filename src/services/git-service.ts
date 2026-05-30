@@ -1,6 +1,6 @@
 import { simpleGit, SimpleGit, StatusResult, BranchSummary, LogResult, DiffResult } from 'simple-git';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, statSync } from 'fs';
+import { join, resolve, isAbsolute } from 'path';
 import { logger } from '../utils/logger.js';
 
 export interface GitStatus {
@@ -34,13 +34,32 @@ const STATUS_CACHE_TTL_MS = 2000;
 class GitService {
   private git: SimpleGit;
   private statusCache: { data: GitStatus; timestamp: number } | null = null;
+  private basePath: string;
+  private gitDirCache: string | null = null;
 
   constructor(basePath?: string) {
-    this.git = simpleGit(basePath || process.cwd());
+    this.basePath = basePath || process.cwd();
+    this.git = simpleGit(this.basePath);
+  }
+
+  /**
+   * Resolve the absolute path to the repository's .git directory.
+   * Uses `git rev-parse --git-dir` so it works from a subdirectory and with
+   * worktrees/submodules, instead of assuming `cwd/.git`.
+   */
+  private async getGitDir(): Promise<string> {
+    if (this.gitDirCache) {
+      return this.gitDirCache;
+    }
+    const raw = (await this.git.revparse(['--git-dir'])).trim();
+    this.gitDirCache = isAbsolute(raw) ? raw : resolve(this.basePath, raw);
+    return this.gitDirCache;
   }
 
   setWorkingDirectory(path: string): void {
+    this.basePath = path;
     this.git = simpleGit(path);
+    this.gitDirCache = null;
     this.invalidateCache();
   }
 
@@ -69,7 +88,7 @@ class GitService {
       isClean: status.isClean(),
       current: status.current,
       tracking: status.tracking,
-      staged: [...status.staged, ...status.created.filter(f => status.staged.includes(f))],
+      staged: [...status.staged, ...status.created.filter(f => !status.staged.includes(f))],
       modified: status.modified.filter(f => !status.staged.includes(f)),
       deleted: status.deleted,
       untracked: status.not_added,
@@ -297,13 +316,19 @@ class GitService {
   }
 
   async getLog(maxCount: number = 10): Promise<CommitInfo[]> {
-    const log: LogResult = await this.git.log({ maxCount });
-    return log.all.map(entry => ({
-      hash: entry.hash,
-      date: entry.date,
-      message: entry.message,
-      author: entry.author_name
-    }));
+    try {
+      const log: LogResult = await this.git.log({ maxCount });
+      return log.all.map(entry => ({
+        hash: entry.hash,
+        date: entry.date,
+        message: entry.message,
+        author: entry.author_name
+      }));
+    } catch {
+      // Empty repository (no commits yet) or log unavailable
+      logger.debug('getLog failed (likely empty repository)');
+      return [];
+    }
   }
 
   async getRemotes(): Promise<string[]> {
@@ -333,6 +358,7 @@ class GitService {
 
   async fetch(remote: string = 'origin'): Promise<void> {
     await this.git.fetch(remote);
+    this.invalidateCache();
   }
 
   async reset(mode: 'soft' | 'mixed' | 'hard' = 'mixed', ref: string = 'HEAD'): Promise<void> {
@@ -356,10 +382,12 @@ class GitService {
 
   async stashApply(index: number = 0): Promise<void> {
     await this.git.stash(['apply', `stash@{${index}}`]);
+    this.invalidateCache();
   }
 
   async stashDrop(index: number = 0): Promise<void> {
     await this.git.stash(['drop', `stash@{${index}}`]);
+    this.invalidateCache();
   }
 
   async getStashList(): Promise<string[]> {
@@ -382,8 +410,7 @@ class GitService {
 
   async isMergeInProgress(): Promise<boolean> {
     try {
-      const gitDir = join(process.cwd(), '.git', 'MERGE_HEAD');
-      return existsSync(gitDir);
+      return existsSync(join(await this.getGitDir(), 'MERGE_HEAD'));
     } catch {
       logger.debug('Failed to check merge-in-progress state');
       return false;
@@ -392,9 +419,9 @@ class GitService {
 
   async isRebaseInProgress(): Promise<boolean> {
     try {
-      const cwd = process.cwd();
-      return existsSync(join(cwd, '.git', 'rebase-merge')) ||
-             existsSync(join(cwd, '.git', 'rebase-apply'));
+      const gitDir = await this.getGitDir();
+      return existsSync(join(gitDir, 'rebase-merge')) ||
+             existsSync(join(gitDir, 'rebase-apply'));
     } catch {
       logger.debug('Failed to check rebase-in-progress state');
       return false;
@@ -403,7 +430,7 @@ class GitService {
 
   async isCherryPickInProgress(): Promise<boolean> {
     try {
-      return existsSync(join(process.cwd(), '.git', 'CHERRY_PICK_HEAD'));
+      return existsSync(join(await this.getGitDir(), 'CHERRY_PICK_HEAD'));
     } catch {
       logger.debug('Failed to check cherry-pick-in-progress state');
       return false;
@@ -412,7 +439,7 @@ class GitService {
 
   async isBisectInProgress(): Promise<boolean> {
     try {
-      return existsSync(join(process.cwd(), '.git', 'BISECT_LOG'));
+      return existsSync(join(await this.getGitDir(), 'BISECT_LOG'));
     } catch {
       logger.debug('Failed to check bisect-in-progress state');
       return false;
@@ -451,6 +478,76 @@ class GitService {
     } else {
       await this.git.clone(repoUrl);
     }
+  }
+
+  /**
+   * Read the effective git identity (local overrides global). Returns null for
+   * a field that is not configured anywhere.
+   */
+  async getUserIdentity(): Promise<{ name: string | null; email: string | null }> {
+    const read = async (key: string): Promise<string | null> => {
+      try {
+        const value = (await this.git.raw(['config', key])).trim();
+        return value.length > 0 ? value : null;
+      } catch {
+        // `git config <key>` exits non-zero when the key is unset
+        return null;
+      }
+    };
+    return { name: await read('user.name'), email: await read('user.email') };
+  }
+
+  async setUserIdentity(name: string, email: string, global: boolean = false): Promise<void> {
+    const scope = global ? ['--global'] : [];
+    await this.git.raw(['config', ...scope, 'user.name', name]);
+    await this.git.raw(['config', ...scope, 'user.email', email]);
+  }
+
+  /** Staged files whose on-disk size exceeds maxBytes (staged-deleted files are skipped). */
+  async getLargeStagedFiles(maxBytes: number): Promise<string[]> {
+    const staged = await this.getStagedFiles();
+    const large: string[] = [];
+    for (const file of staged) {
+      try {
+        const stats = statSync(join(this.basePath, file));
+        if (stats.isFile() && stats.size > maxBytes) {
+          large.push(file);
+        }
+      } catch {
+        // staged-deleted or unreadable — not a large-file risk
+      }
+    }
+    return large;
+  }
+
+  async getReflog(maxCount: number = 30): Promise<Array<{ hash: string; ref: string; message: string }>> {
+    try {
+      const raw = await this.git.raw([
+        'reflog',
+        '--no-color',
+        '--format=%h%x09%gd%x09%gs',
+        '-n',
+        String(maxCount)
+      ]);
+      return raw
+        .split('\n')
+        .filter(line => line.trim().length > 0)
+        .map(line => {
+          const [hash, ref, ...rest] = line.split('\t');
+          return {
+            hash: (hash || '').trim(),
+            ref: (ref || '').trim(),
+            message: rest.join('\t').trim()
+          };
+        });
+    } catch {
+      logger.debug('Failed to read reflog');
+      return [];
+    }
+  }
+
+  async createBranchAt(name: string, ref: string): Promise<void> {
+    await this.git.branch([name, ref]);
   }
 }
 

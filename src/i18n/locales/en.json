@@ -358,6 +358,18 @@
       "popSuccess": "Stash applied and removed!",
       "confirmDrop": "Delete this stash? This cannot be undone!",
       "dropSuccess": "Stash deleted."
+    },
+    "recovery": {
+      "title": "Recover Lost Work",
+      "explain": "The reflog records where HEAD has been. You can create a branch at any past point to recover commits lost after a reset, checkout, or rebase.",
+      "empty": "No reflog entries found.",
+      "selectEntry": "Select the state to recover:",
+      "branchNamePrompt": "Name for the recovery branch:",
+      "invalidBranch": "Invalid branch name.",
+      "confirmCreate": "Create branch '{{branch}}' at {{hash}}?",
+      "success": "Branch '{{branch}}' created at {{hash}}. Your work is recovered.",
+      "menuItem": "Recover lost commits (reflog)",
+      "menuItemDesc": "Restore commits or branches lost after a reset/checkout"
     }
   },
   "time": {
@@ -389,7 +401,14 @@
     "cherryPickInProgress": "A cherry-pick is currently in progress.",
     "cherryPickInProgressAction": "Continue with 'git cherry-pick --continue' or abort with 'git cherry-pick --abort'.",
     "bisectInProgress": "A bisect session is currently in progress.",
-    "bisectInProgressAction": "Continue bisecting or end with 'git bisect reset'."
+    "bisectInProgressAction": "Continue bisecting or end with 'git bisect reset'.",
+    "noIdentity": "Your Git identity (user.name / user.email) is not configured.",
+    "noIdentityAction": "Set it so your commits are attributed correctly.",
+    "sensitiveFiles": "Potentially sensitive file(s) staged: {{files}}",
+    "sensitiveFilesAction": "Make sure no secrets are committed. Consider adding them to .gitignore.",
+    "largeFiles": "Very large file(s) staged: {{files}}",
+    "largeFilesAction": "Large files bloat the repository and may be rejected by the remote.",
+    "commitAnyway": "Commit these changes anyway?"
   },
   "errors": {
     "title": "Error",
@@ -415,7 +434,8 @@
     "analyzing": "Analyzing error...",
     "explanation": "Explanation",
     "noExplanation": "Could not explain the error",
-    "explainFailed": "Failed to get explanation"
+    "explainFailed": "Failed to get explanation",
+    "nonInteractive": "GitCoach needs an interactive terminal. Run it directly in your terminal (not piped or in a non-interactive CI job)."
   },
   "success": {
     "title": "Success",
@@ -487,7 +507,10 @@
     "copilotRefresh": "Re-check Copilot CLI",
     "copilotAvailable": "GitHub Copilot CLI is available and ready!",
     "copilotNotAvailable": "GitHub Copilot CLI is not available.",
-    "copilotChecking": "Checking Copilot CLI availability..."
+    "copilotChecking": "Checking Copilot CLI availability...",
+    "aiProvider": "AI Provider",
+    "aiProviderSelect": "Select the AI provider:",
+    "aiModelPrompt": "Model name (leave empty for default):"
   },
   "stats": {
     "title": "Your Statistics",
@@ -592,5 +615,15 @@
     "stashedAndReturned": "Changes saved and returned to {{branch}}.",
     "commandExecuted": "Command executed: {{command}}",
     "stashMessage": "Detached HEAD changes"
+  },
+  "identity": {
+    "title": "Git Identity",
+    "missing": "Git needs to know who you are before you can commit (user.name and user.email are not set).",
+    "namePrompt": "Your name:",
+    "nameRequired": "Name is required.",
+    "emailPrompt": "Your email:",
+    "emailInvalid": "Please enter a valid email address.",
+    "configured": "Identity set: {{name}} <{{email}}>",
+    "required": "A git identity is required to commit."
   }
 }

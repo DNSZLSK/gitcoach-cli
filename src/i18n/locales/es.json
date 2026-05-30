@@ -358,6 +358,18 @@
       "popSuccess": "Stash aplicado y eliminado!",
       "confirmDrop": "Eliminar este stash? No se puede deshacer!",
       "dropSuccess": "Stash eliminado."
+    },
+    "recovery": {
+      "title": "Recuperar trabajo perdido",
+      "explain": "El reflog registra donde ha estado HEAD. Puedes crear una rama en cualquier punto anterior para recuperar commits perdidos tras un reset, checkout o rebase.",
+      "empty": "No se encontraron entradas en el reflog.",
+      "selectEntry": "Selecciona el estado a recuperar:",
+      "branchNamePrompt": "Nombre de la rama de recuperacion:",
+      "invalidBranch": "Nombre de rama no valido.",
+      "confirmCreate": "Crear la rama '{{branch}}' en {{hash}}?",
+      "success": "Rama '{{branch}}' creada en {{hash}}. Tu trabajo esta recuperado.",
+      "menuItem": "Recuperar commits perdidos (reflog)",
+      "menuItemDesc": "Restaurar commits o ramas perdidos tras un reset/checkout"
     }
   },
   "time": {
@@ -389,7 +401,14 @@
     "cherryPickInProgress": "Un cherry-pick esta actualmente en progreso.",
     "cherryPickInProgressAction": "Continua con 'git cherry-pick --continue' o aborta con 'git cherry-pick --abort'.",
     "bisectInProgress": "Una sesion de bisect esta en progreso.",
-    "bisectInProgressAction": "Continua el bisect o termina con 'git bisect reset'."
+    "bisectInProgressAction": "Continua el bisect o termina con 'git bisect reset'.",
+    "noIdentity": "Tu identidad de Git (user.name / user.email) no esta configurada.",
+    "noIdentityAction": "Configurala para que tus commits se atribuyan correctamente.",
+    "sensitiveFiles": "Archivo(s) potencialmente sensible(s) preparado(s): {{files}}",
+    "sensitiveFilesAction": "Asegurate de no commitear secretos. Considera anadirlos a .gitignore.",
+    "largeFiles": "Archivo(s) muy grande(s) preparado(s): {{files}}",
+    "largeFilesAction": "Los archivos grandes inflan el repositorio y el remoto puede rechazarlos.",
+    "commitAnyway": "Commitear estos cambios de todos modos?"
   },
   "errors": {
     "title": "Error",
@@ -415,7 +434,8 @@
     "analyzing": "Analizando error...",
     "explanation": "Explicacion",
     "noExplanation": "No se pudo explicar el error",
-    "explainFailed": "Fallo al obtener explicacion"
+    "explainFailed": "Fallo al obtener explicacion",
+    "nonInteractive": "GitCoach necesita una terminal interactiva. Ejecutalo directamente en tu terminal (no en un pipe ni en un job de CI no interactivo)."
   },
   "success": {
     "title": "Exito",
@@ -487,7 +507,10 @@
     "copilotRefresh": "Re-verificar Copilot CLI",
     "copilotAvailable": "GitHub Copilot CLI esta disponible y listo!",
     "copilotNotAvailable": "GitHub Copilot CLI no esta disponible.",
-    "copilotChecking": "Verificando Copilot CLI..."
+    "copilotChecking": "Verificando Copilot CLI...",
+    "aiProvider": "Proveedor de IA",
+    "aiProviderSelect": "Selecciona el proveedor de IA:",
+    "aiModelPrompt": "Nombre del modelo (vacio para el predeterminado):"
   },
   "stats": {
     "title": "Tus Estadisticas",
@@ -592,5 +615,15 @@
     "stashedAndReturned": "Cambios guardados y volviste a {{branch}}.",
     "commandExecuted": "Comando ejecutado: {{command}}",
     "stashMessage": "Cambios HEAD separado"
+  },
+  "identity": {
+    "title": "Identidad de Git",
+    "missing": "Git necesita saber quien eres antes de poder commitear (user.name y user.email no estan definidos).",
+    "namePrompt": "Tu nombre:",
+    "nameRequired": "El nombre es obligatorio.",
+    "emailPrompt": "Tu correo electronico:",
+    "emailInvalid": "Introduce una direccion de correo valida.",
+    "configured": "Identidad definida: {{name}} <{{email}}>",
+    "required": "Se requiere una identidad de Git para commitear."
   }
 }

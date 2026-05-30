@@ -4,7 +4,7 @@ import { promptInput, promptConfirm, promptSelect } from '../components/prompt.j
 import { successBox, warningBox, infoBox, errorBox } from '../components/box.js';
 import { withSpinner, createSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
-import { copilotService } from '../../services/copilot-service.js';
+import { aiService } from '../../services/ai/index.js';
 import { preventionService } from '../../services/prevention-service.js';
 import { userConfig } from '../../config/user-config.js';
 import { isValidCommitMessage, isConventionalCommit } from '../../utils/validators.js';
@@ -46,6 +46,13 @@ export async function showCommitMenu(): Promise<CommitResult> {
       // Conflicts resolved - continue with commit flow
     }
 
+    // Ensure a git identity exists — the #1 blocker for a beginner's first commit
+    const { ensureGitIdentity } = await import('./setup-menu.js');
+    if (!(await ensureGitIdentity())) {
+      logger.raw(warningBox(t('identity.required'), t('warnings.title')));
+      return { committed: false };
+    }
+
     // Validate we can commit
     const validation = await preventionService.validateCommit();
 
@@ -71,6 +78,23 @@ export async function showCommitMenu(): Promise<CommitResult> {
     stagedFiles.forEach(f => logger.raw(theme.file(f, 'staged')));
     logger.raw('');
 
+    // Guard against committing secrets or very large files
+    const riskyWarnings = await preventionService.checkRiskyStagedFiles();
+    if (riskyWarnings.length > 0) {
+      for (const warning of riskyWarnings) {
+        logger.raw(warningBox(
+          warning.action ? `${warning.message}\n\n${warning.action}` : warning.message,
+          warning.title
+        ));
+      }
+      const proceed = await promptConfirm(t('warnings.commitAnyway'), false);
+      if (!proceed) {
+        userConfig.incrementErrorsPrevented();
+        logger.raw(theme.textMuted(t('commands.commit.cancelled')));
+        return { committed: false };
+      }
+    }
+
     // Show explanation for beginners
     if (shouldShowExplanation()) {
       logger.raw(infoBox(
@@ -80,13 +104,13 @@ export async function showCommitMenu(): Promise<CommitResult> {
     }
 
     // Show AI diff summary if Copilot is available
-    if (await copilotService.isAvailable()) {
+    if (await aiService.isAvailable()) {
       try {
         const diff = await gitService.getDiff(true);
         if (diff) {
           const spinner = createSpinner({ text: t('copilot.analyzingChanges') });
           spinner.start();
-          const summary = await copilotService.summarizeStagedDiff(diff);
+          const summary = await aiService.summarizeStagedDiff(diff);
           spinner.stop();
           if (summary) {
             logger.raw(infoBox(`${t('copilot.diffSummary')}:\n\n${summary}`));
@@ -100,7 +124,7 @@ export async function showCommitMenu(): Promise<CommitResult> {
     let commitMessage: string = '';
 
     // Check if Copilot CLI is available
-    const copilotAvailable = await copilotService.isAvailable();
+    const copilotAvailable = await aiService.isAvailable();
     const wantsAutoGenerate = userConfig.getAutoGenerateCommitMessages();
 
     // Expert mode: show action menu
@@ -230,7 +254,7 @@ async function generateAIMessage(_theme: ReturnType<typeof getTheme>): Promise<s
 
   try {
     const diff = await gitService.getDiff(true);
-    const suggestion = await copilotService.generateCommitMessage(diff);
+    const suggestion = await aiService.generateCommitMessage(diff);
 
     if (suggestion.success && suggestion.message) {
       spinner.succeed();

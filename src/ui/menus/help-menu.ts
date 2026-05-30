@@ -4,7 +4,7 @@ import { APP_VERSION } from '../../utils/version.js';
 import { promptSelect, promptInput } from '../components/prompt.js';
 import { infoBox, warningBox } from '../components/box.js';
 import { createSpinner } from '../components/spinner.js';
-import { copilotService } from '../../services/copilot-service.js';
+import { aiService } from '../../services/ai/index.js';
 import { logger } from '../../utils/logger.js';
 
 export type HelpAction = 'askQuestion' | 'quickHelp' | 'about' | 'back';
@@ -63,7 +63,7 @@ async function askGitQuestion(): Promise<void> {
   const theme = getTheme();
 
   // Check if Copilot is available
-  const copilotAvailable = await copilotService.isAvailable();
+  const copilotAvailable = await aiService.isAvailable();
 
   if (!copilotAvailable) {
     logger.raw(warningBox(
@@ -98,7 +98,7 @@ async function askGitQuestion(): Promise<void> {
   spinner.start();
 
   try {
-    const response = await copilotService.askGitQuestion(question);
+    const response = await aiService.askGitQuestion(question);
 
     if (response.success && response.message) {
       spinner.succeed();

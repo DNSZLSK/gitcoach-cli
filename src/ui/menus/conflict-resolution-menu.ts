@@ -5,7 +5,7 @@ import { promptSelect, promptInput, promptConfirm } from '../components/prompt.j
 import { successBox, warningBox, errorBox, infoBox } from '../components/box.js';
 import { createSpinner } from '../components/spinner.js';
 import { gitService } from '../../services/git-service.js';
-import { copilotService } from '../../services/copilot-service.js';
+import { aiService } from '../../services/ai/index.js';
 import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
 
@@ -168,7 +168,7 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
           { name: t('commands.conflicts.editManually'), value: 'edit' },
         ];
 
-        if (await copilotService.isAvailable()) {
+        if (await aiService.isAvailable()) {
           choices.push({ name: t('commands.conflicts.askCopilot'), value: 'copilot' });
         }
 
@@ -186,7 +186,7 @@ export async function showConflictResolutionMenu(): Promise<{ resolved: boolean 
         if (choice === 'copilot') {
           const spinner = createSpinner({ text: t('copilot.analyzing') });
           spinner.start();
-          const suggestion = await copilotService.suggestConflictResolution(
+          const suggestion = await aiService.suggestConflictResolution(
             file, block.localContent, block.remoteContent
           );
           spinner.stop();

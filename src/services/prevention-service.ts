@@ -3,6 +3,21 @@ import { userConfig } from '../config/user-config.js';
 import { t } from '../i18n/index.js';
 import { logger } from '../utils/logger.js';
 
+// Files that commonly hold secrets or are accidentally committed. Matched
+// against staged paths (case-insensitive, forward-slash separators).
+const RISKY_FILE_PATTERNS: RegExp[] = [
+  /(^|\/)\.env(\.|$)/i,
+  /\.pem$/i,
+  /(^|\/)id_rsa$/i,
+  /\.(key|keystore|p12|pfx)$/i,
+  /(^|\/)credentials(\.|$)/i,
+  /(^|\/)\.npmrc$/i,
+  /(^|\/)\.aws\//i,
+  /(^|\/)node_modules\//i
+];
+
+const LARGE_FILE_BYTES = 50 * 1024 * 1024; // 50 MB — well under common host limits
+
 export type WarningLevel = 'info' | 'warning' | 'critical';
 
 export interface Warning {
@@ -133,6 +148,54 @@ class PreventionService {
     }
   }
 
+  async checkGitIdentity(): Promise<Warning | null> {
+    try {
+      const { name, email } = await gitService.getUserIdentity();
+      if (!name || !email) {
+        return {
+          level: 'critical',
+          title: t('warnings.title'),
+          message: t('warnings.noIdentity'),
+          action: t('warnings.noIdentityAction')
+        };
+      }
+      return null;
+    } catch {
+      logger.debug('Failed to check git identity');
+      return null;
+    }
+  }
+
+  async checkRiskyStagedFiles(): Promise<Warning[]> {
+    const warnings: Warning[] = [];
+    try {
+      const staged = await gitService.getStagedFiles();
+
+      const sensitive = staged.filter(f => RISKY_FILE_PATTERNS.some(p => p.test(f)));
+      if (sensitive.length > 0) {
+        warnings.push({
+          level: 'warning',
+          title: t('warnings.title'),
+          message: t('warnings.sensitiveFiles', { files: sensitive.join(', ') }),
+          action: t('warnings.sensitiveFilesAction')
+        });
+      }
+
+      const large = await gitService.getLargeStagedFiles(LARGE_FILE_BYTES);
+      if (large.length > 0) {
+        warnings.push({
+          level: 'warning',
+          title: t('warnings.title'),
+          message: t('warnings.largeFiles', { files: large.join(', ') }),
+          action: t('warnings.largeFilesAction')
+        });
+      }
+    } catch {
+      logger.debug('Failed to check risky staged files');
+    }
+    return warnings;
+  }
+
   async validateCheckout(_targetBranch: string): Promise<ValidationResult> {
     const warnings: Warning[] = [];
 
@@ -152,8 +215,10 @@ class PreventionService {
   async validatePush(force: boolean = false): Promise<ValidationResult> {
     const warnings: Warning[] = [];
 
-    // Check for detached HEAD
+    // Detached HEAD: there is no branch to push, so a normal push would fail at
+    // the git layer. Block here and explain instead of relying on that failure.
     const detachedWarning = await this.checkDetachedHead();
+    const isDetached = detachedWarning !== null;
     if (detachedWarning) {
       warnings.push(detachedWarning);
     }
@@ -161,7 +226,8 @@ class PreventionService {
     // Note: no remote check is handled directly by push-menu
     // which offers to add a remote interactively before reaching this point
 
-    // Check force push
+    // Force push is destructive — surface a critical warning so the caller
+    // requires an explicit confirmation before proceeding.
     if (force) {
       const forcePushWarning = await this.checkForcePush();
       if (forcePushWarning) {
@@ -172,12 +238,22 @@ class PreventionService {
     return {
       valid: warnings.length === 0,
       warnings,
-      canProceed: !warnings.some(w => w.level === 'critical' && !force)
+      // A detached HEAD must block the push; a force push is confirmed
+      // separately by the caller (double-confirmation flow) so it does not
+      // hard-block here.
+      canProceed: !isDetached
     };
   }
 
   async validateCommit(): Promise<ValidationResult> {
     const warnings: Warning[] = [];
+
+    // Missing git identity makes the first commit fail with a cryptic message;
+    // surface it as critical so the caller can fix it before committing.
+    const identityWarning = await this.checkGitIdentity();
+    if (identityWarning) {
+      warnings.push(identityWarning);
+    }
 
     // Check for detached HEAD
     const detachedWarning = await this.checkDetachedHead();
@@ -196,10 +272,11 @@ class PreventionService {
       });
     }
 
+    const canCommit = stagedFiles.length > 0 && !identityWarning;
     return {
-      valid: stagedFiles.length > 0,
+      valid: canCommit,
       warnings,
-      canProceed: stagedFiles.length > 0
+      canProceed: canCommit
     };
   }
 

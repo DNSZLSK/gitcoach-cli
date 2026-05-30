@@ -4,6 +4,7 @@ import { userConfig } from '../config/user-config.js';
 import { gitService } from '../services/git-service.js';
 import { logger } from '../utils/logger.js';
 import { mapGitError } from '../utils/error-mapper.js';
+import { isInteractive } from '../utils/helpers.js';
 import { getTheme } from '../ui/themes/index.js';
 import {
   showMainMenu,
@@ -41,6 +42,13 @@ export default class Index extends Command {
   async run(): Promise<void> {
     // Initialize i18n
     await initI18n();
+
+    // Interactive menus need a TTY; fail clearly instead of hanging in pipes/CI
+    if (!isInteractive()) {
+      logger.error(t('errors.nonInteractive'));
+      process.exitCode = 1;
+      return;
+    }
 
     // Check if we're in a git repository
     const isRepo = await gitService.isGitRepo();

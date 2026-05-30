@@ -2,7 +2,7 @@ import { t } from '../i18n/index.js';
 import { warningBox, infoBox } from '../ui/components/box.js';
 import { promptConfirm } from '../ui/components/prompt.js';
 import { createSpinner } from '../ui/components/spinner.js';
-import { copilotService } from '../services/copilot-service.js';
+import { aiService } from '../services/ai/index.js';
 import { logger } from './logger.js';
 
 /**
@@ -20,7 +20,7 @@ export async function handleGitError(
   logger.raw(warningBox(errorMessage, t('errors.title') || 'Error'));
 
   // Check if Copilot is available
-  const copilotAvailable = await copilotService.isAvailable();
+  const copilotAvailable = await aiService.isAvailable();
 
   if (!copilotAvailable) {
     return;
@@ -41,7 +41,7 @@ export async function handleGitError(
     spinner.start();
 
     try {
-      const explanation = await copilotService.explainGitError(errorMessage, command ? { command } : undefined);
+      const explanation = await aiService.explainGitError(errorMessage, command ? { command } : undefined);
 
       if (explanation.success && explanation.message) {
         spinner.succeed();

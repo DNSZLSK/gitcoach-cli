@@ -23,6 +23,12 @@ jest.mock('../../src/utils/logger.js', () => ({
   }
 }));
 
+// Mock user config: error-mapper now reaches it via the AI facade, and the real
+// module pulls in the ESM-only `conf` package which Jest cannot load.
+jest.mock('../../src/config/user-config.js', () => ({
+  userConfig: { getAiProvider: () => 'copilot' }
+}));
+
 describe('Error Mapper', () => {
   describe('mapGitError', () => {
     it('should map authentication errors', () => {

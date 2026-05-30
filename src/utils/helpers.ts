@@ -1,25 +1,66 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
+import spawn from 'cross-spawn';
 
 const DEFAULT_COMMAND_TIMEOUT_MS = 30000;
 const MAX_BUFFER_SIZE = 10 * 1024 * 1024; // 10MB
 
-export async function executeCommand(command: string, timeout: number = DEFAULT_COMMAND_TIMEOUT_MS): Promise<{ stdout: string; stderr: string }> {
-  try {
-    const result = await execAsync(command, {
-      maxBuffer: MAX_BUFFER_SIZE,
-      timeout
+/**
+ * Execute an external program WITHOUT a shell, passing arguments as a list.
+ *
+ * This avoids shell interpolation/quoting entirely (no command injection, no
+ * `%VAR%` expansion or quote-breakout on Windows cmd.exe). `cross-spawn` is used
+ * so npm-installed `.cmd`/`.bat` shims (e.g. `copilot`, `npm`) launch correctly
+ * on Windows without `shell: true`.
+ *
+ * Resolves with whatever stdout/stderr were captured even on a non-zero exit
+ * (the Copilot CLI sometimes exits non-zero while still emitting a useful
+ * answer); rejects only when the process cannot be spawned (e.g. ENOENT) or the
+ * timeout elapses.
+ */
+export function executeFile(
+  file: string,
+  args: string[] = [],
+  timeout: number = DEFAULT_COMMAND_TIMEOUT_MS
+): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(file, args, { windowsHide: true });
+
+    let stdout = '';
+    let stderr = '';
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.kill();
+      reject(new Error(`Command timed out after ${timeout}ms`));
+    }, timeout);
+
+    const finish = (fn: () => void): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn();
+    };
+
+    child.stdout?.on('data', (chunk: Buffer) => {
+      stdout += chunk.toString();
+      if (stdout.length > MAX_BUFFER_SIZE) {
+        child.kill();
+      }
     });
-    return result;
-  } catch (error) {
-    if (error instanceof Error && 'stdout' in error && 'stderr' in error) {
-      const execError = error as { stdout: string; stderr: string };
-      return { stdout: execError.stdout || '', stderr: execError.stderr || error.message };
-    }
-    throw error;
-  }
+
+    child.stderr?.on('data', (chunk: Buffer) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('error', (error: Error) => {
+      finish(() => reject(error));
+    });
+
+    child.on('close', () => {
+      finish(() => resolve({ stdout, stderr }));
+    });
+  });
 }
 
 export function truncateString(str: string, maxLength: number): string {
@@ -100,6 +141,15 @@ export function getRelativePath(absolutePath: string, basePath: string): string 
 
 export function isWindows(): boolean {
   return process.platform === 'win32';
+}
+
+/**
+ * Whether the process is attached to an interactive terminal on both ends.
+ * Interactive menus (Inquirer) hang or crash without a TTY, so callers should
+ * bail out early when this is false (piped input, CI, etc.).
+ */
+export function isInteractive(): boolean {
+  return Boolean(process.stdout.isTTY && process.stdin.isTTY);
 }
 
 export function normalizeLineEndings(text: string): string {

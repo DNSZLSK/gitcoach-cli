@@ -1,7 +1,11 @@
-import { executeCommand, sleep } from '../utils/helpers.js';
+import { executeFile, sleep } from '../utils/helpers.js';
 import { logger } from '../utils/logger.js';
 import { t } from '../i18n/index.js';
 import i18next from 'i18next';
+import type { AIProvider, CopilotSuggestion, ConflictResolutionSuggestion } from './ai/ai-provider.js';
+
+// The canonical definitions live in ai-provider; re-exported here for back-compat.
+export type { CopilotSuggestion, ConflictResolutionSuggestion } from './ai/ai-provider.js';
 
 const COPILOT_TIMEOUT_MS = 30000;
 const COPILOT_RETRY_DELAY_MS = 1000;
@@ -17,19 +21,7 @@ function getCopilotCommand(): string {
   return process.env.COPILOT_CLI_PATH || 'copilot';
 }
 
-export interface CopilotSuggestion {
-  success: boolean;
-  message: string;
-  command?: string;
-}
-
-export interface ConflictResolutionSuggestion {
-  recommendation: 'local' | 'remote' | 'both' | 'custom';
-  explanation: string;
-  customContent?: string;
-}
-
-class CopilotService {
+class CopilotService implements AIProvider {
   private available: boolean | null = null;
   private _notAuthenticated = false;
 
@@ -54,7 +46,7 @@ class CopilotService {
 
     try {
       // Use the new GitHub Copilot CLI (not gh copilot extension)
-      const { stdout, stderr } = await executeCommand(`${getCopilotCommand()} --version`);
+      const { stdout, stderr } = await executeFile(getCopilotCommand(), ['--version']);
 
       // Check for version number in output (e.g., "0.0.393")
       const hasVersion = /\d+\.\d+/.test(stdout);
@@ -97,8 +89,9 @@ class CopilotService {
   async installCopilotCli(): Promise<{ success: boolean; message: string }> {
     try {
       // Install the GitHub Copilot CLI package globally
-      const { stdout, stderr } = await executeCommand(
-        'npm install -g @github/copilot',
+      const { stdout, stderr } = await executeFile(
+        'npm',
+        ['install', '-g', '@github/copilot'],
         COPILOT_INSTALL_TIMEOUT_MS
       );
 
@@ -156,7 +149,8 @@ class CopilotService {
 
       // Use copilot CLI in non-interactive mode with silent output
       const result = await this.executeWithRetry(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -229,16 +223,6 @@ class CopilotService {
     return parts.join('. ');
   }
 
-  private escapeForShell(str: string): string {
-    return str
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/`/g, '\\`')
-      .replace(/\$/g, '\\$')
-      .replace(/\n/g, '\\n')
-      .replace(/\r/g, '');
-  }
-
   async analyzeContext(
     branch: string,
     stagedFiles: string[],
@@ -255,8 +239,9 @@ class CopilotService {
       const context = `Branch: ${branch}. Staged files: ${stagedFiles.join(', ') || 'none'}. Modified files: ${modifiedFiles.join(', ') || 'none'}.`;
       const prompt = `Given this git state: ${context} What should the user do next? Reply with a single brief suggestion in one sentence. ${this.getLanguageInstruction()}`;
 
-      const { stdout, stderr } = await executeCommand(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+      const { stdout, stderr } = await executeFile(
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -290,15 +275,16 @@ class CopilotService {
       const context = `Action: ${action}. Branch: ${currentBranch}. Uncommitted changes: ${hasUncommitted}.`;
       const prompt = `Will this git action cause problems? ${context} Reply briefly in one sentence. ${this.getLanguageInstruction()}`;
 
-      const { stdout, stderr } = await executeCommand(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+      const { stdout, stderr } = await executeFile(
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
       const prediction = this.parseSuggestion(stdout, stderr);
 
       return {
-        success: true,
+        success: !!prediction,
         message: prediction || 'No issues predicted'
       };
     } catch (error) {
@@ -320,8 +306,9 @@ class CopilotService {
     try {
       const prompt = `Explain this Git concept briefly for a beginner in 2-3 sentences: ${concept} ${this.getLanguageInstruction()}`;
 
-      const { stdout, stderr } = await executeCommand(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+      const { stdout, stderr } = await executeFile(
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -364,8 +351,9 @@ Question: ${question}
 
 Provide a helpful answer in 2-4 sentences. If relevant, include the Git command. ${this.getLanguageInstruction()}`;
 
-      const { stdout, stderr } = await executeCommand(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+      const { stdout, stderr } = await executeFile(
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -416,8 +404,9 @@ ${branchLine}${uncommittedLine}
 Explain this error in simple terms for a beginner. What happened, why, and how to fix it.
 Reply in 3-4 sentences maximum. No code blocks. ${this.getLanguageInstruction()}`;
 
-      const { stdout, stderr } = await executeCommand(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+      const { stdout, stderr } = await executeFile(
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -466,8 +455,9 @@ EXPLANATION: (1-2 sentences why)
 MERGED: (only if CUSTOM, the merged content)
 ${this.getLanguageInstruction()}`;
 
-      const { stdout, stderr } = await executeCommand(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+      const { stdout, stderr } = await executeFile(
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -561,7 +551,8 @@ Changes:
 ${diff}`;
 
       const result = await this.executeWithRetry(
-        `${getCopilotCommand()} -p "${this.escapeForShell(prompt)}" -s`,
+        getCopilotCommand(),
+        ['-p', prompt, '-s'],
         COPILOT_TIMEOUT_MS
       );
 
@@ -610,12 +601,13 @@ ${diff}`;
   }
 
   private async executeWithRetry(
-    command: string,
+    file: string,
+    args: string[],
     timeout: number
   ): Promise<{ stdout: string; stderr: string } | null> {
     for (let attempt = 0; attempt <= COPILOT_MAX_RETRIES; attempt++) {
       try {
-        return await executeCommand(command, timeout);
+        return await executeFile(file, args, timeout);
       } catch (error) {
         logger.debug(`Copilot attempt ${attempt + 1} failed:`, error);
         if (attempt < COPILOT_MAX_RETRIES) {
