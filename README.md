@@ -13,7 +13,7 @@
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach-cli?style=social)](https://github.com/DNSZLSK/gitcoach-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-522%20passing-brightgreen)](https://github.com/DNSZLSK/gitcoach-cli)
+[![Tests](https://img.shields.io/badge/tests-557%20passing-brightgreen)](https://github.com/DNSZLSK/gitcoach-cli)
 
 ---
 
@@ -27,7 +27,7 @@ Git is powerful but brutal to beginners. Cryptic error messages, lost work from 
 - **Educational** - Shows every Git command being executed so you learn while you use it
 - **Adapts to your level** - Beginner (verbose), Intermediate (balanced), Expert (minimal)
 - **Multilingual** - Works in English, French, and Spanish
-- **5 AI integrations** - Uses GitHub Copilot CLI for commit messages, Git Q&A, diff summaries, error explanations, and conflict resolution (works without it too)
+- **5 AI integrations** - GitHub Copilot CLI for commit messages, Git Q&A, diff summaries, error explanations, and conflict resolution — or plug in a **local Ollama** model (works without any of them too)
 
 Built for the **[GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github-2026-01-21)**.
 
@@ -104,10 +104,12 @@ Navigate Git with simple menus instead of memorizing commands.
   [P] Push     - Upload to remote
   [L] Pull     - Download changes
   [B] Branch   - Manage branches
-  [U] Undo     - Undo actions
+  [R] Remote   - Configure remote repository
+  [U] Undo     - Undo actions (incl. reflog recovery)
   [H] History  - View commit history
   [W] Stash    - Save work temporarily
-  [G] Config   - Configure GitCoach
+  [G] Config   - Settings & AI provider
+  [T] Stats    - View your statistics
   [?] Help     - Ask Git questions
   [Q] Quit     - Exit GitCoach
 ```
@@ -130,6 +132,9 @@ GitCoach warns you BEFORE you make mistakes:
 - **Detached HEAD** — detects and offers recovery options (create branch, return to main, stash)
 - **Force push** — requires explicit confirmation
 - **Merge conflicts** — guides you through resolution step by step
+- **Missing git identity** — configures `user.name` / `user.email` before your first commit fails
+- **Secrets & large files** — warns before staging `.env`, keys, `node_modules`, or files over 50 MB
+- **Lost commits** — recover them from the reflog via the Undo menu (creates a rescue branch)
 
 ### Educational Mode
 
@@ -228,6 +233,10 @@ When merge conflicts occur, GitCoach shows both versions and offers 5 options �
 
 All Copilot responses respect your language configuration (English, French, or Spanish).
 
+### Bring your own LLM
+
+The AI layer is provider-agnostic. **GitHub Copilot CLI is the default**, but you can switch to a **local Ollama** model (no API key, fully offline) from **Settings → AI Provider** — useful for privacy or working without Copilot.
+
 ---
 
 ### Branch Management
@@ -257,6 +266,7 @@ English, French, and Spanish. Localized confirmations:
 | Command | Description |
 |---------|-------------|
 | `gitcoach` | Launch interactive menu |
+| `gitcoach quick` | Fast commit + push (expert mode) |
 | `gitcoach init` | First-time setup |
 | `gitcoach config` | Change settings |
 | `gitcoach stats` | View your statistics |
@@ -268,9 +278,10 @@ English, French, and Spanish. Localized confirmations:
 - **TypeScript** - Type-safe code
 - **Inquirer.js** - Interactive prompts
 - **simple-git** - Git operations
+- **cross-spawn** - Safe, shell-free AI CLI calls
 - **i18next** - Internationalization
 - **Chalk** - Terminal styling
-- **Jest** - 522 tests
+- **Jest** - 557 tests
 
 ---
 
@@ -297,13 +308,13 @@ gitcoach-cli/
 │   ├── commands/     # CLI commands
 │   ├── config/       # Configuration management
 │   ├── i18n/         # Translations (en, fr, es)
-│   ├── services/     # Git operations, Copilot integration
+│   ├── services/     # Git ops + AI providers (ai/: Copilot, Ollama)
 │   ├── ui/
 │   │   ├── components/   # Reusable UI components
 │   │   ├── menus/        # Interactive menus
 │   │   └── themes/       # Color themes
 │   └── utils/        # Helpers, validators
-├── test/             # 522 tests
+├── test/             # 557 tests
 └── docs/             # Documentation
 ```
 
@@ -339,5 +350,4 @@ Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/gith
 ## License
 
 MIT
-```
 
