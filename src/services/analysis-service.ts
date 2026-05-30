@@ -1,5 +1,5 @@
 import { gitService, GitStatus } from './git-service.js';
-import { copilotService } from './copilot-service.js';
+import { aiService } from './ai/index.js';
 import { t } from '../i18n/index.js';
 import { userConfig } from '../config/user-config.js';
 
@@ -102,7 +102,7 @@ class AnalysisService {
   async getAISuggestion(): Promise<string | null> {
     const status = await gitService.getStatus();
 
-    const result = await copilotService.analyzeContext(
+    const result = await aiService.analyzeContext(
       status.current || 'unknown',
       status.staged,
       status.modified

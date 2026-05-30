@@ -22,6 +22,12 @@ jest.mock('../../src/utils/logger.js', () => ({
   }
 }));
 
+// The conflict menu now reaches user-config via the AI facade; the real module
+// imports the ESM-only `conf` package which Jest cannot load, so stub it.
+jest.mock('../../src/config/user-config.js', () => ({
+  userConfig: { getAiProvider: () => 'copilot' }
+}));
+
 jest.mock('../../src/services/git-service.js', () => ({
   gitService: {
     getConflictedFiles: jest.fn(),

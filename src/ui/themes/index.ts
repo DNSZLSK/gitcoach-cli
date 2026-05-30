@@ -39,6 +39,11 @@ export interface ThemeFunctions {
 export type Theme = ThemeFunctions;
 
 export function getTheme(): Theme {
+  // Honor the NO_COLOR convention (https://no-color.org): any value forces
+  // plain output regardless of the saved preference.
+  if (process.env.NO_COLOR !== undefined) {
+    return monochromeTheme;
+  }
   const themeName = userConfig.getTheme();
   return themeName === 'colored' ? coloredTheme : monochromeTheme;
 }

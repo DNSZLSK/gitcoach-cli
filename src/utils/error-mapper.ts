@@ -1,6 +1,6 @@
 import { t } from '../i18n/index.js';
 import { logger } from './logger.js';
-import { copilotService } from '../services/copilot-service.js';
+import { aiService } from '../services/ai/index.js';
 
 interface ErrorPattern {
   patterns: RegExp[];
@@ -119,9 +119,9 @@ export async function mapGitErrorWithAI(
   const staticMessage = mapGitError(error);
 
   try {
-    if (await copilotService.isAvailable()) {
+    if (await aiService.isAvailable()) {
       const rawMessage = extractErrorMessage(error);
-      const aiResult = await copilotService.explainGitError(rawMessage, context);
+      const aiResult = await aiService.explainGitError(rawMessage, context);
       if (aiResult.success && aiResult.message) {
         return `${staticMessage}\n\n${t('copilot.aiExplanation')}:\n${aiResult.message}`;
       }

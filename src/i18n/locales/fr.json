@@ -358,6 +358,18 @@
       "popSuccess": "Stash applique et supprime !",
       "confirmDrop": "Supprimer ce stash ? Cette action est irreversible !",
       "dropSuccess": "Stash supprime."
+    },
+    "recovery": {
+      "title": "Recuperer du travail perdu",
+      "explain": "Le reflog enregistre les positions passees de HEAD. Vous pouvez creer une branche a n'importe quel point pour recuperer des commits perdus apres un reset, un checkout ou un rebase.",
+      "empty": "Aucune entree de reflog trouvee.",
+      "selectEntry": "Selectionnez l'etat a recuperer :",
+      "branchNamePrompt": "Nom de la branche de recuperation :",
+      "invalidBranch": "Nom de branche invalide.",
+      "confirmCreate": "Creer la branche '{{branch}}' sur {{hash}} ?",
+      "success": "Branche '{{branch}}' creee sur {{hash}}. Votre travail est recupere.",
+      "menuItem": "Recuperer des commits perdus (reflog)",
+      "menuItemDesc": "Restaurer des commits ou branches perdus apres un reset/checkout"
     }
   },
   "time": {
@@ -389,7 +401,14 @@
     "cherryPickInProgress": "Un cherry-pick est actuellement en cours.",
     "cherryPickInProgressAction": "Continuez avec 'git cherry-pick --continue' ou annulez avec 'git cherry-pick --abort'.",
     "bisectInProgress": "Une session de bisect est en cours.",
-    "bisectInProgressAction": "Continuez le bisect ou terminez avec 'git bisect reset'."
+    "bisectInProgressAction": "Continuez le bisect ou terminez avec 'git bisect reset'.",
+    "noIdentity": "Votre identite Git (user.name / user.email) n'est pas configuree.",
+    "noIdentityAction": "Configurez-la pour que vos commits soient correctement attribues.",
+    "sensitiveFiles": "Fichier(s) potentiellement sensible(s) indexe(s) : {{files}}",
+    "sensitiveFilesAction": "Verifiez qu'aucun secret n'est commite. Pensez a les ajouter au .gitignore.",
+    "largeFiles": "Fichier(s) tres volumineux indexe(s) : {{files}}",
+    "largeFilesAction": "Les gros fichiers alourdissent le depot et peuvent etre rejetes par le serveur distant.",
+    "commitAnyway": "Commiter ces changements quand meme ?"
   },
   "errors": {
     "title": "Erreur",
@@ -415,7 +434,8 @@
     "analyzing": "Analyse de l'erreur...",
     "explanation": "Explication",
     "noExplanation": "Impossible d'expliquer l'erreur",
-    "explainFailed": "Echec de l'explication"
+    "explainFailed": "Echec de l'explication",
+    "nonInteractive": "GitCoach necessite un terminal interactif. Lancez-le directement dans votre terminal (pas via un pipe ni dans un job CI non interactif)."
   },
   "success": {
     "title": "Succes",
@@ -487,7 +507,10 @@
     "copilotRefresh": "Re-verifier Copilot CLI",
     "copilotAvailable": "GitHub Copilot CLI est disponible et pret !",
     "copilotNotAvailable": "GitHub Copilot CLI n'est pas disponible.",
-    "copilotChecking": "Verification de Copilot CLI..."
+    "copilotChecking": "Verification de Copilot CLI...",
+    "aiProvider": "Fournisseur IA",
+    "aiProviderSelect": "Selectionnez le fournisseur IA :",
+    "aiModelPrompt": "Nom du modele (vide pour la valeur par defaut) :"
   },
   "stats": {
     "title": "Vos Statistiques",
@@ -592,5 +615,15 @@
     "stashedAndReturned": "Modifications sauvegardees et revenu sur {{branch}}.",
     "commandExecuted": "Commande executee : {{command}}",
     "stashMessage": "Modifications HEAD detache"
+  },
+  "identity": {
+    "title": "Identite Git",
+    "missing": "Git doit savoir qui vous etes avant de pouvoir commiter (user.name et user.email ne sont pas definis).",
+    "namePrompt": "Votre nom :",
+    "nameRequired": "Le nom est requis.",
+    "emailPrompt": "Votre e-mail :",
+    "emailInvalid": "Veuillez saisir une adresse e-mail valide.",
+    "configured": "Identite definie : {{name}} <{{email}}>",
+    "required": "Une identite Git est requise pour commiter."
   }
 }

@@ -2,11 +2,13 @@ import { writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
-import { banner } from '../components/box.js';
+import { banner, infoBox, successBox } from '../components/box.js';
 import { promptSelect, promptConfirm, promptInput } from '../components/prompt.js';
 import { gitService } from '../../services/git-service.js';
 import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
+import { isValidRemoteUrl } from '../../utils/validators.js';
+import { APP_VERSION } from '../../utils/version.js';
 
 export type SetupMenuAction = 'init' | 'clone' | 'quit';
 
@@ -126,7 +128,7 @@ export async function showSetupMenu(): Promise<SetupMenuAction> {
   const theme = getTheme();
 
   // Show banner
-  logger.raw(banner('1.0.0', t('app.tagline')));
+  logger.raw(banner(APP_VERSION, t('app.tagline')));
 
   // Show message that this is not a git repo
   logger.raw(theme.warning(`  ${t('setup.notGitRepo')}\n`));
@@ -172,10 +174,7 @@ export async function handleGitInit(): Promise<boolean> {
           if (!input.trim()) {
             return t('setup.remoteUrlRequired');
           }
-          // Basic URL validation
-          if (!input.includes('github.com') && !input.includes('gitlab.com') &&
-              !input.includes('bitbucket.org') && !input.startsWith('git@') &&
-              !input.startsWith('https://')) {
+          if (!isValidRemoteUrl(input.trim())) {
             return t('setup.remoteUrlInvalid');
           }
           return true;
@@ -261,6 +260,52 @@ export async function handleGitClone(): Promise<boolean> {
     return true;
   } catch (error) {
     logger.raw(theme.error(mapGitError(error)) + '\n');
+    return false;
+  }
+}
+
+/**
+ * Ensure a git identity (user.name + user.email) is configured — the single
+ * most common blocker for a beginner's first commit, which otherwise fails with
+ * `*** Please tell me who you are`. Returns true when an identity exists
+ * (already, or after prompting), false if the user cancelled. `scope` selects
+ * local (this repo) vs global config.
+ */
+export async function ensureGitIdentity(scope: 'local' | 'global' = 'local'): Promise<boolean> {
+  const { name, email } = await gitService.getUserIdentity();
+
+  if (name && email) {
+    return true;
+  }
+
+  logger.raw(infoBox(t('identity.missing'), t('identity.title')));
+
+  const newName = await promptInput(
+    t('identity.namePrompt'),
+    name || '',
+    (value: string) => (value.trim().length > 0 ? true : t('identity.nameRequired'))
+  );
+  if (!newName || newName.trim().length === 0) {
+    return false;
+  }
+
+  const newEmail = await promptInput(
+    t('identity.emailPrompt'),
+    email || '',
+    (value: string) => (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value.trim()) ? true : t('identity.emailInvalid'))
+  );
+  if (!newEmail || newEmail.trim().length === 0) {
+    return false;
+  }
+
+  try {
+    await gitService.setUserIdentity(newName.trim(), newEmail.trim(), scope === 'global');
+    logger.raw(successBox(
+      t('identity.configured', { name: newName.trim(), email: newEmail.trim() }),
+      t('success.title')
+    ));
+    return true;
+  } catch {
     return false;
   }
 }

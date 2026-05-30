@@ -1,6 +1,7 @@
 export type Language = 'en' | 'fr' | 'es';
 export type Theme = 'colored' | 'monochrome';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'expert';
+export type AiProviderId = 'copilot' | 'ollama';
 
 export interface UserPreferences {
   language: Language;
@@ -10,6 +11,9 @@ export interface UserPreferences {
   confirmDestructiveActions: boolean;
   autoGenerateCommitMessages: boolean;
   defaultBranch: string;
+  aiProvider: AiProviderId;
+  aiModel: string;
+  aiEndpoint: string;
 }
 
 export interface AppConfig {
@@ -28,7 +32,10 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   showTips: true,
   confirmDestructiveActions: true,
   autoGenerateCommitMessages: true,
-  defaultBranch: 'main'
+  defaultBranch: 'main',
+  aiProvider: 'copilot',
+  aiModel: '',
+  aiEndpoint: ''
 };
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
@@ -60,3 +67,4 @@ export const THEMES: { theme: Theme; description: string }[] = [
 export const VALID_LANGUAGES: ReadonlySet<string> = new Set(['en', 'fr', 'es']);
 export const VALID_THEMES: ReadonlySet<string> = new Set(['colored', 'monochrome']);
 export const VALID_LEVELS: ReadonlySet<string> = new Set(['beginner', 'intermediate', 'expert']);
+export const VALID_AI_PROVIDERS: ReadonlySet<string> = new Set(['copilot', 'ollama']);
