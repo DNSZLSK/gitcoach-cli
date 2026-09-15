@@ -10,17 +10,8 @@ jest.mock('../../src/i18n/index.js', () => ({
   t: (key: string) => key
 }));
 
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn(),
-    success: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
 // The conflict menu now reaches user-config via the AI facade; the real module
 // imports the ESM-only `conf` package which Jest cannot load, so stub it.
@@ -37,28 +28,11 @@ jest.mock('../../src/services/git-service.js', () => ({
   }
 }));
 
-jest.mock('../../src/ui/themes/index.js', () => ({
-  getTheme: () => ({
-    title: (s: string) => s,
-    textBold: (s: string) => s,
-    textMuted: (s: string) => s,
-    info: (s: string) => s,
-    warning: (s: string) => s,
-    error: (s: string) => s,
-    dim: (s: string) => s,
-    file: (name: string) => name,
-    commitHash: (h: string) => h,
-    primary: (s: string) => s,
-    menuItem: (k: string, l: string) => `${k} ${l}`
-  })
-}));
+jest.mock('../../src/ui/themes/index.js', () =>
+  require('../helpers/module-mocks.js').themeMock());
 
-jest.mock('../../src/ui/components/box.js', () => ({
-  successBox: (msg: string) => msg,
-  warningBox: (msg: string) => msg,
-  errorBox: (msg: string) => msg,
-  infoBox: (msg: string) => msg
-}));
+jest.mock('../../src/ui/components/box.js', () =>
+  require('../helpers/module-mocks.js').boxMock());
 
 jest.mock('../../src/ui/components/prompt.js', () => ({
   promptSelect: jest.fn(),
@@ -70,16 +44,8 @@ jest.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (e: unknown) => String(e)
 }));
 
-jest.mock('../../src/ui/components/spinner.js', () => ({
-  createSpinner: () => ({
-    start: jest.fn(),
-    stop: jest.fn(),
-    succeed: jest.fn(),
-    warn: jest.fn(),
-    fail: jest.fn()
-  }),
-  withSpinner: jest.fn((_text: string, fn: () => Promise<unknown>) => fn())
-}));
+jest.mock('../../src/ui/components/spinner.js', () =>
+  require('../helpers/module-mocks.js').spinnerMock());
 
 jest.mock('../../src/services/copilot-service.js', () => ({
   copilotService: {

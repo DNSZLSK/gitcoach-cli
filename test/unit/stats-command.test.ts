@@ -15,17 +15,8 @@ jest.mock('../../src/i18n/index.js', () => ({
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn(),
-    success: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
 // Mock user config
 jest.mock('../../src/config/user-config.js', () => ({
@@ -45,21 +36,12 @@ jest.mock('../../src/services/analysis-service.js', () => ({
 }));
 
 // Mock theme
-jest.mock('../../src/ui/themes/index.js', () => ({
-  getTheme: () => ({
-    textMuted: (text: string) => text,
-    success: (text: string) => text,
-    title: (text: string) => text,
-    info: (text: string) => text
-  })
-}));
+jest.mock('../../src/ui/themes/index.js', () =>
+  require('../helpers/module-mocks.js').themeMock());
 
 // Mock UI components
-jest.mock('../../src/ui/components/box.js', () => ({
-  titleBox: (title: string, subtitle?: string) => `[${title}] ${subtitle || ''}`,
-  infoBox: (text: string) => `[info] ${text}`,
-  successBox: (text: string) => `[success] ${text}`
-}));
+jest.mock('../../src/ui/components/box.js', () =>
+  require('../helpers/module-mocks.js').boxMock());
 
 jest.mock('../../src/ui/components/table.js', () => ({
   statsTable: (stats: Array<{ label: string; value: string | number }>) =>

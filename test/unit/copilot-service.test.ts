@@ -12,17 +12,8 @@ jest.mock('i18next', () => ({
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn(),
-    success: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
 // Mock helpers
 const mockExecuteFile = jest.fn();

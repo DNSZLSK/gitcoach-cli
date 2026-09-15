@@ -11,28 +11,14 @@ jest.mock('../../src/i18n/index.js', () => ({
   t: (key: string) => key
 }));
 
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
-jest.mock('../../src/ui/themes/index.js', () => ({
-  getTheme: () => new Proxy({}, { get: () => (value: string) => String(value) })
-}));
+jest.mock('../../src/ui/themes/index.js', () =>
+  require('../helpers/module-mocks.js').themeMock());
 
-jest.mock('../../src/ui/components/box.js', () => ({
-  successBox: (text: string) => text,
-  warningBox: (text: string) => text,
-  infoBox: (text: string) => text,
-  errorBox: (text: string) => text
-}));
+jest.mock('../../src/ui/components/box.js', () =>
+  require('../helpers/module-mocks.js').boxMock());
 
 jest.mock('../../src/ui/components/prompt.js', () => ({
   promptSelect: jest.fn(),
@@ -42,16 +28,8 @@ jest.mock('../../src/ui/components/prompt.js', () => ({
 
 // The menu module pulls in the spinner, and ora is ESM that Jest will not
 // transform. Only the pure parsing functions are under test here.
-jest.mock('../../src/ui/components/spinner.js', () => ({
-  createSpinner: () => ({
-    start: jest.fn(),
-    stop: jest.fn(),
-    succeed: jest.fn(),
-    warn: jest.fn(),
-    fail: jest.fn()
-  }),
-  withSpinner: async (_text: string, task: () => unknown) => task()
-}));
+jest.mock('../../src/ui/components/spinner.js', () =>
+  require('../helpers/module-mocks.js').spinnerMock());
 
 jest.mock('../../src/services/git-service.js', () => ({ gitService: {} }));
 jest.mock('../../src/services/ai/index.js', () => ({ aiService: {} }));

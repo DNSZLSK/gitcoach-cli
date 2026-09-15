@@ -7,17 +7,8 @@
 
 // git-service imports logger, which imports chalk; chalk ships ESM that Jest
 // will not transform, so the logger is replaced with a factory mock.
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';

@@ -15,17 +15,8 @@ jest.mock('../../src/i18n/index.js', () => ({
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn(),
-    success: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
 // Mock user config
 jest.mock('../../src/config/user-config.js', () => ({

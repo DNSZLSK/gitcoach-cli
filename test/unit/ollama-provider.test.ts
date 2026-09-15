@@ -7,17 +7,8 @@
  * answers it gets back, including malformed ones.
  */
 
-jest.mock('../../src/utils/logger.js', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-    raw: jest.fn(),
-    command: jest.fn()
-  }
-}));
+jest.mock('../../src/utils/logger.js', () =>
+  require('../helpers/module-mocks.js').loggerMock());
 
 jest.mock('../../src/config/user-config.js', () => ({
   userConfig: {
