@@ -36,64 +36,52 @@
     "quitDesc": "Cerrar GitCoach",
     "back": "Volver",
     "backDesc": "Regresar al menu anterior",
-
     "statusBeginner": "Estado - Ver el estado actual de tus archivos",
     "statusIntermediate": "Estado - Ver cambios",
     "statusExpert": "git status",
-
     "addBeginner": "Agregar - Preparar archivos para guardar",
     "addIntermediate": "Agregar - Preparar archivos",
     "addExpert": "git add",
-
     "commitBeginner": "Commit - Guardar tus cambios con un mensaje",
     "commitIntermediate": "Commit - Guardar cambios",
     "commitExpert": "git commit",
-
     "pushBeginner": "Push - Enviar cambios al servidor remoto",
     "pushIntermediate": "Push - Enviar al remoto",
     "pushExpert": "git push",
-
     "pullBeginner": "Pull - Descargar cambios del servidor",
     "pullIntermediate": "Pull - Descargar cambios",
     "pullExpert": "git pull",
-
     "branchBeginner": "Rama - Trabajar en versiones separadas",
     "branchIntermediate": "Rama - Gestionar ramas",
     "branchExpert": "git branch",
-
     "remote": "Remote",
     "remoteDesc": "Configurar repositorio remoto",
     "remoteBeginner": "Remote - Configurar repositorio remoto",
     "remoteIntermediate": "Remote - Configurar remoto",
     "remoteExpert": "git remote",
-
     "undoBeginner": "Deshacer - Revertir acciones de forma segura",
     "undoIntermediate": "Deshacer - Revertir acciones",
     "undoExpert": "git reset/restore",
-
     "historyBeginner": "Historial - Ver commits anteriores",
     "historyIntermediate": "Historial - Ver commits",
     "historyExpert": "git log",
-
     "stashBeginner": "Stash - Guardar trabajo temporalmente",
     "stashIntermediate": "Stash - Guardar temporalmente",
     "stashExpert": "git stash",
-
     "configBeginner": "Configuracion - Configurar GitCoach",
     "configIntermediate": "Configuracion - Configurar",
     "configExpert": "config",
-
     "statsBeginner": "Estadisticas - Ver tu progreso",
     "statsIntermediate": "Estadisticas - Ver stats",
     "statsExpert": "stats",
-
     "helpBeginner": "Ayuda - Obtener asistencia",
     "helpIntermediate": "Ayuda - Obtener ayuda",
     "helpExpert": "help",
-
     "quitBeginner": "Salir - Cerrar GitCoach",
     "quitIntermediate": "Salir - Cerrar",
-    "quitExpert": "quit"
+    "quitExpert": "quit",
+    "tags": "Etiquetas",
+    "tagsDesc": "Marcar y publicar versiones"
   },
   "levels": {
     "beginner": "Principiante",
@@ -225,9 +213,9 @@
       "keepRemote": "Conservar la version remota",
       "keepBoth": "Conservar ambas (combinar)",
       "editManually": "Editar manualmente en mi editor",
-    "askCopilot": "Preguntar a Copilot IA",
-    "acceptSuggestion": "Aceptar esta sugerencia?",
-    "copilotSuggests": "Copilot sugiere",
+      "askCopilot": "Preguntar a Copilot IA",
+      "acceptSuggestion": "Aceptar esta sugerencia?",
+      "copilotSuggests": "Copilot sugiere",
       "fileResolved": "{{file}} resuelto ({{current}}/{{total}})",
       "allResolved": "Los {{count}} conflicto(s) han sido resueltos!",
       "finalizeCommit": "Finalizar el merge con git commit?",
@@ -370,6 +358,41 @@
       "success": "Rama '{{branch}}' creada en {{hash}}. Tu trabajo esta recuperado.",
       "menuItem": "Recuperar commits perdidos (reflog)",
       "menuItemDesc": "Restaurar commits o ramas perdidos tras un reset/checkout"
+    },
+    "tags": {
+      "title": "Etiquetas y versiones",
+      "selectAction": "Que desea hacer?",
+      "list": "Listar etiquetas",
+      "create": "Crear una etiqueta",
+      "delete": "Eliminar una etiqueta",
+      "push": "Enviar etiquetas al remoto",
+      "noTags": "Sin etiquetas. Una etiqueta marca un punto del historial, normalmente una version.",
+      "tagCount": "{{count}} etiqueta(s)",
+      "annotated": "anotada",
+      "lightweight": "ligera",
+      "namePrompt": "Nombre de la etiqueta (ej. v1.0.0):",
+      "nameRequired": "Se requiere un nombre de etiqueta.",
+      "nameInvalid": "Nombre invalido. Evite espacios, ~, ^, :, ? y *.",
+      "nameExists": "Ya existe una etiqueta llamada '{{name}}'.",
+      "messagePrompt": "Mensaje (dejar vacio para una etiqueta ligera):",
+      "annotatedExplain": "Un mensaje crea una etiqueta anotada, que registra autor y fecha. Las versiones deberian ser anotadas.",
+      "created": "Etiqueta '{{name}}' creada.",
+      "selectToDelete": "Que etiqueta desea eliminar?",
+      "confirmDelete": "Eliminar la etiqueta '{{name}}' localmente?",
+      "deleted": "Etiqueta '{{name}}' eliminada localmente.",
+      "alsoDeleteRemote": "Esta etiqueta tambien existe en el remoto. Eliminarla alli tambien?",
+      "deletedRemote": "Etiqueta '{{name}}' eliminada en el remoto.",
+      "remoteDeleteWarning": "Eliminar una etiqueta publicada rompe a quienes ya la descargaron.",
+      "unpushedCount": "{{count}} etiqueta(s) sin enviar: {{names}}",
+      "allPushed": "Todas las etiquetas ya estan en el remoto.",
+      "pushOne": "Enviar una sola etiqueta",
+      "pushAll": "Enviar todas las etiquetas",
+      "selectToPush": "Que etiqueta desea enviar?",
+      "pushed": "Etiqueta '{{name}}' enviada a {{remote}}.",
+      "pushedAll": "Todas las etiquetas enviadas a {{remote}}.",
+      "noRemote": "No hay remoto configurado, no se pueden enviar etiquetas.",
+      "remoteCheckFailed": "No se pudo contactar el remoto para comparar etiquetas.",
+      "explainTag": "Una etiqueta es un nombre permanente para un commit. A diferencia de una rama, nunca se mueve."
     }
   },
   "time": {

@@ -22,6 +22,14 @@ export interface BranchInfo {
   label: string;
 }
 
+export interface TagInfo {
+  name: string;
+  annotated: boolean;
+  commit: string;
+  message: string;
+  date: string;
+}
+
 export interface CommitInfo {
   hash: string;
   date: string;
@@ -31,7 +39,7 @@ export interface CommitInfo {
 
 const STATUS_CACHE_TTL_MS = 2000;
 
-class GitService {
+export class GitService {
   private git: SimpleGit;
   private statusCache: { data: GitStatus; timestamp: number } | null = null;
   private basePath: string;
@@ -548,6 +556,96 @@ class GitService {
 
   async createBranchAt(name: string, ref: string): Promise<void> {
     await this.git.branch([name, ref]);
+  }
+
+  /**
+   * Tags, newest first.
+   *
+   * `--sort=-creatordate` covers lightweight and annotated tags alike, unlike
+   * `-version:refname`, which orders by name and misplaces anything that is not
+   * strictly semver.
+   */
+  async getTags(): Promise<TagInfo[]> {
+    // Unit separator: Node rejects NUL bytes in process arguments, and 0x1F
+    // cannot appear in a tag name, subject or date.
+    const SEP = '\u001f';
+    const format = ['%(refname:short)', '%(objecttype)', '%(objectname:short)',
+      '%(contents:subject)', '%(creatordate:short)'].join(SEP);
+
+    const raw = await this.git.raw(['for-each-ref', '--sort=-creatordate',
+      `--format=${format}`, 'refs/tags']);
+
+    return raw
+      .split('\n')
+      .filter(line => line.trim().length > 0)
+      .map(line => {
+        const [name, type, commit, message, date] = line.split(SEP);
+        return {
+          name,
+          // An annotated tag is its own object; a lightweight one points
+          // straight at the commit.
+          annotated: type === 'tag',
+          commit: commit || '',
+          message: message || '',
+          date: date || ''
+        };
+      });
+  }
+
+  async tagExists(name: string): Promise<boolean> {
+    const tags = await this.getTags();
+    return tags.some(tag => tag.name === name);
+  }
+
+  /**
+   * Create a tag. A message produces an annotated tag, which records who made
+   * it and when; without one the tag is lightweight and carries no metadata.
+   */
+  async createTag(name: string, message?: string, ref?: string): Promise<void> {
+    const args = message
+      ? ['tag', '-a', name, '-m', message]
+      : ['tag', name];
+    if (ref) {
+      args.push(ref);
+    }
+    await this.git.raw(args);
+  }
+
+  async deleteTag(name: string): Promise<void> {
+    await this.git.raw(['tag', '-d', name]);
+  }
+
+  async deleteRemoteTag(name: string, remote: string = 'origin'): Promise<void> {
+    await this.git.push([remote, '--delete', name]);
+  }
+
+  async pushTag(name: string, remote: string = 'origin'): Promise<void> {
+    await this.git.push([remote, name]);
+  }
+
+  async pushAllTags(remote: string = 'origin'): Promise<void> {
+    await this.git.push([remote, '--tags']);
+  }
+
+  /**
+   * Tags that exist locally but not on the remote.
+   *
+   * `ls-remote` is a network call, so callers should treat a failure here as
+   * "unknown" rather than "nothing to push".
+   */
+  async getUnpushedTags(remote: string = 'origin'): Promise<string[]> {
+    const raw = await this.git.raw(['ls-remote', '--tags', remote]);
+    const remoteTags = new Set(
+      raw
+        .split('\n')
+        .map(line => line.split('refs/tags/')[1])
+        .filter((name): name is string => !!name)
+        // ls-remote lists annotated tags twice, the second dereferenced with ^{}
+        .map(name => name.replace(/\^\{\}$/, ''))
+    );
+
+    const local = await this.getTags();
+    return local.filter(tag => !remoteTags.has(tag.name)).map(tag => tag.name);
   }
 }
 

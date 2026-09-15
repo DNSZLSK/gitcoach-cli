@@ -32,6 +32,7 @@ export type MainMenuAction =
   | 'remote'
   | 'undo'
   | 'history'
+  | 'tags'
   | 'stash'
   | 'config'
   | 'stats'
@@ -106,6 +107,12 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     {
       name: theme.menuItem('R', getMenuLabel('remote')),
       value: 'remote' as MainMenuAction
+    },
+    {
+      // V for version: tags mark releases, and the letter reads the same way
+      // in English, French and Spanish.
+      name: theme.menuItem('V', getMenuLabel('tags')),
+      value: 'tags' as MainMenuAction
     },
     {
       name: theme.menuItem('U', getMenuLabel('undo')),

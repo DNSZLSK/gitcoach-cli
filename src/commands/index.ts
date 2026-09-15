@@ -181,6 +181,12 @@ export default class Index extends Command {
         return true;
       }
 
+      case 'tags': {
+        const { showTagMenu } = await import('../ui/menus/tag-menu.js');
+        await showTagMenu();
+        return true;
+      }
+
       case 'stash': {
         const { showStashMenu } = await import('../ui/menus/stash-menu.js');
         await showStashMenu();

@@ -5,7 +5,8 @@ import {
   validateFilePath,
   isValidRemoteUrl,
   sanitizeInput,
-  extractCommitMessage
+  extractCommitMessage,
+  isValidTagName
 } from '../../src/utils/validators.js';
 
 describe('Validators', () => {
@@ -177,6 +178,32 @@ describe('Validators', () => {
     it('should truncate an over-long conventional header', () => {
       const long = 'feat: ' + 'x'.repeat(200);
       expect(extractCommitMessage(long)).toHaveLength(100);
+    });
+  });
+
+
+  describe('isValidTagName', () => {
+    it('should accept common release tag names', () => {
+      expect(isValidTagName('v1.0.0')).toBe(true);
+      expect(isValidTagName('1.0.0')).toBe(true);
+      expect(isValidTagName('release/2026-01')).toBe(true);
+      expect(isValidTagName('v2.0.0-rc.1')).toBe(true);
+    });
+
+    it('should reject names git refuses as refs', () => {
+      expect(isValidTagName('')).toBe(false);
+      expect(isValidTagName('with space')).toBe(false);
+      expect(isValidTagName('bad~name')).toBe(false);
+      expect(isValidTagName('bad^name')).toBe(false);
+      expect(isValidTagName('bad:name')).toBe(false);
+      expect(isValidTagName('bad?name')).toBe(false);
+      expect(isValidTagName('bad*name')).toBe(false);
+      expect(isValidTagName('-leading-dash')).toBe(false);
+      expect(isValidTagName('.leading-dot')).toBe(false);
+    });
+
+    it('should reject a name ending in a dot', () => {
+      expect(isValidTagName('v1.0.')).toBe(false);
     });
   });
 

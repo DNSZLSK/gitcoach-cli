@@ -36,64 +36,52 @@
     "quitDesc": "Fermer GitCoach",
     "back": "Retour",
     "backDesc": "Revenir au menu precedent",
-
     "statusBeginner": "Statut - Voir l'etat actuel de vos fichiers",
     "statusIntermediate": "Statut - Voir les modifications",
     "statusExpert": "git status",
-
     "addBeginner": "Ajouter - Preparer vos fichiers pour l'enregistrement",
     "addIntermediate": "Ajouter - Indexer les fichiers",
     "addExpert": "git add",
-
     "commitBeginner": "Commit - Enregistrer vos modifications avec un message",
     "commitIntermediate": "Commit - Enregistrer",
     "commitExpert": "git commit",
-
     "pushBeginner": "Push - Envoyer vos modifications au serveur distant",
     "pushIntermediate": "Push - Envoyer",
     "pushExpert": "git push",
-
     "pullBeginner": "Pull - Telecharger les modifications du serveur",
     "pullIntermediate": "Pull - Telecharger",
     "pullExpert": "git pull",
-
     "branchBeginner": "Branche - Travailler sur des versions separees",
     "branchIntermediate": "Branche - Gerer les branches",
     "branchExpert": "git branch",
-
     "remote": "Remote",
     "remoteDesc": "Configurer le depot distant",
     "remoteBeginner": "Remote - Configurer le depot distant",
     "remoteIntermediate": "Remote - Configurer le remote",
     "remoteExpert": "git remote",
-
     "undoBeginner": "Annuler - Revenir en arriere en securite",
     "undoIntermediate": "Annuler - Revenir en arriere",
     "undoExpert": "git reset/restore",
-
     "historyBeginner": "Historique - Voir les commits passes",
     "historyIntermediate": "Historique - Voir les commits",
     "historyExpert": "git log",
-
     "stashBeginner": "Stash - Sauvegarder temporairement votre travail",
     "stashIntermediate": "Stash - Sauvegarder temporairement",
     "stashExpert": "git stash",
-
     "configBeginner": "Parametres - Configurer GitCoach",
     "configIntermediate": "Parametres - Configurer",
     "configExpert": "config",
-
     "statsBeginner": "Statistiques - Voir votre progression",
     "statsIntermediate": "Statistiques - Voir les stats",
     "statsExpert": "stats",
-
     "helpBeginner": "Aide - Obtenir de l'assistance",
     "helpIntermediate": "Aide - Obtenir de l'aide",
     "helpExpert": "help",
-
     "quitBeginner": "Quitter - Fermer GitCoach",
     "quitIntermediate": "Quitter - Fermer",
-    "quitExpert": "quit"
+    "quitExpert": "quit",
+    "tags": "Tags",
+    "tagsDesc": "Marquer et publier des versions"
   },
   "levels": {
     "beginner": "Débutant",
@@ -225,9 +213,9 @@
       "keepRemote": "Garder la version distante",
       "keepBoth": "Garder les deux (combiner)",
       "editManually": "Editer manuellement dans mon editeur",
-    "askCopilot": "Demander a Copilot IA",
-    "acceptSuggestion": "Accepter cette suggestion ?",
-    "copilotSuggests": "Copilot suggere",
+      "askCopilot": "Demander a Copilot IA",
+      "acceptSuggestion": "Accepter cette suggestion ?",
+      "copilotSuggests": "Copilot suggere",
       "fileResolved": "{{file}} resolu ({{current}}/{{total}})",
       "allResolved": "Les {{count}} conflit(s) ont ete resolus !",
       "finalizeCommit": "Finaliser le merge avec git commit ?",
@@ -370,6 +358,41 @@
       "success": "Branche '{{branch}}' creee sur {{hash}}. Votre travail est recupere.",
       "menuItem": "Recuperer des commits perdus (reflog)",
       "menuItemDesc": "Restaurer des commits ou branches perdus apres un reset/checkout"
+    },
+    "tags": {
+      "title": "Tags et versions",
+      "selectAction": "Que voulez-vous faire ?",
+      "list": "Lister les tags",
+      "create": "Creer un tag",
+      "delete": "Supprimer un tag",
+      "push": "Pousser les tags vers le serveur distant",
+      "noTags": "Aucun tag. Un tag marque un point de l'historique, en general une version.",
+      "tagCount": "{{count}} tag(s)",
+      "annotated": "annote",
+      "lightweight": "leger",
+      "namePrompt": "Nom du tag (ex. v1.0.0) :",
+      "nameRequired": "Un nom de tag est requis.",
+      "nameInvalid": "Nom de tag invalide. Evitez les espaces, ~, ^, :, ? et *.",
+      "nameExists": "Un tag nomme '{{name}}' existe deja.",
+      "messagePrompt": "Message (laisser vide pour un tag leger) :",
+      "annotatedExplain": "Un message cree un tag annote, qui enregistre l'auteur et la date. Les versions devraient etre annotees.",
+      "created": "Tag '{{name}}' cree.",
+      "selectToDelete": "Quel tag voulez-vous supprimer ?",
+      "confirmDelete": "Supprimer le tag '{{name}}' en local ?",
+      "deleted": "Tag '{{name}}' supprime en local.",
+      "alsoDeleteRemote": "Ce tag existe aussi sur le serveur distant. Le supprimer la-bas aussi ?",
+      "deletedRemote": "Tag '{{name}}' supprime sur le serveur distant.",
+      "remoteDeleteWarning": "Supprimer un tag publie casse ceux qui l'ont deja recupere.",
+      "unpushedCount": "{{count}} tag(s) pas encore pousse(s) : {{names}}",
+      "allPushed": "Tous les tags sont deja sur le serveur distant.",
+      "pushOne": "Pousser un seul tag",
+      "pushAll": "Pousser tous les tags",
+      "selectToPush": "Quel tag voulez-vous pousser ?",
+      "pushed": "Tag '{{name}}' pousse vers {{remote}}.",
+      "pushedAll": "Tous les tags ont ete pousses vers {{remote}}.",
+      "noRemote": "Aucun serveur distant configure, les tags ne peuvent pas etre pousses.",
+      "remoteCheckFailed": "Impossible de joindre le serveur distant pour comparer les tags.",
+      "explainTag": "Un tag est un nom permanent pour un commit. Contrairement a une branche, il ne bouge jamais."
     }
   },
   "time": {

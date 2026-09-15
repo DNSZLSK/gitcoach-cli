@@ -32,6 +32,18 @@ export function isValidBranchName(name: string): boolean {
   return true;
 }
 
+/**
+ * Tags and branches are both refs, so git applies the same name rules to each.
+ * The extra restriction here is that a tag may not end in a dot, which git
+ * rejects for refs but which `isValidBranchName` does not need to state.
+ */
+export function isValidTagName(name: string): boolean {
+  if (!isValidBranchName(name)) {
+    return false;
+  }
+  return !name.endsWith('.');
+}
+
 const MIN_COMMIT_MESSAGE_LENGTH = 3;
 const MAX_COMMIT_FIRST_LINE_LENGTH = 100;
 

@@ -36,64 +36,52 @@
     "quitDesc": "Exit GitCoach",
     "back": "Back",
     "backDesc": "Return to previous menu",
-
     "statusBeginner": "Status - See current state of your files",
     "statusIntermediate": "Status - View changes",
     "statusExpert": "git status",
-
     "addBeginner": "Add - Prepare files for saving",
     "addIntermediate": "Add - Stage files",
     "addExpert": "git add",
-
     "commitBeginner": "Commit - Save your changes with a message",
     "commitIntermediate": "Commit - Save changes",
     "commitExpert": "git commit",
-
     "pushBeginner": "Push - Send changes to remote server",
     "pushIntermediate": "Push - Send to remote",
     "pushExpert": "git push",
-
     "pullBeginner": "Pull - Download changes from server",
     "pullIntermediate": "Pull - Download changes",
     "pullExpert": "git pull",
-
     "branchBeginner": "Branch - Work on separate versions",
     "branchIntermediate": "Branch - Manage branches",
     "branchExpert": "git branch",
-
     "remote": "Remote",
     "remoteDesc": "Configure remote repository",
     "remoteBeginner": "Remote - Configure remote repository",
     "remoteIntermediate": "Remote - Configure remote",
     "remoteExpert": "git remote",
-
     "undoBeginner": "Undo - Reverse actions safely",
     "undoIntermediate": "Undo - Reverse actions",
     "undoExpert": "git reset/restore",
-
     "historyBeginner": "History - See past commits",
     "historyIntermediate": "History - View commits",
     "historyExpert": "git log",
-
     "stashBeginner": "Stash - Temporarily save work",
     "stashIntermediate": "Stash - Save temporarily",
     "stashExpert": "git stash",
-
     "configBeginner": "Settings - Configure GitCoach",
     "configIntermediate": "Settings - Configure",
     "configExpert": "config",
-
     "statsBeginner": "Statistics - View your progress",
     "statsIntermediate": "Statistics - View stats",
     "statsExpert": "stats",
-
     "helpBeginner": "Help - Get assistance",
     "helpIntermediate": "Help - Get help",
     "helpExpert": "help",
-
     "quitBeginner": "Quit - Exit GitCoach",
     "quitIntermediate": "Quit - Exit",
-    "quitExpert": "quit"
+    "quitExpert": "quit",
+    "tags": "Tags",
+    "tagsDesc": "Mark and publish releases"
   },
   "levels": {
     "beginner": "Beginner",
@@ -225,9 +213,9 @@
       "keepRemote": "Keep the remote version",
       "keepBoth": "Keep both (combine)",
       "editManually": "Edit manually in my editor",
-    "askCopilot": "Ask Copilot AI",
-    "acceptSuggestion": "Accept this suggestion?",
-    "copilotSuggests": "Copilot suggests",
+      "askCopilot": "Ask Copilot AI",
+      "acceptSuggestion": "Accept this suggestion?",
+      "copilotSuggests": "Copilot suggests",
       "fileResolved": "{{file}} resolved ({{current}}/{{total}})",
       "allResolved": "All {{count}} conflict(s) resolved!",
       "finalizeCommit": "Finalize the merge with git commit?",
@@ -370,6 +358,41 @@
       "success": "Branch '{{branch}}' created at {{hash}}. Your work is recovered.",
       "menuItem": "Recover lost commits (reflog)",
       "menuItemDesc": "Restore commits or branches lost after a reset/checkout"
+    },
+    "tags": {
+      "title": "Tags & Releases",
+      "selectAction": "What would you like to do?",
+      "list": "List tags",
+      "create": "Create a tag",
+      "delete": "Delete a tag",
+      "push": "Push tags to remote",
+      "noTags": "No tags yet. A tag marks a point in history, usually a release.",
+      "tagCount": "{{count}} tag(s)",
+      "annotated": "annotated",
+      "lightweight": "lightweight",
+      "namePrompt": "Tag name (e.g. v1.0.0):",
+      "nameRequired": "A tag name is required.",
+      "nameInvalid": "Invalid tag name. Avoid spaces, ~, ^, :, ? and *.",
+      "nameExists": "A tag named '{{name}}' already exists.",
+      "messagePrompt": "Message (leave empty for a lightweight tag):",
+      "annotatedExplain": "A message creates an annotated tag, which records the author and date. Releases should be annotated.",
+      "created": "Tag '{{name}}' created.",
+      "selectToDelete": "Which tag do you want to delete?",
+      "confirmDelete": "Delete tag '{{name}}' locally?",
+      "deleted": "Tag '{{name}}' deleted locally.",
+      "alsoDeleteRemote": "This tag also exists on the remote. Delete it there too?",
+      "deletedRemote": "Tag '{{name}}' deleted on the remote.",
+      "remoteDeleteWarning": "Deleting a published tag breaks anyone who already fetched it.",
+      "unpushedCount": "{{count}} tag(s) not pushed yet: {{names}}",
+      "allPushed": "All tags are already on the remote.",
+      "pushOne": "Push a single tag",
+      "pushAll": "Push all tags",
+      "selectToPush": "Which tag do you want to push?",
+      "pushed": "Tag '{{name}}' pushed to {{remote}}.",
+      "pushedAll": "All tags pushed to {{remote}}.",
+      "noRemote": "No remote configured, so tags cannot be pushed.",
+      "remoteCheckFailed": "Could not reach the remote to compare tags.",
+      "explainTag": "A tag is a permanent name for one commit. Unlike a branch, it never moves."
     }
   },
   "time": {
