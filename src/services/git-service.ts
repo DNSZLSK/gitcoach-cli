@@ -514,6 +514,49 @@ export class GitService {
   /**
    * Drop the commit a rebase is stuck on and move to the next one.
    */
+  /**
+   * Replay the current branch on top of another.
+   *
+   * Returns whether it finished. A rebase that stops on a conflict is not an
+   * error, it is the normal interrupted state the in-progress flow handles, so
+   * it comes back as false rather than as a rejection.
+   */
+  async rebaseOnto(branch: string): Promise<boolean> {
+    return this.resumeOperation(
+      ['-c', 'core.editor=true', 'rebase', branch],
+      () => this.isRebaseInProgress()
+    );
+  }
+
+  /**
+   * Squash the last `count` commits into one.
+   *
+   * Implemented with a soft reset plus a fresh commit rather than an
+   * interactive rebase: the result is identical and it needs no editor
+   * scripting, which cannot be driven reliably from a menu.
+   */
+  async squashCommits(count: number, message: string): Promise<void> {
+    if (count < 2) {
+      throw new Error('Squashing needs at least two commits');
+    }
+    await this.git.reset(['--soft', `HEAD~${count}`]);
+    await this.git.commit(message);
+    this.invalidateCache();
+  }
+
+  /**
+   * Commits on this branch that are not on `base`, newest first.
+   */
+  async getCommitsAhead(base: string, maxCount: number = 50): Promise<CommitInfo[]> {
+    const log = await this.git.log({ from: base, to: 'HEAD', maxCount });
+    return log.all.map(entry => ({
+      hash: entry.hash,
+      date: entry.date,
+      message: entry.message,
+      author: entry.author_name
+    }));
+  }
+
   async skipRebase(): Promise<void> {
     await this.git.rebase(['--skip']);
     this.invalidateCache();
