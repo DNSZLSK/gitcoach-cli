@@ -3,11 +3,15 @@ import { createRequire } from 'module';
 import { userConfig } from '../config/user-config.js';
 import type { Language } from '../config/defaults.js';
 
-const require = createRequire(import.meta.url);
+// Named loadJson rather than `require`: TypeScript reserves `require` in a
+// module's top-level scope, so the shadowing binding is a duplicate identifier.
+// tsc lets it pass with this project's settings, ts-jest does not, which kept
+// every module reaching i18n out of the test run.
+const loadJson = createRequire(import.meta.url);
 
-const en = require('./locales/en.json');
-const fr = require('./locales/fr.json');
-const es = require('./locales/es.json');
+const en = loadJson('./locales/en.json');
+const fr = loadJson('./locales/fr.json');
+const es = loadJson('./locales/es.json');
 
 const resources = {
   en: { translation: en },

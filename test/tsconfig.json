@@ -3,7 +3,11 @@
   "compilerOptions": {
     "rootDir": "..",
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "isolatedModules": true,
+    "types": ["jest", "node"]
   },
   "include": ["./**/*", "../src/**/*"]
 }
