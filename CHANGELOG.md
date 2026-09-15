@@ -5,7 +5,7 @@ All notable changes to GitCoach are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.6] - 2026-09-15
 
 ### Fixed
 
@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   previously took the model's first non-empty line unconditionally.
 - **Answers mentioning "token", "model" or "session" are no longer swallowed.**
   The output filters matched those words anywhere in a line, so a legitimate
-  answer about a personal access token — or a commit touching a model file —
+  answer about a personal access token, or a commit touching a model file,
   was discarded as CLI telemetry. Patterns are now anchored to actual telemetry
   lines and shared via `TELEMETRY_LINE_PATTERNS`.
 
@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 10 unit tests covering commit-message extraction (567 tests total).
 - This changelog.
+- Project logo (`docs/assets/logo.png`), shown at the top of the README.
+
+### Changed
+
+- README restructured: logo header, `Quick Start` moved above the rationale,
+  installation moved below the feature tour, the orphaned "Branch management"
+  and "Multilingual support" sections nested under `Features`, warning and
+  prerequisite lists turned into tables, and em dashes removed throughout.
 
 ## [1.1.5] - 2026-05-30
 
@@ -221,7 +229,7 @@ First release, published to npm as `gitcoach-cli`.
 - `gitcoach quick` for fast commit and push.
 - Local analytics and persistent user configuration.
 
-[Unreleased]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.5...HEAD
+[1.1.6]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.2...v1.1.3
