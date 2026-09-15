@@ -6,7 +6,7 @@
 
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Tests](https://img.shields.io/badge/tests-567%20passing-brightgreen)](https://github.com/DNSZLSK/gitcoach-cli)
+[![Tests](https://img.shields.io/badge/tests-871%20passing-brightgreen)](https://github.com/DNSZLSK/gitcoach-cli)
 [![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach-cli?style=social)](https://github.com/DNSZLSK/gitcoach-cli)
 
 </div>
@@ -68,10 +68,12 @@ Navigate Git with menus instead of memorizing commands.
   [L] Pull     - Download changes
   [B] Branch   - Manage branches
   [R] Remote   - Configure remote repository
+  [V] Tags     - Mark and publish releases
   [U] Undo     - Undo actions (incl. reflog recovery)
   [H] History  - View commit history
   [W] Stash    - Save work temporarily
   [G] Config   - Settings & AI provider
+  [X] Advanced - Submodules, worktrees and signing
   [T] Stats    - View your statistics
   [?] Help     - Ask Git questions
   [Q] Quit     - Exit GitCoach
@@ -98,6 +100,8 @@ GitCoach warns you before you make the mistake, not after:
 | Missing git identity | Sets `user.name` and `user.email` before your first commit fails |
 | Secrets and large files | Warns before staging `.env`, keys, `node_modules` or files over 50 MB |
 | Lost commits | Recovers them from the reflog via the Undo menu, on a rescue branch |
+| Interrupted rebase, cherry-pick, merge or bisect | Detects it on launch and offers continue, skip or cancel |
+| Amending a pushed commit | Warns that it rewrites shared history before you do it |
 
 ### Educational mode
 
@@ -134,6 +138,59 @@ English, French and Spanish, including localized confirmations:
 | English | `(Y/n)` |
 | French | `(O/n)` |
 | Spanish | `(S/n)` |
+
+### Tags and releases
+
+Tagging is the release workflow, so it gets its own menu:
+
+```
+? Tags & Releases
+> [L] List tags
+  [C] Create a tag
+  [P] Push tags to remote
+  [D] Delete a tag
+```
+
+Creating explains that a message is what makes a tag annotated, then offers
+to push it. Deleting removes it locally first and only offers the remote
+deletion when the tag is actually published there.
+
+### Rewriting history, carefully
+
+| Operation | Where | Guard rail |
+|-----------|-------|------------|
+| Amend the last commit | offered right after committing, and in Undo | warns when the commit is already pushed |
+| Revert a commit | Undo | shows the message git will generate before confirming |
+| Rebase onto a branch | Branch | refuses on a dirty tree, counts the published commits |
+| Squash commits | Branch | lists the commits that will disappear |
+
+### Getting unstuck
+
+If git stopped part-way through a rebase, cherry-pick, merge or bisect,
+GitCoach detects it on launch and offers the way out rather than just
+reporting the state:
+
+```
+Operation in progress
+  A rebase is in progress. Step 2 of 3.
+  1 file(s) still contain conflict markers.
+
+> [R] Open conflict resolution
+  [S] Skip this commit and continue
+  [A] Cancel and go back to the starting point
+  [I] Leave it as it is for now
+```
+
+### Inspecting history
+
+From the History menu: the patch a commit introduced, blame on any tracked
+file, and a comparison between two branches.
+
+### Advanced
+
+Submodules (status, init, update, add), worktrees (list, add, remove) and
+commit signing (key, on, off). Grouped under one entry so the main menu stays
+readable.
 
 ---
 
@@ -306,7 +363,7 @@ gitcoach-cli/
 │   │   ├── menus/        # Interactive menus
 │   │   └── themes/       # Color themes
 │   └── utils/        # Helpers, validators
-├── test/             # 567 tests
+├── test/             # 871 tests
 └── docs/             # Documentation
 ```
 

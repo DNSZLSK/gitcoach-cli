@@ -5,6 +5,58 @@ All notable changes to GitCoach are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2026-09-15
+
+Committed and ready; not yet published to npm.
+
+### Added
+
+- **Tags and releases.** A dedicated menu to list, create, push and delete
+  tags, annotated or lightweight. Deleting removes the tag locally first and
+  offers the remote deletion only when it is actually published there.
+- **Amend and revert.** Amending is offered right after a commit, where a
+  beginner looks for it, and again in Undo. It warns when the commit is already
+  pushed, since that rewrites shared history. Revert shows the message git will
+  generate before confirming, rather than leaving it to be discovered in the log.
+- **A way out of interrupted operations.** A rebase, cherry-pick, merge or
+  bisect that stopped part-way is detected on launch and offers continue, skip,
+  cancel, or entry into the guided conflict resolver. The tool previously
+  detected these states and warned about them without being able to resolve them.
+- **Rebase and squash** in the Branch menu. Rebase refuses on a dirty tree and
+  names how many of the commits being replayed are already published. Squash
+  lists the commits that will disappear before doing it.
+- **History inspection.** The patch a commit introduced, blame on any tracked
+  file, and a comparison between two branches. Output is capped at 200 lines
+  with the cap announced, so a large patch cannot bury the prompt.
+- **Advanced menu.** Submodules (status, init, update, add), worktrees (list,
+  add, remove) and commit signing (key, on, off), grouped under one entry rather
+  than three so the main menu stays readable.
+
+### Fixed
+
+- **The detached-HEAD menu no longer appears mid-rebase.** git detaches HEAD for
+  the duration of a rebase, so the recovery menu used to open during one and
+  invite the user further into trouble. An interrupted operation is now checked
+  first.
+- **`continue` no longer reports success when git refused.** simple-git resolves
+  rather than rejects when `rebase --continue` fails, putting git's refusal in
+  the output, while `cherry-pick --continue` does reject. The same failure
+  behaved differently depending on the command. Both are normalised, and the
+  outcome is read from the repository state rather than from the absence of an
+  exception.
+
+### Changed
+
+- Startup is roughly 165ms faster. The twelve secondary menus load on demand
+  instead of on every launch, and the two git probes the main menu needs now run
+  concurrently.
+- `npm run test:coverage` passes. The 70% thresholds in jest.config.js had been
+  unmet since before this work. Several UI suites called a mock and then
+  asserted the mock had been called, which executes none of the code under test;
+  they are replaced by tests that drive the real modules. Statements 65.67% to
+  83.25%, branches to 70.80%, functions to 81.75%, lines to 84.12%, across 871
+  tests.
+
 ## [1.1.7] - 2026-09-15
 
 ### Fixed
@@ -35,6 +87,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   covering the GitCoach name. Versions 1.0.0 through 1.1.4, already published
   to npm, remain available under MIT; a licence change is not retroactive.
 - `author` corrected to DNSZLSK in `package.json`.
+- README restructured: logo header, `Quick Start` moved above the rationale,
+  installation moved below the feature tour, the orphaned "Branch management"
+  and "Multilingual support" sections nested under `Features`, warning and
+  prerequisite lists turned into tables, and em dashes removed throughout.
 
 ### Added
 
@@ -42,15 +98,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with the npm package.
 - 10 unit tests covering commit-message extraction (567 tests total).
 - This changelog.
-- Removed `docs/README.md`, a stale duplicate of the root README.
 - Project logo (`docs/assets/logo.png`), shown at the top of the README.
 
-### Changed
+### Removed
 
-- README restructured: logo header, `Quick Start` moved above the rationale,
-  installation moved below the feature tour, the orphaned "Branch management"
-  and "Multilingual support" sections nested under `Features`, warning and
-  prerequisite lists turned into tables, and em dashes removed throughout.
+- `docs/README.md`, a stale duplicate of the root README that had been
+  diverging since commit 433feea.
 
 ## [1.1.6] - 2026-09-15
 
@@ -247,6 +300,7 @@ First release, published to npm as `gitcoach-cli`.
 - `gitcoach quick` for fast commit and push.
 - Local analytics and persistent user configuration.
 
+[1.1.8]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.4...v1.1.5
