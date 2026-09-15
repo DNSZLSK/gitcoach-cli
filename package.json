@@ -33,6 +33,14 @@
   ],
   "author": "kposz",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DNSZLSK/gitcoach-cli.git"
+  },
+  "homepage": "https://github.com/DNSZLSK/gitcoach-cli#readme",
+  "bugs": {
+    "url": "https://github.com/DNSZLSK/gitcoach-cli/issues"
+  },
   "oclif": {
     "bin": "gitcoach",
     "dirname": "gitcoach",
