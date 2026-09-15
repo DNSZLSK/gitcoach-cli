@@ -547,6 +547,39 @@ export class GitService {
   /**
    * Commits on this branch that are not on `base`, newest first.
    */
+  /**
+   * Who last changed each line of a file, as git prints it.
+   *
+   * `--date=short` and `-w` keep the output narrow enough for a terminal and
+   * stop pure whitespace edits claiming authorship of a line.
+   */
+  async blameFile(file: string): Promise<string> {
+    return this.git.raw(['blame', '--date=short', '-w', '--', file]);
+  }
+
+  /**
+   * Files tracked at HEAD, so blame can offer a list instead of asking the
+   * user to type a path.
+   */
+  async getTrackedFiles(): Promise<string[]> {
+    const raw = await this.git.raw(['ls-files']);
+    return raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  }
+
+  /**
+   * Patch introduced by a single commit.
+   */
+  async getCommitDiff(hash: string): Promise<string> {
+    return this.git.raw(['show', '--patch', '--stat', '--format=%H%n%an%n%ad%n%s', hash]);
+  }
+
+  /**
+   * Difference between two commits or branches.
+   */
+  async getDiffBetween(from: string, to: string): Promise<string> {
+    return this.git.raw(['diff', '--stat', '--patch', `${from}..${to}`]);
+  }
+
   async getCommitsAhead(base: string, maxCount: number = 50): Promise<CommitInfo[]> {
     const log = await this.git.log({ from: base, to: 'HEAD', maxCount });
     return log.all.map(entry => ({

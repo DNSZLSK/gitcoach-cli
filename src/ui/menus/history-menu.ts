@@ -107,6 +107,21 @@ export async function showHistoryMenu(): Promise<void> {
       }
 
       choices.push({
+        name: theme.menuItem('D', t('commands.history.diff')),
+        value: 'diff'
+      });
+
+      choices.push({
+        name: theme.menuItem('W', t('commands.history.blame')),
+        value: 'blame'
+      });
+
+      choices.push({
+        name: theme.menuItem('C', t('commands.history.compare')),
+        value: 'compare'
+      });
+
+      choices.push({
         name: theme.menuItem('B', t('menu.back')),
         value: 'back'
       });
@@ -118,6 +133,12 @@ export async function showHistoryMenu(): Promise<void> {
       } else if (action === 'view_more') {
         // Load more commits on next iteration
         continue;
+      } else if (action === 'diff') {
+        await showCommitPatch(displayCommits);
+      } else if (action === 'blame') {
+        await showBlame();
+      } else if (action === 'compare') {
+        await compareBranches();
       } else {
         // View commit details
         await showCommitDetails(action);
@@ -157,6 +178,178 @@ async function showCommitDetails(hash: string): Promise<void> {
     logger.raw(theme.dim('  ' + t('commands.history.fullDiffHint', { hash: hash.substring(0, SHORT_HASH_LENGTH) })));
     logger.raw('');
 
+  } catch (error) {
+    logger.raw(theme.error(mapGitError(error)));
+  }
+}
+
+/**
+ * Terminals scroll, but dumping thousands of lines buries the prompt and makes
+ * the tool feel broken, so long output is capped and the cap is announced.
+ */
+const MAX_OUTPUT_LINES = 200;
+
+function printCapped(text: string, noticeKey: string): boolean {
+  const theme = getTheme();
+  const lines = text.split('\n').filter((line, index, all) =>
+    // Drop only a single trailing blank line, not blank lines inside a patch.
+    !(line === '' && index === all.length - 1)
+  );
+
+  if (lines.length === 0) {
+    return false;
+  }
+
+  for (const line of lines.slice(0, MAX_OUTPUT_LINES)) {
+    logger.raw('  ' + colourise(line, theme));
+  }
+
+  if (lines.length > MAX_OUTPUT_LINES) {
+    logger.raw('');
+    logger.raw(theme.textMuted('  ' + t(noticeKey, {
+      count: MAX_OUTPUT_LINES,
+      total: lines.length
+    })));
+  }
+
+  logger.raw('');
+  return true;
+}
+
+/**
+ * Colour a patch the way git does, so additions and removals are readable at a
+ * glance. Themes decide the actual colours, monochrome included.
+ */
+function colourise(line: string, theme: ReturnType<typeof getTheme>): string {
+  if (line.startsWith('+') && !line.startsWith('+++')) return theme.success(line);
+  if (line.startsWith('-') && !line.startsWith('---')) return theme.error(line);
+  if (line.startsWith('@@')) return theme.info(line);
+  return line;
+}
+
+/**
+ * Show the patch a commit introduced.
+ */
+async function showCommitPatch(commits: CommitInfo[]): Promise<void> {
+  const theme = getTheme();
+
+  if (commits.length === 0) {
+    return;
+  }
+
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(t('commands.history.diffExplain')));
+  }
+
+  const hash = await promptSelect<string>(t('commands.history.diffSelectCommit'), [
+    ...commits.map(commit => ({
+      name: `${commit.hash.substring(0, SHORT_HASH_LENGTH)}  ${commit.message.split('\n')[0]}`,
+      value: commit.hash
+    })),
+    { name: t('menu.back'), value: '' }
+  ]);
+
+  if (!hash) {
+    return;
+  }
+
+  try {
+    logger.command(`git show ${hash.substring(0, SHORT_HASH_LENGTH)}`);
+    const patch = await gitService.getCommitDiff(hash);
+
+    if (!printCapped(patch, 'commands.history.diffTruncated')) {
+      logger.raw(infoBox(t('commands.history.diffEmpty')));
+    }
+  } catch (error) {
+    logger.raw(theme.error(mapGitError(error)));
+  }
+}
+
+/**
+ * Attribute every line of a file to the commit that last changed it.
+ */
+async function showBlame(): Promise<void> {
+  const theme = getTheme();
+
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(t('commands.history.blameExplain')));
+  }
+
+  let files: string[];
+  try {
+    files = await gitService.getTrackedFiles();
+  } catch (error) {
+    logger.raw(theme.error(mapGitError(error)));
+    return;
+  }
+
+  if (files.length === 0) {
+    logger.raw(infoBox(t('commands.history.blameNoFiles')));
+    return;
+  }
+
+  const file = await promptSelect<string>(t('commands.history.blameSelectFile'), [
+    ...files.map(name => ({ name, value: name })),
+    { name: t('menu.back'), value: '' }
+  ]);
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    logger.command(`git blame --date=short -w -- ${file}`);
+    const blame = await gitService.blameFile(file);
+
+    if (!printCapped(blame, 'commands.history.blameTruncated')) {
+      logger.raw(infoBox(t('commands.history.blameEmpty')));
+    }
+  } catch (error) {
+    logger.raw(theme.error(mapGitError(error)));
+  }
+}
+
+/**
+ * Compare two branches, which is what you want before merging or opening a
+ * pull request.
+ */
+async function compareBranches(): Promise<void> {
+  const theme = getTheme();
+
+  let branches: Awaited<ReturnType<typeof gitService.getLocalBranches>>;
+  try {
+    branches = await gitService.getLocalBranches();
+  } catch (error) {
+    logger.raw(theme.error(mapGitError(error)));
+    return;
+  }
+
+  if (branches.length < 2) {
+    logger.raw(infoBox(t('commands.branch.noOtherBranches')));
+    return;
+  }
+
+  const options = branches.map(branch => ({ name: branch.name, value: branch.name }));
+  const back = { name: t('menu.back'), value: '' };
+
+  const from = await promptSelect<string>(t('commands.history.compareFrom'), [...options, back]);
+  if (!from) return;
+
+  const to = await promptSelect<string>(t('commands.history.compareTo'), [...options, back]);
+  if (!to) return;
+
+  if (from === to) {
+    logger.raw(infoBox(t('commands.history.compareSame')));
+    return;
+  }
+
+  try {
+    logger.command(`git diff ${from}..${to}`);
+    const diff = await gitService.getDiffBetween(from, to);
+
+    if (!printCapped(diff, 'commands.history.diffTruncated')) {
+      logger.raw(infoBox(t('commands.history.compareEmpty')));
+    }
   } catch (error) {
     logger.raw(theme.error(mapGitError(error)));
   }
