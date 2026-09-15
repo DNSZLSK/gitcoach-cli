@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "gitcoach": "./bin/run.js"
+    "gitcoach": "bin/run.js"
   },
   "scripts": {
     "dev": "tsc -w",
