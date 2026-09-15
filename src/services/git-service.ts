@@ -1,5 +1,5 @@
 import { simpleGit, SimpleGit, StatusResult, BranchSummary, LogResult, DiffResult } from 'simple-git';
-import { existsSync, statSync } from 'fs';
+import { existsSync, statSync, readFileSync } from 'fs';
 import { join, resolve, isAbsolute } from 'path';
 import { logger } from '../utils/logger.js';
 
@@ -462,6 +462,106 @@ export class GitService {
   async abortRebase(): Promise<void> {
     await this.git.rebase(['--abort']);
     this.invalidateCache();
+  }
+
+  /**
+   * Resume a rebase once its conflicts are resolved.
+   *
+   * Returns whether the rebase actually finished. simple-git resolves rather
+   * than rejects when `rebase --continue` exits non-zero, putting git's refusal
+   * in the output, so the outcome has to be read from the repository state.
+   * A rebase that clears one conflict only to stop on the next also returns
+   * false: it has not finished, and the caller must say so.
+   *
+   * `-c core.editor=true` stops git opening an editor for the commit message,
+   * passed per-invocation so the setting does not leak into later commands.
+   */
+  async continueRebase(): Promise<boolean> {
+    return this.resumeOperation(
+      ['-c', 'core.editor=true', 'rebase', '--continue'],
+      () => this.isRebaseInProgress()
+    );
+  }
+
+  /**
+   * Run a `--continue` and report whether the operation actually finished.
+   *
+   * These commands are inconsistent through simple-git: a failed
+   * `rebase --continue` resolves with git's refusal in the output, while a
+   * failed `cherry-pick --continue` rejects. Both mean the same thing, so the
+   * refusal is absorbed here and the answer is read from the repository. A
+   * genuine error, one that leaves no operation in progress, still propagates.
+   */
+  private async resumeOperation(
+    args: string[],
+    stillRunning: () => Promise<boolean>
+  ): Promise<boolean> {
+    try {
+      await this.git.raw(args);
+    } catch (error) {
+      this.invalidateCache();
+      if (await stillRunning()) {
+        logger.debug('Operation refused to continue, probably unresolved conflicts');
+        return false;
+      }
+      throw error;
+    }
+
+    this.invalidateCache();
+    return !(await stillRunning());
+  }
+
+  /**
+   * Drop the commit a rebase is stuck on and move to the next one.
+   */
+  async skipRebase(): Promise<void> {
+    await this.git.rebase(['--skip']);
+    this.invalidateCache();
+  }
+
+  /**
+   * Resume a cherry-pick. Like continueRebase, the outcome is read from the
+   * repository rather than from a thrown error.
+   */
+  async continueCherryPick(): Promise<boolean> {
+    return this.resumeOperation(
+      ['-c', 'core.editor=true', 'cherry-pick', '--continue'],
+      () => this.isCherryPickInProgress()
+    );
+  }
+
+  async abortCherryPick(): Promise<void> {
+    await this.git.raw(['cherry-pick', '--abort']);
+    this.invalidateCache();
+  }
+
+  async abortBisect(): Promise<void> {
+    await this.git.raw(['bisect', 'reset']);
+    this.invalidateCache();
+  }
+
+  /**
+   * How far a rebase has got, as "step of total".
+   *
+   * git keeps these counters in the rebase state directory; they are absent for
+   * an interrupted `rebase --apply`, so callers must tolerate null.
+   */
+  async getRebaseProgress(): Promise<{ current: number; total: number } | null> {
+    try {
+      const dir = join(await this.getGitDir(), 'rebase-merge');
+      if (!existsSync(dir)) {
+        return null;
+      }
+      const current = Number(readFileSync(join(dir, 'msgnum'), 'utf-8').trim());
+      const total = Number(readFileSync(join(dir, 'end'), 'utf-8').trim());
+      if (!Number.isFinite(current) || !Number.isFinite(total)) {
+        return null;
+      }
+      return { current, total };
+    } catch {
+      logger.debug('Failed to read rebase progress');
+      return null;
+    }
   }
 
   async hasUpstream(branch?: string): Promise<boolean> {

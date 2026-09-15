@@ -8,6 +8,7 @@ import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
 import { APP_VERSION } from '../../utils/version.js';
 import { showDetachedHeadMenu, handleDetachedHead } from './detached-head-menu.js';
+import { detectInProgress, runInProgressFlow } from '../flows/in-progress.js';
 import { getLevel } from '../../utils/level-helper.js';
 
 /**
@@ -53,8 +54,16 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     return null;
   });
 
+  // An interrupted operation comes first, and not only because it is more
+  // urgent: git detaches HEAD for the duration of a rebase, so checking the
+  // detached state first would offer HEAD recovery in the middle of one and
+  // push the user further into trouble.
   let headMoved = false;
-  if (await detachedProbe) {
+  const interrupted = await detectInProgress();
+
+  if (interrupted) {
+    headMoved = await runInProgressFlow(interrupted);
+  } else if (await detachedProbe) {
     const action = await showDetachedHeadMenu();
     if (action !== 'ignore') {
       await handleDetachedHead(action);

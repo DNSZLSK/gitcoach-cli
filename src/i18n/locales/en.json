@@ -413,6 +413,30 @@
       "noRemote": "No remote configured, so tags cannot be pushed.",
       "remoteCheckFailed": "Could not reach the remote to compare tags.",
       "explainTag": "A tag is a permanent name for one commit. Unlike a branch, it never moves."
+    },
+    "inProgress": {
+      "title": "Operation in progress",
+      "rebase": "A rebase is in progress.",
+      "cherryPick": "A cherry-pick is in progress.",
+      "merge": "A merge is in progress.",
+      "bisect": "A bisect session is in progress.",
+      "rebaseProgress": "Step {{current}} of {{total}}.",
+      "explain": "Git stopped part-way through and is waiting for you. Nothing is lost: you can finish the operation or cancel it and return to where you started.",
+      "conflictsRemain": "{{count}} file(s) still contain conflict markers. Resolve them before continuing.",
+      "readyToContinue": "All conflicts are resolved. You can continue.",
+      "selectAction": "What do you want to do?",
+      "continue": "Continue the operation",
+      "skip": "Skip this commit and continue",
+      "abort": "Cancel and go back to the starting point",
+      "ignore": "Leave it as it is for now",
+      "resolveFirst": "Open conflict resolution",
+      "continued": "Operation continued.",
+      "skipped": "Commit skipped.",
+      "aborted": "Operation cancelled. The branch is back to its starting point.",
+      "bisectAborted": "Bisect session ended.",
+      "continueFailed": "Git could not continue. Conflicts probably remain.",
+      "abortExplain": "Cancelling puts the branch back exactly where it was before the operation started.",
+      "skipExplain": "Skipping drops the commit the rebase is stuck on. Its changes will not be in the result."
     }
   },
   "time": {

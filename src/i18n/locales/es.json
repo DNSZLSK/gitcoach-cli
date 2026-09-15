@@ -413,6 +413,30 @@
       "noRemote": "No hay remoto configurado, no se pueden enviar etiquetas.",
       "remoteCheckFailed": "No se pudo contactar el remoto para comparar etiquetas.",
       "explainTag": "Una etiqueta es un nombre permanente para un commit. A diferencia de una rama, nunca se mueve."
+    },
+    "inProgress": {
+      "title": "Operacion en curso",
+      "rebase": "Hay un rebase en curso.",
+      "cherryPick": "Hay un cherry-pick en curso.",
+      "merge": "Hay una fusion en curso.",
+      "bisect": "Hay una sesion de bisect en curso.",
+      "rebaseProgress": "Paso {{current}} de {{total}}.",
+      "explain": "Git se detuvo a medio camino y le espera. No se ha perdido nada: puede terminar la operacion o cancelarla y volver al punto de partida.",
+      "conflictsRemain": "{{count}} archivo(s) aun contienen marcas de conflicto. Resuelvalos antes de continuar.",
+      "readyToContinue": "Todos los conflictos estan resueltos. Puede continuar.",
+      "selectAction": "Que desea hacer?",
+      "continue": "Continuar la operacion",
+      "skip": "Omitir este commit y continuar",
+      "abort": "Cancelar y volver al punto de partida",
+      "ignore": "Dejarlo asi por ahora",
+      "resolveFirst": "Abrir la resolucion de conflictos",
+      "continued": "Operacion continuada.",
+      "skipped": "Commit omitido.",
+      "aborted": "Operacion cancelada. La rama volvio a su punto de partida.",
+      "bisectAborted": "Sesion de bisect finalizada.",
+      "continueFailed": "Git no pudo continuar. Probablemente quedan conflictos.",
+      "abortExplain": "Cancelar devuelve la rama exactamente a donde estaba antes de empezar la operacion.",
+      "skipExplain": "Omitir descarta el commit en el que el rebase se atasca. Sus cambios no estaran en el resultado."
     }
   },
   "time": {

@@ -413,6 +413,30 @@
       "noRemote": "Aucun serveur distant configure, les tags ne peuvent pas etre pousses.",
       "remoteCheckFailed": "Impossible de joindre le serveur distant pour comparer les tags.",
       "explainTag": "Un tag est un nom permanent pour un commit. Contrairement a une branche, il ne bouge jamais."
+    },
+    "inProgress": {
+      "title": "Operation en cours",
+      "rebase": "Un rebase est en cours.",
+      "cherryPick": "Un cherry-pick est en cours.",
+      "merge": "Une fusion est en cours.",
+      "bisect": "Une session bisect est en cours.",
+      "rebaseProgress": "Etape {{current}} sur {{total}}.",
+      "explain": "Git s'est arrete en cours de route et vous attend. Rien n'est perdu : vous pouvez terminer l'operation ou l'annuler et revenir a votre point de depart.",
+      "conflictsRemain": "{{count}} fichier(s) contiennent encore des marqueurs de conflit. Resolvez-les avant de continuer.",
+      "readyToContinue": "Tous les conflits sont resolus. Vous pouvez continuer.",
+      "selectAction": "Que voulez-vous faire ?",
+      "continue": "Continuer l'operation",
+      "skip": "Ignorer ce commit et continuer",
+      "abort": "Annuler et revenir au point de depart",
+      "ignore": "Laisser en l'etat pour l'instant",
+      "resolveFirst": "Ouvrir la resolution de conflits",
+      "continued": "Operation poursuivie.",
+      "skipped": "Commit ignore.",
+      "aborted": "Operation annulee. La branche est revenue a son point de depart.",
+      "bisectAborted": "Session bisect terminee.",
+      "continueFailed": "Git n'a pas pu continuer. Il reste probablement des conflits.",
+      "abortExplain": "Annuler remet la branche exactement ou elle etait avant le debut de l'operation.",
+      "skipExplain": "Ignorer abandonne le commit sur lequel le rebase bloque. Ses modifications ne seront pas dans le resultat."
     }
   },
   "time": {
