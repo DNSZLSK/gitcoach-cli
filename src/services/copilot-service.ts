@@ -1,4 +1,5 @@
 import { executeFile, sleep } from '../utils/helpers.js';
+import { extractCommitMessage, TELEMETRY_LINE_PATTERNS } from '../utils/validators.js';
 import { logger } from '../utils/logger.js';
 import { t } from '../i18n/index.js';
 import i18next from 'i18next';
@@ -12,7 +13,6 @@ const COPILOT_RETRY_DELAY_MS = 1000;
 const COPILOT_MAX_RETRIES = 1;
 const COPILOT_INSTALL_TIMEOUT_MS = 120000;
 const MAX_DIFF_FILES = 5;
-const MAX_COMMIT_MSG_LENGTH = 100;
 const MIN_COMMIT_MSG_LENGTH = 10;
 const MIN_LINE_LENGTH = 5;
 const MAX_SUGGESTION_LENGTH = 500;
@@ -622,18 +622,7 @@ ${diff}`;
     const combined = `${output}\n${stderr || ''}`.trim();
     const lines = combined.split('\n');
 
-    // Patterns to filter out (CLI stats)
-    const filterPatterns = [
-      /^\s*$/,
-      /tokens?/i,
-      /model/i,
-      /session/i,
-      /^\d+\s*(tokens?|ms|s)\b/i,
-      /^Time:/i,
-      /^Cost:/i,
-      /^Input:/i,
-      /^Output:/i
-    ];
+    const filterPatterns = TELEMETRY_LINE_PATTERNS;
 
     // Collect all meaningful lines
     const meaningfulLines: string[] = [];
@@ -658,93 +647,17 @@ ${diff}`;
   }
 
   private parseCommitMessage(output: string, stderr?: string): string | null {
-    // Combine stdout and stderr
-    const combined = `${output}\n${stderr || ''}`.trim();
-    const lines = combined.split('\n');
-
-    // Patterns to filter out (CLI noise, stats, etc.)
-    const filterPatterns = [
-      /^\s*$/,
-      /^#/,
-      /^\$/,
-      /^>/,
-      /tokens?/i,
-      /model/i,
-      /session/i,
-      /^\d+\s*(tokens?|ms|s)\b/i,
-      /^Time:/i,
-      /^Cost:/i,
-      /^Input:/i,
-      /^Output:/i
-    ];
-
-    // First pass: look for conventional commit pattern
-    for (const line of lines) {
-      const trimmed = line.trim();
-
-      // Skip filtered patterns
-      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
-        continue;
-      }
-
-      // Match conventional commit format
-      if (/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?:\s*.+/i.test(trimmed)) {
-        // Clean up the message (remove quotes, backticks)
-        return trimmed.replace(/^["'`]|["'`]$/g, '').substring(0, MAX_COMMIT_MSG_LENGTH);
-      }
-    }
-
-    // Second pass: look for any meaningful commit-like message
-    for (const line of lines) {
-      const trimmed = line.trim();
-
-      // Skip filtered patterns
-      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
-        continue;
-      }
-
-      // Accept lines that look like commit messages (start with verb, reasonable length)
-      if (trimmed.length >= MIN_COMMIT_MSG_LENGTH && trimmed.length <= MAX_COMMIT_MSG_LENGTH) {
-        // Check if it starts with a common commit verb
-        if (/^(add|update|fix|remove|refactor|implement|create|delete|change|improve|move|rename)/i.test(trimmed)) {
-          return trimmed.replace(/^["'`]|["'`]$/g, '');
-        }
-      }
-    }
-
-    // Third pass: return first clean line as fallback
-    for (const line of lines) {
-      const trimmed = line.trim();
-
-      if (filterPatterns.some(pattern => pattern.test(trimmed))) {
-        continue;
-      }
-
-      if (trimmed.length >= MIN_LINE_LENGTH && trimmed.length <= MAX_COMMIT_MSG_LENGTH) {
-        return trimmed.replace(/^["'`]|["'`]$/g, '');
-      }
-    }
-
-    return null;
+    // Extraction lives in validators so the Copilot and Ollama providers apply
+    // the same guard against model chatter reaching a commit.
+    return extractCommitMessage(`${output}
+${stderr || ''}`);
   }
 
   private parseSuggestion(output: string, stderr?: string): string | null {
     const combined = `${output}\n${stderr || ''}`.trim();
     const lines = combined.split('\n');
 
-    // Patterns to filter out
-    const filterPatterns = [
-      /^\s*$/,
-      /^#/,
-      /^\$/,
-      /^>/,
-      /tokens?/i,
-      /model/i,
-      /session/i,
-      /^\d+\s*(tokens?|ms|s)\b/i,
-      /^Time:/i,
-      /^Cost:/i
-    ];
+    const filterPatterns = [...TELEMETRY_LINE_PATTERNS, /^#/, /^\$/, /^>/];
 
     // Return meaningful content, filtering out CLI stats
     for (const line of lines) {

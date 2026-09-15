@@ -8,6 +8,7 @@ import type {
 } from './ai-provider.js';
 import { userConfig } from '../../config/user-config.js';
 import { logger } from '../../utils/logger.js';
+import { extractCommitMessage } from '../../utils/validators.js';
 
 const OLLAMA_DEFAULT_ENDPOINT = 'http://localhost:11434';
 const OLLAMA_DEFAULT_MODEL = 'llama3.2';
@@ -94,9 +95,11 @@ class OllamaProvider implements AIProvider {
     if (!out) {
       return { success: false, message: 'Could not generate a commit message' };
     }
-    const firstLine = out.split('\n').map(l => l.trim()).find(l => l.length > 0) || out.trim();
-    const message = firstLine.replace(/^["'`]|["'`]$/g, '').slice(0, MAX_COMMIT_MSG_LENGTH);
-    return { success: true, message };
+    const message = extractCommitMessage(out);
+    if (!message) {
+      return { success: false, message: 'Could not generate a commit message' };
+    }
+    return { success: true, message: message.slice(0, MAX_COMMIT_MSG_LENGTH) };
   }
 
   async analyzeContext(

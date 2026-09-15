@@ -4,7 +4,8 @@ import {
   isConventionalCommit,
   validateFilePath,
   isValidRemoteUrl,
-  sanitizeInput
+  sanitizeInput,
+  extractCommitMessage
 } from '../../src/utils/validators.js';
 
 describe('Validators', () => {
@@ -119,4 +120,64 @@ describe('Validators', () => {
       expect(sanitizeInput('`backtick`')).toBe('backtick');
     });
   });
+
+  describe('extractCommitMessage', () => {
+    it('should prefer a conventional commit header', () => {
+      expect(extractCommitMessage('feat: add login module')).toBe('feat: add login module');
+      expect(extractCommitMessage('Some noise\nfix(auth): handle expired token')).toBe(
+        'fix(auth): handle expired token'
+      );
+    });
+
+    it('should strip wrapping quotes and backticks', () => {
+      expect(extractCommitMessage('"feat: add login module"')).toBe('feat: add login module');
+      expect(extractCommitMessage('`chore: bump deps`')).toBe('chore: bump deps');
+    });
+
+    it('should accept a verb-led subject when no conventional header exists', () => {
+      expect(extractCommitMessage('Add login module for users')).toBe('Add login module for users');
+    });
+
+    it('should reject conversational preambles', () => {
+      expect(extractCommitMessage('Sure, here is your commit message:')).toBeNull();
+      expect(extractCommitMessage('Of course! The commit message you asked for')).toBeNull();
+      expect(extractCommitMessage('Voici le message de commit :')).toBeNull();
+      expect(extractCommitMessage('Claro, aqui tienes el mensaje')).toBeNull();
+    });
+
+    it('should skip a preamble and keep the real message that follows', () => {
+      const output = 'Sure, here is your commit message:\n\nfeat: add login module';
+      expect(extractCommitMessage(output)).toBe('feat: add login module');
+    });
+
+    it('should reject questions and meta-commentary', () => {
+      expect(extractCommitMessage('Would you like another commit message?')).toBeNull();
+      expect(extractCommitMessage('This commit message follows the convention')).toBeNull();
+    });
+
+    it('should reject CLI noise and markdown scaffolding', () => {
+      expect(extractCommitMessage('')).toBeNull();
+      expect(extractCommitMessage('   ')).toBeNull();
+      expect(extractCommitMessage('1234 tokens used\nCost: $0.01')).toBeNull();
+      expect(extractCommitMessage('```\n```')).toBeNull();
+      expect(extractCommitMessage('- a bulleted suggestion line')).toBeNull();
+    });
+
+    it('should keep a non-English subject that reads like a commit', () => {
+      expect(extractCommitMessage('Ajoute le module de connexion')).toBe(
+        'Ajoute le module de connexion'
+      );
+    });
+
+    it('should reject subjects that are too short or too long', () => {
+      expect(extractCommitMessage('nope')).toBeNull();
+      expect(extractCommitMessage('Add ' + 'x'.repeat(200))).toBeNull();
+    });
+
+    it('should truncate an over-long conventional header', () => {
+      const long = 'feat: ' + 'x'.repeat(200);
+      expect(extractCommitMessage(long)).toHaveLength(100);
+    });
+  });
+
 });
