@@ -5,7 +5,7 @@ All notable changes to GitCoach are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.6] - 2026-09-15
+## [1.1.7] - 2026-09-15
 
 ### Fixed
 
@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with the npm package.
 - 10 unit tests covering commit-message extraction (567 tests total).
 - This changelog.
+- Removed `docs/README.md`, a stale duplicate of the root README.
 - Project logo (`docs/assets/logo.png`), shown at the top of the README.
 
 ### Changed
@@ -50,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   installation moved below the feature tour, the orphaned "Branch management"
   and "Multilingual support" sections nested under `Features`, warning and
   prerequisite lists turned into tables, and em dashes removed throughout.
+
+## [1.1.6] - 2026-09-15
+
+Tagged but never published to npm; its contents ship in 1.1.7.
 
 ## [1.1.5] - 2026-05-30
 
@@ -242,6 +247,7 @@ First release, published to npm as `gitcoach-cli`.
 - `gitcoach quick` for fast commit and push.
 - Local analytics and persistent user configuration.
 
+[1.1.7]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/DNSZLSK/gitcoach-cli/compare/v1.1.3...v1.1.4
