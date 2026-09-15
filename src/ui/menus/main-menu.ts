@@ -34,6 +34,7 @@ export type MainMenuAction =
   | 'undo'
   | 'history'
   | 'tags'
+  | 'advanced'
   | 'stash'
   | 'config'
   | 'stats'
@@ -138,6 +139,12 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     {
       name: theme.menuItem('G', getMenuLabel('config')),
       value: 'config' as MainMenuAction
+    },
+    {
+      // Grouped rather than given their own top-level entries: submodules,
+      // worktrees and signing belong to real projects, not to a first commit.
+      name: theme.menuItem('X', getMenuLabel('advanced')),
+      value: 'advanced' as MainMenuAction
     },
     {
       name: theme.menuItem('T', getMenuLabel('stats')),

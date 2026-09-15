@@ -187,6 +187,12 @@ export default class Index extends Command {
         return true;
       }
 
+      case 'advanced': {
+        const { showAdvancedMenu } = await import('../ui/menus/advanced-menu.js');
+        await showAdvancedMenu();
+        return true;
+      }
+
       case 'stash': {
         const { showStashMenu } = await import('../ui/menus/stash-menu.js');
         await showStashMenu();

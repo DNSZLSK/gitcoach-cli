@@ -22,6 +22,21 @@ export interface BranchInfo {
   label: string;
 }
 
+export interface SubmoduleInfo {
+  path: string;
+  commit: string;
+  initialized: boolean;
+  modified: boolean;
+  conflicted: boolean;
+}
+
+export interface WorktreeInfo {
+  path: string;
+  branch: string | null;
+  detached: boolean;
+  locked: boolean;
+}
+
 export interface TagInfo {
   name: string;
   annotated: boolean;
@@ -553,6 +568,140 @@ export class GitService {
    * `--date=short` and `-w` keep the output narrow enough for a terminal and
    * stop pure whitespace edits claiming authorship of a line.
    */
+  /**
+   * Submodules declared in .gitmodules, with the state git reports for each.
+   *
+   * `git submodule status` prefixes each line with a marker: '-' not
+   * initialised, '+' checked out at a different commit than recorded, 'U'
+   * conflicted, and a space when it matches.
+   */
+  /**
+   * Commit-signing settings for this repository.
+   *
+   * Read with `--get` so an unset value is an absent key rather than an error,
+   * and scoped to `--local` so the answer describes this repository and not
+   * whatever the user's global config happens to say.
+   */
+  async getSigningConfig(): Promise<{ enabled: boolean; key: string | null }> {
+    const read = async (name: string): Promise<string | null> => {
+      try {
+        const value = await this.git.raw(['config', '--local', '--get', name]);
+        return value.trim() || null;
+      } catch {
+        // git exits non-zero when the key is simply not set.
+        return null;
+      }
+    };
+
+    const [sign, key] = await Promise.all([read('commit.gpgsign'), read('user.signingkey')]);
+    return { enabled: sign === 'true', key };
+  }
+
+  async setSigningEnabled(enabled: boolean): Promise<void> {
+    await this.git.raw(['config', '--local', 'commit.gpgsign', enabled ? 'true' : 'false']);
+  }
+
+  async setSigningKey(key: string): Promise<void> {
+    await this.git.raw(['config', '--local', 'user.signingkey', key]);
+  }
+
+  async getSubmodules(): Promise<SubmoduleInfo[]> {
+    if (!existsSync(join(this.basePath, '.gitmodules'))) {
+      return [];
+    }
+
+    const raw = await this.git.raw(['submodule', 'status']);
+
+    return raw
+      .split('\n')
+      .filter(line => line.trim().length > 0)
+      .map(line => {
+        const marker = line[0];
+        const [commit, path] = line.slice(1).trim().split(/\s+/);
+        return {
+          path: path || '',
+          commit: commit || '',
+          initialized: marker !== '-',
+          modified: marker === '+',
+          conflicted: marker === 'U'
+        };
+      })
+      .filter(entry => entry.path.length > 0);
+  }
+
+  async initSubmodules(): Promise<void> {
+    await this.git.raw(['submodule', 'update', '--init', '--recursive']);
+  }
+
+  async updateSubmodules(): Promise<void> {
+    await this.git.raw(['submodule', 'update', '--remote', '--merge']);
+  }
+
+  async addSubmodule(url: string, path: string): Promise<void> {
+    await this.git.raw(['submodule', 'add', url, path]);
+    this.invalidateCache();
+  }
+
+  /**
+   * Worktrees attached to this repository, the main one included.
+   *
+   * Parsed from the porcelain format, which emits a blank-line-separated
+   * record per worktree rather than a fixed number of columns.
+   */
+  async getWorktrees(): Promise<WorktreeInfo[]> {
+    const raw = await this.git.raw(['worktree', 'list', '--porcelain']);
+    const worktrees: WorktreeInfo[] = [];
+    let current: Partial<WorktreeInfo> = {};
+
+    for (const line of raw.split('\n')) {
+      const trimmed = line.trim();
+
+      if (trimmed.length === 0) {
+        if (current.path) {
+          worktrees.push({
+            path: current.path,
+            branch: current.branch ?? null,
+            detached: current.detached ?? false,
+            locked: current.locked ?? false
+          });
+        }
+        current = {};
+        continue;
+      }
+
+      if (trimmed.startsWith('worktree ')) current.path = trimmed.slice(9);
+      else if (trimmed.startsWith('branch ')) current.branch = trimmed.slice(7).replace('refs/heads/', '');
+      else if (trimmed === 'detached') current.detached = true;
+      else if (trimmed.startsWith('locked')) current.locked = true;
+    }
+
+    // The porcelain output may end without a trailing blank line.
+    if (current.path) {
+      worktrees.push({
+        path: current.path,
+        branch: current.branch ?? null,
+        detached: current.detached ?? false,
+        locked: current.locked ?? false
+      });
+    }
+
+    return worktrees;
+  }
+
+  async addWorktree(path: string, branch: string, createBranch: boolean): Promise<void> {
+    const args = createBranch
+      ? ['worktree', 'add', '-b', branch, path]
+      : ['worktree', 'add', path, branch];
+    await this.git.raw(args);
+  }
+
+  async removeWorktree(path: string, force: boolean = false): Promise<void> {
+    const args = ['worktree', 'remove'];
+    if (force) args.push('--force');
+    args.push(path);
+    await this.git.raw(args);
+  }
+
   async blameFile(file: string): Promise<string> {
     return this.git.raw(['blame', '--date=short', '-w', '--', file]);
   }
