@@ -25,8 +25,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   was discarded as CLI telemetry. Patterns are now anchored to actual telemetry
   lines and shared via `TELEMETRY_LINE_PATTERNS`.
 
+### Changed
+
+- **Licence changed from MIT to Apache 2.0.** The repository declared MIT in
+  `package.json` and the README but shipped no LICENSE file at all, so the one
+  obligation MIT imposes, preserving the copyright notice, had no notice to
+  preserve. Apache 2.0 keeps the same permissive terms and adds an express
+  patent grant, an obligation to state modifications, and a trademark clause
+  covering the GitCoach name. Versions 1.0.0 through 1.1.4, already published
+  to npm, remain available under MIT; a licence change is not retroactive.
+- `author` corrected to DNSZLSK in `package.json`.
+
 ### Added
 
+- `LICENSE` (Apache 2.0, Copyright 2026 DNSZLSK) and `NOTICE`, both shipped
+  with the npm package.
 - 10 unit tests covering commit-message extraction (567 tests total).
 - This changelog.
 - Project logo (`docs/assets/logo.png`), shown at the top of the README.

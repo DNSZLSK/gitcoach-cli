@@ -13,7 +13,7 @@
 
 [![npm version](https://img.shields.io/npm/v/gitcoach-cli)](https://www.npmjs.com/package/gitcoach-cli)
 [![GitHub](https://img.shields.io/github/stars/DNSZLSK/gitcoach-cli?style=social)](https://github.com/DNSZLSK/gitcoach-cli)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ---
 
@@ -368,4 +368,4 @@ Built for the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/gith
 
 ## License
 
-MIT
+Apache License 2.0. Copyright 2026 DNSZLSK. See [LICENSE](../LICENSE).

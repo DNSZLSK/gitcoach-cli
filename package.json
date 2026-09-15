@@ -32,8 +32,8 @@
     "beginner",
     "multilingual"
   ],
-  "author": "kposz",
-  "license": "MIT",
+  "author": "DNSZLSK",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DNSZLSK/gitcoach-cli.git"
@@ -51,7 +51,9 @@
   "files": [
     "/bin",
     "/dist",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "LICENSE",
+    "NOTICE"
   ],
   "dependencies": {
     "@inquirer/prompts": "^7.2.1",
