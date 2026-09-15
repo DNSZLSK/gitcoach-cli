@@ -336,6 +336,7 @@ gitcoach-cli/
 - **GitHub:** [github.com/DNSZLSK/gitcoach-cli](https://github.com/DNSZLSK/gitcoach-cli)
 - **DEV.to:** [GitCoach — GitHub Copilot CLI Challenge](https://dev.to/dnszlsk/gitcoach-the-git-mentor-that-teaches-you-while-you-work-github-copilot-cli-challenge-1708)
 - **Issues:** [github.com/DNSZLSK/gitcoach-cli/issues](https://github.com/DNSZLSK/gitcoach-cli/issues)
+- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
