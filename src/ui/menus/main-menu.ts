@@ -41,28 +41,41 @@ export type MainMenuAction =
 export async function showMainMenu(): Promise<MainMenuAction> {
   const theme = getTheme();
 
-  // Check for detached HEAD state
-  try {
-    const isDetached = await gitService.isDetachedHead();
-    if (isDetached) {
-      const action = await showDetachedHeadMenu();
-      if (action !== 'ignore') {
-        await handleDetachedHead(action);
-      }
-    }
-  } catch {
+  // Both probes spawn git, and neither needs the other's result, so start them
+  // together rather than paying for two round trips in series.
+  const detachedProbe = gitService.isDetachedHead().catch(() => {
     logger.debug('Error checking detached HEAD state');
+    return false;
+  });
+  let statusProbe = analysisService.getQuickStatus().catch(() => {
+    logger.debug('Error fetching quick status');
+    return null;
+  });
+
+  let headMoved = false;
+  if (await detachedProbe) {
+    const action = await showDetachedHeadMenu();
+    if (action !== 'ignore') {
+      await handleDetachedHead(action);
+      headMoved = true;
+    }
   }
 
   // Show ASCII art banner
   logger.raw(banner(APP_VERSION, t('app.tagline')));
 
-  // Show quick status if available
-  try {
-    const quickStatus = await analysisService.getQuickStatus();
+  // Recovering from a detached HEAD moves HEAD, which makes the status started
+  // above stale; only then is a second call warranted.
+  if (headMoved) {
+    statusProbe = analysisService.getQuickStatus().catch(() => {
+      logger.debug('Error fetching quick status');
+      return null;
+    });
+  }
+
+  const quickStatus = await statusProbe;
+  if (quickStatus) {
     logger.raw(theme.textMuted(`  ${quickStatus}\n`));
-  } catch {
-    logger.debug('Error fetching quick status');
   }
 
   const choices = [

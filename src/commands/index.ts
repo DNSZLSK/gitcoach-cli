@@ -11,23 +11,12 @@ import {
   showStatusScreen,
   MainMenuAction
 } from '../ui/menus/main-menu.js';
-import { showAddMenu } from '../ui/menus/add-menu.js';
-import { showCommitMenu } from '../ui/menus/commit-menu.js';
-import { showBranchMenu } from '../ui/menus/branch-menu.js';
-import { showRemoteMenu } from '../ui/menus/remote-menu.js';
-import { showConfigMenu } from '../ui/menus/config-menu.js';
-import { showPushMenu } from '../ui/menus/push-menu.js';
-import { showPullMenu } from '../ui/menus/pull-menu.js';
-import { showUndoMenu } from '../ui/menus/undo-menu.js';
-import { showHistoryMenu } from '../ui/menus/history-menu.js';
-import { showStashMenu } from '../ui/menus/stash-menu.js';
-import {
-  showSetupMenu,
-  handleGitInit,
-  handleGitClone,
-  SetupMenuAction
-} from '../ui/menus/setup-menu.js';
-import { showHelpMenu } from '../ui/menus/help-menu.js';
+import type { SetupMenuAction } from '../ui/menus/setup-menu.js';
+
+// Secondary menus are loaded on demand. Importing all thirteen up front cost
+// roughly 170ms on every launch, including `--version`, for screens the user
+// may never open. The import is cached after first use, and the wait is hidden
+// behind the keypress that selects the menu.
 
 export default class Index extends Command {
   static override description = 'GitCoach - Your Interactive Git Assistant';
@@ -97,6 +86,10 @@ export default class Index extends Command {
   private async handleSetupMenu(): Promise<boolean> {
     const theme = getTheme();
 
+    const { showSetupMenu, handleGitInit, handleGitClone } = await import(
+      '../ui/menus/setup-menu.js'
+    );
+
     let running = true;
     while (running) {
       try {
@@ -140,53 +133,75 @@ export default class Index extends Command {
         await showStatusScreen();
         return true;
 
-      case 'add':
+      case 'add': {
+        const { showAddMenu } = await import('../ui/menus/add-menu.js');
         await showAddMenu();
         return true;
+      }
 
-      case 'commit':
+      case 'commit': {
+        const { showCommitMenu } = await import('../ui/menus/commit-menu.js');
         await showCommitMenu();
         return true;
+      }
 
-      case 'push':
+      case 'push': {
+        const { showPushMenu } = await import('../ui/menus/push-menu.js');
         await showPushMenu();
         return true;
+      }
 
-      case 'pull':
+      case 'pull': {
+        const { showPullMenu } = await import('../ui/menus/pull-menu.js');
         await showPullMenu();
         return true;
+      }
 
-      case 'branch':
+      case 'branch': {
+        const { showBranchMenu } = await import('../ui/menus/branch-menu.js');
         await showBranchMenu();
         return true;
+      }
 
-      case 'remote':
+      case 'remote': {
+        const { showRemoteMenu } = await import('../ui/menus/remote-menu.js');
         await showRemoteMenu();
         return true;
+      }
 
-      case 'undo':
+      case 'undo': {
+        const { showUndoMenu } = await import('../ui/menus/undo-menu.js');
         await showUndoMenu();
         return true;
+      }
 
-      case 'history':
+      case 'history': {
+        const { showHistoryMenu } = await import('../ui/menus/history-menu.js');
         await showHistoryMenu();
         return true;
+      }
 
-      case 'stash':
+      case 'stash': {
+        const { showStashMenu } = await import('../ui/menus/stash-menu.js');
         await showStashMenu();
         return true;
+      }
 
-      case 'config':
+      case 'config': {
+        const { showConfigMenu } = await import('../ui/menus/config-menu.js');
         await showConfigMenu();
         return true;
+      }
 
       case 'stats':
         await this.config.runCommand('stats');
         return true;
 
-      case 'help':
+      case 'help': {
+        const { showHelpMenu } = await import('../ui/menus/help-menu.js');
         await showHelpMenu();
         return true;
+      }
 
       case 'quit':
         return false;
