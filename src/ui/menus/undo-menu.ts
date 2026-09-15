@@ -7,8 +7,17 @@ import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
 import { shouldShowExplanation, shouldConfirm } from '../../utils/level-helper.js';
 import { showRecoveryMenu } from './recovery-menu.js';
+import { runAmendFlow } from '../flows/amend.js';
 
-export type UndoAction = 'soft_reset' | 'hard_reset' | 'unstage' | 'restore' | 'recover' | 'back';
+export type UndoAction =
+  | 'amend'
+  | 'revert'
+  | 'soft_reset'
+  | 'hard_reset'
+  | 'unstage'
+  | 'restore'
+  | 'recover'
+  | 'back';
 
 export async function showUndoMenu(): Promise<void> {
   const theme = getTheme();
@@ -16,6 +25,16 @@ export async function showUndoMenu(): Promise<void> {
   logger.raw('\n' + theme.title(t('commands.undo.title')) + '\n');
 
   const choices = [
+    {
+      name: theme.menuItem('M', t('commands.undo.amend')),
+      value: 'amend' as UndoAction,
+      description: t('commands.undo.amendDesc')
+    },
+    {
+      name: theme.menuItem('V', t('commands.undo.revert')),
+      value: 'revert' as UndoAction,
+      description: t('commands.undo.revertDesc')
+    },
     {
       name: theme.menuItem('S', t('commands.undo.softReset')),
       value: 'soft_reset' as UndoAction,
@@ -55,6 +74,14 @@ export async function showUndoMenu(): Promise<void> {
   const action = await promptSelect<UndoAction>(t('commands.undo.selectAction'), choices);
 
   switch (action) {
+    case 'amend':
+      await runAmendFlow();
+      break;
+
+    case 'revert':
+      await handleRevert();
+      break;
+
     case 'soft_reset':
       await handleSoftReset();
       break;
@@ -258,6 +285,62 @@ async function handleRestore(): Promise<void> {
     }
     logger.raw('\n' + successBox(t('commands.undo.restoreSuccess', { count: selectedFiles.length })));
   } catch (error) {
+    logger.raw(errorBox(mapGitError(error)));
+  }
+}
+
+/**
+ * Undo a commit by adding one that cancels it, leaving history intact.
+ */
+async function handleRevert(): Promise<void> {
+  const commits = await gitService.getLog(10);
+
+  if (commits.length === 0) {
+    logger.raw(warningBox(t('commands.undo.noCommitsToRevert')));
+    return;
+  }
+
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(t('commands.undo.revertExplain')));
+  }
+
+  const selected = await promptSelect<string>(t('commands.undo.selectCommitToRevert'), [
+    ...commits.map(commit => ({
+      name: `${commit.hash.substring(0, 7)}  ${commit.message.split('\n')[0]}`,
+      value: commit.hash
+    })),
+    { name: t('menu.back'), value: '' }
+  ]);
+
+  if (!selected) {
+    return;
+  }
+
+  const target = commits.find(commit => commit.hash === selected);
+  const subject = target ? target.message.split('\n')[0] : selected;
+
+  // --no-edit means git writes the message itself, so show exactly what will
+  // land in the history rather than leaving the user to discover it after.
+  logger.raw(infoBox(t('commands.undo.revertMessagePreview', {
+    subject,
+    hash: selected.substring(0, 7)
+  })));
+
+  if (!(await promptConfirm(t('commands.undo.confirmRevert', { message: subject }), false))) {
+    return;
+  }
+
+  try {
+    logger.command(`git revert --no-edit ${selected.substring(0, 7)}`);
+    await gitService.revertCommit(selected);
+    logger.raw(successBox(t('commands.undo.reverted')));
+  } catch (error) {
+    // A revert that touches changed lines stops with conflict markers, exactly
+    // like a merge; say so instead of reporting a bare git error.
+    if (await gitService.hasConflicts()) {
+      logger.raw(warningBox(t('commands.undo.revertConflict')));
+      return;
+    }
     logger.raw(errorBox(mapGitError(error)));
   }
 }

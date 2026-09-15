@@ -233,6 +233,17 @@ export async function showCommitMenu(): Promise<CommitResult> {
       t('success.title')
     ));
 
+    // A beginner who mistypes a message looks for the fix here, not under
+    // Undo, so offer it on the spot. Experts are left alone; they know where
+    // amend lives. Loaded on demand to keep it off the startup path.
+    if (!isLevel('expert')) {
+      const fix = await promptConfirm(t('commands.commit.amendJustCommitted'), false);
+      if (fix) {
+        const { runAmendFlow } = await import('../flows/amend.js');
+        await runAmendFlow();
+      }
+    }
+
     return {
       committed: true,
       hash,

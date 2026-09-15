@@ -149,7 +149,8 @@
       "typeFix": "fix: (correction de bug)",
       "typeDocs": "docs: (documentation)",
       "typeRefactor": "refactor: (refactorisation)",
-      "typeChore": "chore: (maintenance)"
+      "typeChore": "chore: (maintenance)",
+      "amendJustCommitted": "Message incorrect ? Modifier ce commit maintenant ?"
     },
     "push": {
       "title": "Envoyer les Modifications",
@@ -298,7 +299,26 @@
       "modifiedFiles": "Fichiers modifies :",
       "selectFilesToRestore": "Selectionnez les fichiers a restaurer :",
       "confirmRestore": "Annuler les modifications de {{count}} fichier(s) ? Cette action est irreversible !",
-      "restoreSuccess": "{{count}} fichier(s) restaure(s) a la derniere version."
+      "restoreSuccess": "{{count}} fichier(s) restaure(s) a la derniere version.",
+      "amend": "Modifier le dernier commit",
+      "amendDesc": "Changer le message ou integrer les fichiers prepares au dernier commit",
+      "amendExplain": "Amender remplace le dernier commit par un nouveau. L'ancien disparait, son identifiant change donc.",
+      "amendPushedWarning": "Ce commit a deja ete pousse. L'amender reecrit l'historique partage, et il faudra un push force qui peut ecraser le travail des autres.",
+      "amendCurrent": "Message actuel : {{message}}",
+      "amendStagedNote": "{{count}} fichier(s) prepare(s) seront integres au commit.",
+      "amendNewMessage": "Nouveau message (laisser vide pour garder l'actuel) :",
+      "amendConfirm": "Remplacer le dernier commit ?",
+      "amended": "Dernier commit reecrit.",
+      "noCommitToAmend": "Aucun commit a modifier pour l'instant.",
+      "revert": "Annuler un commit (revert)",
+      "revertDesc": "Ajouter un nouveau commit qui annule un commit precedent",
+      "revertExplain": "Revert n'efface rien : il ajoute un commit qui annule un commit anterieur. C'est donc sur sur une branche que d'autres ont recuperee, contrairement a un reset.",
+      "selectCommitToRevert": "Quel commit voulez-vous annuler ?",
+      "confirmRevert": "Creer un commit qui annule '{{message}}' ?",
+      "reverted": "Commit annule. Un nouveau commit l'annule desormais.",
+      "revertConflict": "L'annulation a provoque un conflit. Resolvez les fichiers, puis commitez.",
+      "noCommitsToRevert": "Aucun commit a annuler pour l'instant.",
+      "revertMessagePreview": "Git va creer ce commit :\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}."
     },
     "history": {
       "title": "Historique des Commits",

@@ -565,6 +565,42 @@ export class GitService {
    * `-version:refname`, which orders by name and misplaces anything that is not
    * strictly semver.
    */
+  /**
+   * Message of the most recent commit, or null in a repository with no commits.
+   */
+  async getLastCommitMessage(): Promise<string | null> {
+    try {
+      const message = await this.git.raw(['log', '-1', '--pretty=%B']);
+      return message.trim() || null;
+    } catch {
+      logger.debug('No commit to read a message from');
+      return null;
+    }
+  }
+
+  /**
+   * Replace the most recent commit.
+   *
+   * This creates a new commit object, so the old hash disappears. Callers must
+   * warn first when the commit has already been pushed.
+   */
+  async amendCommit(message?: string): Promise<void> {
+    const args = message
+      ? ['commit', '--amend', '-m', message]
+      : ['commit', '--amend', '--no-edit'];
+    await this.git.raw(args);
+    this.invalidateCache();
+  }
+
+  /**
+   * Revert a commit by adding a new commit that undoes it. Unlike a reset this
+   * keeps history intact, so it is safe on a shared branch.
+   */
+  async revertCommit(hash: string): Promise<void> {
+    await this.git.raw(['revert', '--no-edit', hash]);
+    this.invalidateCache();
+  }
+
   async getTags(): Promise<TagInfo[]> {
     // Unit separator: Node rejects NUL bytes in process arguments, and 0x1F
     // cannot appear in a tag name, subject or date.

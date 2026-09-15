@@ -149,7 +149,8 @@
       "typeFix": "fix: (bug fix)",
       "typeDocs": "docs: (documentation)",
       "typeRefactor": "refactor: (code refactor)",
-      "typeChore": "chore: (maintenance)"
+      "typeChore": "chore: (maintenance)",
+      "amendJustCommitted": "Wrong message? Modify this commit now?"
     },
     "push": {
       "title": "Push Changes",
@@ -298,7 +299,26 @@
       "modifiedFiles": "Modified files:",
       "selectFilesToRestore": "Select files to restore:",
       "confirmRestore": "Discard changes to {{count}} file(s)? This cannot be undone!",
-      "restoreSuccess": "{{count}} file(s) restored to last commit."
+      "restoreSuccess": "{{count}} file(s) restored to last commit.",
+      "amend": "Modify the last commit",
+      "amendDesc": "Change the message or fold staged changes into the last commit",
+      "amendExplain": "Amending replaces the last commit with a new one. The old commit disappears, so its identifier changes.",
+      "amendPushedWarning": "This commit has already been pushed. Amending it rewrites shared history, and you will need a force push that can overwrite other people's work.",
+      "amendCurrent": "Current message: {{message}}",
+      "amendStagedNote": "{{count}} staged file(s) will be folded into the commit.",
+      "amendNewMessage": "New message (leave empty to keep the current one):",
+      "amendConfirm": "Replace the last commit?",
+      "amended": "Last commit rewritten.",
+      "noCommitToAmend": "No commit to modify yet.",
+      "revert": "Revert a commit",
+      "revertDesc": "Add a new commit that undoes an earlier one",
+      "revertExplain": "Revert does not erase anything: it adds a commit that cancels an earlier one. That makes it safe on a branch others have pulled, unlike a reset.",
+      "selectCommitToRevert": "Which commit do you want to revert?",
+      "confirmRevert": "Create a commit that undoes '{{message}}'?",
+      "reverted": "Commit reverted. A new commit now undoes it.",
+      "revertConflict": "The revert hit a conflict. Resolve the files, then commit.",
+      "noCommitsToRevert": "No commits to revert yet.",
+      "revertMessagePreview": "Git will create this commit:\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}."
     },
     "history": {
       "title": "Commit History",

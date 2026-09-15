@@ -149,7 +149,8 @@
       "typeFix": "fix: (correccion de bug)",
       "typeDocs": "docs: (documentacion)",
       "typeRefactor": "refactor: (refactorizacion)",
-      "typeChore": "chore: (mantenimiento)"
+      "typeChore": "chore: (mantenimiento)",
+      "amendJustCommitted": "Mensaje incorrecto? Modificar este commit ahora?"
     },
     "push": {
       "title": "Subir Cambios",
@@ -298,7 +299,26 @@
       "modifiedFiles": "Archivos modificados:",
       "selectFilesToRestore": "Selecciona archivos para restaurar:",
       "confirmRestore": "Descartar cambios en {{count}} archivo(s)? No se puede deshacer!",
-      "restoreSuccess": "{{count}} archivo(s) restaurado(s) al ultimo commit."
+      "restoreSuccess": "{{count}} archivo(s) restaurado(s) al ultimo commit.",
+      "amend": "Modificar el ultimo commit",
+      "amendDesc": "Cambiar el mensaje o incluir los archivos preparados en el ultimo commit",
+      "amendExplain": "Enmendar reemplaza el ultimo commit por uno nuevo. El anterior desaparece, por lo que su identificador cambia.",
+      "amendPushedWarning": "Este commit ya fue enviado. Enmendarlo reescribe el historial compartido y hara falta un push forzado que puede sobrescribir el trabajo de otros.",
+      "amendCurrent": "Mensaje actual: {{message}}",
+      "amendStagedNote": "{{count}} archivo(s) preparado(s) se incluiran en el commit.",
+      "amendNewMessage": "Nuevo mensaje (dejar vacio para conservar el actual):",
+      "amendConfirm": "Reemplazar el ultimo commit?",
+      "amended": "Ultimo commit reescrito.",
+      "noCommitToAmend": "Aun no hay commit que modificar.",
+      "revert": "Revertir un commit",
+      "revertDesc": "Anadir un commit nuevo que deshace uno anterior",
+      "revertExplain": "Revertir no borra nada: anade un commit que cancela uno anterior. Por eso es seguro en una rama que otros ya descargaron, a diferencia de un reset.",
+      "selectCommitToRevert": "Que commit desea revertir?",
+      "confirmRevert": "Crear un commit que deshaga '{{message}}'?",
+      "reverted": "Commit revertido. Un commit nuevo lo deshace.",
+      "revertConflict": "La reversion provoco un conflicto. Resuelva los archivos y haga commit.",
+      "noCommitsToRevert": "Aun no hay commits que revertir.",
+      "revertMessagePreview": "Git creara este commit:\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}."
     },
     "history": {
       "title": "Historial de Commits",
