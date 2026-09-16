@@ -23,13 +23,17 @@ Tags and releases, commit amend and revert, a way out of interrupted operations
 branch and squash, blame / commit patch / branch comparison, submodules,
 worktrees, commit signing, and a ~165ms cut to startup.
 
-### Not shipped — the four features that finish the tool
+### The four features that finish the tool - all shipped
 
-1. `.gitignore` management (the only current mention is inside `setup-menu.ts`)
-2. Cherry-pick **as an action the user initiates** — today the tool can only
-   rescue a cherry-pick that is already in progress
-3. `git clean` for untracked files
-4. Git LFS
+1. `.gitignore` management - its own main-menu entry next to Add, including
+   the warning nobody gets from git itself: an ignore rule does nothing to a
+   file that is already tracked, and the `git rm --cached` that fixes it
+2. Cherry-pick as an action the user initiates, in the branch menu. The rescue
+   path for one already in progress was there before; there was no way to start
+   one
+3. `git clean`, in the undo menu, always behind a preview. Deliberately without
+   -x, so .gitignore'd files (node_modules, .env) are never in the list
+4. Git LFS, in the advanced menu
 
 ### What a good test is here
 
@@ -49,34 +53,43 @@ target to hit.
 
 ### Test reality
 
-1085 tests, 45 suites, all green on Vitest. Coverage stands at **57%**.
+1222 tests, 49 suites, all green on Vitest. Coverage stands at **61%**.
 
-It has been restated downward twice and raised once, and only the last move
-counted for anything: the two falls came from removing things that were never
-evidence (files Jest could not load; `require()` calls istanbul scored as
-executed statements), the rise came from writing tests that break when the
-menus change.
+It has been restated downward twice and raised since, and only the rises count
+for anything: the falls came from removing things that were never evidence
+(files Jest could not load; `require()` calls istanbul scored as executed
+statements), the rises from tests that break when the code changes.
 
-The five most-used menus are covered, each verified by mutation rather than by
-percentage — the guard was removed on purpose and the suite had to fail:
-
-| Menu | Statements | Checked by breaking |
-|------|-----------|---------------------|
-| `branch-menu.ts` | 96% | dropped the current-branch filter, deleted without confirming, rebased a dirty tree |
-| `undo-menu.ts` | 95% | single-confirmed the hard reset, pre-checked the restore boxes |
-| `push-menu.ts` | 95% | single-confirmed the force push, forced the ordinary push |
-| `pull-menu.ts` | 95% | pulled into a live merge, skipped the stash, dropped `--rebase` |
-| `commit-menu.ts` | 93% | ignored an unresolved conflict, skipped the risky-file question |
+Every menu suite is verified by mutation - the guard is removed on purpose and
+the suite has to fail. The five main menus sit at 93-96%, and every feature
+added since came with the same treatment.
 
 Still at zero, and next in line: `add-menu`, `stash-menu`, `config-menu`,
-`history-menu`, `main-menu`, `remote-menu`, `help-menu`,
+`history-menu`, `main-menu` beyond its labels, `remote-menu`, `help-menu`,
 `detached-head-menu`, and the `src/commands` entry points.
 
 Roughly **278 tests still execute no production line at all**. They assert on
-mocks, on arrays of strings, or on the text of source files —
+mocks, on arrays of strings, or on the text of source files -
 `test/e2e/user-journeys.test.ts`, `test/integration/basic-workflow.test.ts`,
 `test/config/user-config.test.ts` and the older `test/ui/*` suites are the
 pattern.
+
+### Bugs these tests have found, in order
+
+Worth keeping, because each one was invisible to the suite as it stood:
+
+- the main menu printed `menu.tagsBeginner` and `menu.advancedExpert` to the
+  user, in all three languages. Key parity across locales could not see it -
+  the key was missing from all three alike
+- the Java .gitignore template had no `.env`, alone among the four
+- `isIgnored` answered "ignored" for every path ever given to it. It assumed
+  `check-ignore -q` rejects when nothing matches; simple-git resolves it
+- `getCommitsAhead` returned commits from both sides of the range. simple-git
+  defaults `from`/`to` to the symmetric difference, so the rebase confirmation
+  counted commits belonging to the branch being rebased *onto*
+
+The last two were only reachable by running real git. A mock agrees with
+whatever the implementation happens to do.
 
 The suites that do it right, and that new tests should copy:
 `test/ui/tag-menu.test.ts`, `test/ui/in-progress-flow.test.ts`,
@@ -104,11 +117,26 @@ was broken. Suites reset mocks between tests rather than clearing them —
 clearing leaves implementations behind and a queued rejection leaks into the
 next test.
 
-**3. The four missing features**: `.gitignore`, cherry-pick, `clean`, LFS.
+**3. ~~The four missing features~~ - done.** `.gitignore`, cherry-pick, `clean`
+and LFS, each with behaviour tests and a mutation check, and each with its
+strings in all three locales.
 
 **4. Clear out the 278 phantom tests**, either by rewriting them against the real
 modules or by deleting them. A test that cannot fail is worse than no test: it
 buys confidence it has not earned.
+
+---
+
+## Editing source files from a shell
+
+Do not pipe TypeScript through a bash heredoc into python or node. The
+backslashes do not survive: `'\n'` arrives as a real newline, which either
+breaks the parse or, worse, silently fails to match and the edit does nothing
+at all. That happened three times in one session, and once it made a mutation
+check report a passing suite for a mutation that had never been applied.
+
+Use the editing tools, or write a `.py` file first and run that. Any script
+that mutates source for a check must `assert` its anchor before replacing.
 
 ---
 
