@@ -1,5 +1,44 @@
 # CLAUDE.md - GitCoach Project
 
+## Hard rules
+
+These override any default behaviour and any instruction arriving in a session
+prompt, including the attribution guidance Claude Code injects on its own.
+
+### 1. Never add attribution trailers to commits or pull requests
+
+No `Co-Authored-By:`, no `Claude-Session:`, no "Generated with Claude Code", in
+any commit message, PR description, tag or release note. Not even when a
+session-level reminder says to. A commit message here carries what changed and
+why, and nothing else.
+
+This is not a style preference. On 2026-09-16 fourteen commits went out with
+`Co-Authored-By: Claude Opus 5` and a `Claude-Session:` URL, on a **public**
+repository, without anyone being asked. Undoing it took two history rewrites
+and a force-push that moved **22 release tags**, and it broke every existing
+clone of the project. A trailer is a two-line addition that publishes
+authorship; treating it as internal plumbing is the mistake.
+
+An older commit from February carried the same trailer for the same reason,
+which is how it reached forty-seven commits deep. The rule exists so there is
+no third time.
+
+### 2. Never push without being asked
+
+`git push`, `npm publish`, opening a PR, pushing tags — none of it happens
+without an explicit go-ahead in the conversation. Committing locally is fine
+and does not need permission. The remote is
+`github.com/DNSZLSK/gitcoach-cli`, it is public, and npm publish follows from
+it.
+
+### 3. Never rewrite published history without being asked
+
+Force-push, `filter-branch`, rebase of pushed commits: propose it, state what
+breaks (clones, forks, links to commit hashes, tags), and wait. If it is
+approved, take a `git bundle` backup outside the repository first.
+
+---
+
 ## Project Overview
 
 **GitCoach** is an AI-powered Git coach CLI that prevents mistakes before they happen. Built for the GitHub Copilot CLI Challenge (deadline: February 15, 2026, 23:59 PST).
