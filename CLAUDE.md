@@ -49,34 +49,34 @@ target to hit.
 
 ### Test reality
 
-938 tests, 40 suites, all green on Vitest. Coverage stands at **38.5%**, a
-figure that has been restated twice downward without a line being deleted:
+1085 tests, 45 suites, all green on Vitest. Coverage stands at **57%**.
 
-- The suite once implied 83%. That described the fourteen files Jest could
-  load, not the fifty-seven the project ships.
-- Stubbing the ESM dependencies made all of them loadable, and it read 45%.
-- Moving to Vitest took it to 38.5%. ts-jest compiled `import` to `require()`
-  and istanbul counted those calls as statements that ran, so merely loading a
-  menu scored its import block. Real ESM hoists imports out of the module body,
-  where they count for nothing.
+It has been restated downward twice and raised once, and only the last move
+counted for anything: the two falls came from removing things that were never
+evidence (files Jest could not load; `require()` calls istanbul scored as
+executed statements), the rise came from writing tests that break when the
+menus change.
 
-Each restatement removed something that was never evidence.
+The five most-used menus are covered, each verified by mutation rather than by
+percentage — the guard was removed on purpose and the suite had to fail:
 
-The five most-used menus now read as the zero they always were:
+| Menu | Statements | Checked by breaking |
+|------|-----------|---------------------|
+| `branch-menu.ts` | 96% | dropped the current-branch filter, deleted without confirming, rebased a dirty tree |
+| `undo-menu.ts` | 95% | single-confirmed the hard reset, pre-checked the restore boxes |
+| `push-menu.ts` | 95% | single-confirmed the force push, forced the ordinary push |
+| `pull-menu.ts` | 95% | pulled into a live merge, skipped the stash, dropped `--rebase` |
+| `commit-menu.ts` | 93% | ignored an unresolved conflict, skipped the risky-file question |
 
-| Menu | Statements |
-|------|-----------|
-| `branch-menu.ts` | 0% |
-| `commit-menu.ts` | 0% |
-| `undo-menu.ts` | 0% |
-| `push-menu.ts` | 0% |
-| `pull-menu.ts` | 0% |
-| `stash-menu.ts` | 0% |
+Still at zero, and next in line: `add-menu`, `stash-menu`, `config-menu`,
+`history-menu`, `main-menu`, `remote-menu`, `help-menu`,
+`detached-head-menu`, and the `src/commands` entry points.
 
-The ~278 tests that execute nothing assert on mocks, on arrays of strings, or on
-the text of source files — `test/e2e/user-journeys.test.ts`,
-`test/integration/basic-workflow.test.ts`, `test/config/user-config.test.ts` and
-the older `test/ui/*` suites are the pattern.
+Roughly **278 tests still execute no production line at all**. They assert on
+mocks, on arrays of strings, or on the text of source files —
+`test/e2e/user-journeys.test.ts`, `test/integration/basic-workflow.test.ts`,
+`test/config/user-config.test.ts` and the older `test/ui/*` suites are the
+pattern.
 
 The suites that do it right, and that new tests should copy:
 `test/ui/tag-menu.test.ts`, `test/ui/in-progress-flow.test.ts`,
@@ -96,10 +96,13 @@ One stub survives, aliased in the config and unrelated to ESM:
 `test/mocks/conf.ts`. `src/config/user-config.ts` builds its store at module
 scope, so importing it would write to the developer's own config directory.
 
-**2. Real tests for the five main menus** — branch, commit, undo, push, pull —
-on the `tag-menu.test.ts` model: import the real menu, drive it through mocked
-prompts, assert on the git calls it made. Write them to catch the mistake the
-menu exists to prevent, not to move the percentage.
+**2. ~~Real tests for the five main menus~~ — done.** branch, commit, undo,
+push and pull now import the real menu, drive it through mocked prompts and
+assert on the git calls it made, on the `test/ui/tag-menu.test.ts` model. Each
+suite was checked by breaking the menu on purpose; the table above records what
+was broken. Suites reset mocks between tests rather than clearing them —
+clearing leaves implementations behind and a queued rejection leaks into the
+next test.
 
 **3. The four missing features**: `.gitignore`, cherry-pick, `clean`, LFS.
 

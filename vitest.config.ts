@@ -48,21 +48,19 @@ export default defineConfig({
 
       // A ratchet, not a target.
       //
-      // 38% reads like a fall from the 45% Jest reported, and again nothing was
-      // deleted to cause it. ts-jest compiled `import` to `require()`, and
-      // istanbul counted each of those calls as a statement that ran, so simply
-      // loading a menu scored its import block. Vitest runs real ESM, where
-      // imports are hoisted out of the module body and count for nothing. What
-      // is left is the code that actually executed.
+      // The figure moved 38 to 57 when branch, commit, undo, push and pull
+      // gained real tests, which is the only way it is supposed to move. It
+      // still says nothing about whether those tests are any good — the menus
+      // above were checked by breaking them on purpose and watching the suites
+      // fail, and that is the evidence, not this number. What it is good for is
+      // spotting a file at zero, because a file at zero is untested, full stop.
       //
       // Set just under the current figures so a regression fails the build.
-      // Raise them as menus gain real tests; branch, commit, undo, push and
-      // pull are still at zero.
       thresholds: {
-        branches: 34,
-        functions: 42,
-        lines: 38,
-        statements: 38
+        branches: 52,
+        functions: 53,
+        lines: 57,
+        statements: 57
       }
     }
   }
