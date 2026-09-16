@@ -20,6 +20,10 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+# Throwaway coverage runs: measuring one suite at a time needs its own report
+# directory, and each one is hundreds of HTML files. They are never worth
+# committing, and `git add -A` does not know that.
+coverage-*/
 
 # Environment
 .env
