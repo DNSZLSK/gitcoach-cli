@@ -19,6 +19,7 @@ export type BranchAction =
   | 'merge'
   | 'rebase'
   | 'squash'
+  | 'cherry_pick'
   | 'delete'
   | 'back';
 
@@ -44,6 +45,7 @@ export async function showBranchMenu(): Promise<BranchResult> {
       { name: t('commands.branch.merge'), value: 'merge' },
       { name: t('commands.branch.rebase'), value: 'rebase' },
       { name: t('commands.branch.squash'), value: 'squash' },
+      { name: t('commands.branch.cherryPick'), value: 'cherry_pick' },
       { name: t('commands.branch.delete'), value: 'delete' },
       { name: t('menu.back'), value: 'back' }
     ]);
@@ -66,6 +68,9 @@ export async function showBranchMenu(): Promise<BranchResult> {
 
       case 'squash':
         return await squashCommits();
+
+      case 'cherry_pick':
+        return await cherryPickCommit();
 
       case 'delete':
         return await deleteBranch();
@@ -483,4 +488,92 @@ async function squashCommits(): Promise<BranchResult> {
   logger.raw('\n' + successBox(t('commands.branch.squashDone', { count }), t('success.title')));
 
   return { action: 'squash', success: true };
+}
+
+/**
+ * Apply a single commit from another branch onto this one.
+ *
+ * The one thing that separates this from merge in a beginner's head is that
+ * the commit is copied, not moved: it stays on the branch it came from, and
+ * the copy gets a new hash. The explanation says so, because someone who
+ * expects the original to disappear will go looking for it.
+ */
+async function cherryPickCommit(): Promise<BranchResult> {
+  const theme = getTheme();
+
+  // A cherry-pick that has to stop halfway leaves the tree in a state the user
+  // cannot tell apart from their own edits, so it does not start on a dirty one.
+  if (await gitService.hasUncommittedChanges()) {
+    logger.raw(warningBox(t('commands.branch.cherryPickDirty')));
+    return { action: 'cherry_pick', success: false };
+  }
+
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(t('commands.branch.cherryPickExplain')));
+  }
+
+  const branches = await gitService.getLocalBranches();
+  const others = branches.filter(b => !b.current);
+
+  if (others.length === 0) {
+    logger.raw(warningBox(t('commands.branch.noOtherBranches')));
+    return { action: 'cherry_pick', success: false };
+  }
+
+  const source = await promptSelect<string>(t('commands.branch.cherryPickSource'), [
+    ...others.map(b => ({ name: theme.branchName(b.name, false), value: b.name })),
+    { name: t('menu.back'), value: '' }
+  ]);
+
+  if (!source) {
+    return { action: 'cherry_pick', success: true };
+  }
+
+  const commits = await gitService.getCommitsNotIn(source);
+
+  if (commits.length === 0) {
+    logger.raw(infoBox(t('commands.branch.cherryPickNothing', { branch: source })));
+    return { action: 'cherry_pick', success: true };
+  }
+
+  const selected = await promptSelect<string>(t('commands.branch.cherryPickSelect'), [
+    ...commits.map(commit => ({
+      name: `${commit.hash.substring(0, 7)}  ${commit.message.split('\n')[0]}`,
+      value: commit.hash
+    })),
+    { name: t('menu.back'), value: '' }
+  ]);
+
+  if (!selected) {
+    return { action: 'cherry_pick', success: true };
+  }
+
+  const target = commits.find(commit => commit.hash === selected);
+  const subject = target ? target.message.split('\n')[0] : selected;
+
+  const confirmed = await promptConfirm(
+    t('commands.branch.cherryPickConfirm', { hash: selected.substring(0, 7), message: subject }),
+    false
+  );
+
+  if (!confirmed) {
+    return { action: 'cherry_pick', success: true };
+  }
+
+  logger.command(`git cherry-pick ${selected.substring(0, 7)}`);
+  const finished = await gitService.cherryPick(selected);
+
+  if (!finished) {
+    // Not an error: the in-progress flow picks this up on the next menu and
+    // walks the user through --continue or --abort.
+    logger.raw(warningBox(t('commands.branch.cherryPickStopped')));
+    return { action: 'cherry_pick', branch: source, success: false };
+  }
+
+  logger.raw('\n' + successBox(
+    t('commands.branch.cherryPickDone', { hash: selected.substring(0, 7) }),
+    t('success.title')
+  ));
+
+  return { action: 'cherry_pick', branch: source, success: true };
 }

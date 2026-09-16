@@ -282,7 +282,16 @@
       "squashMessage": "Message du commit fusionne :",
       "squashConfirm": "Remplacer ces {{count}} commits par un seul ?",
       "squashDone": "{{count}} commits fusionnes en un seul.",
-      "squashDirty": "Commitez ou remisez vos modifications avant de faire un squash."
+      "squashDirty": "Commitez ou remisez vos modifications avant de faire un squash.",
+      "cherryPick": "Cherry-pick dun commit",
+      "cherryPickExplain": "Le cherry-pick copie un commit dune autre branche sur celle-ci. Loriginal reste ou il est ; la copie recoit un nouveau hash. Utile pour un correctif dont vous avez besoin ici sans vouloir toute la branche.",
+      "cherryPickDirty": "Commitez ou remisez vos changements dabord. Un cherry-pick interrompu par un conflit serait impossible a distinguer de vos propres modifications.",
+      "cherryPickSource": "Prendre le commit sur quelle branche ?",
+      "cherryPickNothing": "{{branch}} na aucun commit qui ne soit deja ici.",
+      "cherryPickSelect": "Quel commit faut-il copier ici ?",
+      "cherryPickConfirm": "Copier {{hash}} ({{message}}) sur cette branche ?",
+      "cherryPickStopped": "Le cherry-pick sest arrete sur un conflit. GitCoach proposera de le continuer ou de labandonner a la prochaine ouverture du menu.",
+      "cherryPickDone": "{{hash}} copie sur cette branche sous forme de nouveau commit."
     },
     "remote": {
       "title": "Gestion du Remote",

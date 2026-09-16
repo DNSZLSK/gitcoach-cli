@@ -282,7 +282,16 @@
       "squashMessage": "Mensaje del commit combinado:",
       "squashConfirm": "Reemplazar estos {{count}} commits por uno solo?",
       "squashDone": "{{count}} commits combinados en uno.",
-      "squashDirty": "Haga commit o guarde sus cambios antes de combinar."
+      "squashDirty": "Haga commit o guarde sus cambios antes de combinar.",
+      "cherryPick": "Cherry-pick de un commit",
+      "cherryPickExplain": "El cherry-pick copia un commit de otra rama a esta. El original se queda donde esta; la copia recibe un hash nuevo. Util para una correccion que necesita aqui sin querer toda la rama.",
+      "cherryPickDirty": "Confirme o guarde sus cambios primero. Un cherry-pick detenido por un conflicto seria imposible de distinguir de sus propias modificaciones.",
+      "cherryPickSource": "De que rama tomar el commit?",
+      "cherryPickNothing": "{{branch}} no tiene ningun commit que no este ya aqui.",
+      "cherryPickSelect": "Que commit hay que copiar aqui?",
+      "cherryPickConfirm": "Copiar {{hash}} ({{message}}) en esta rama?",
+      "cherryPickStopped": "El cherry-pick se detuvo en un conflicto. GitCoach ofrecera continuarlo o abortarlo la proxima vez que abra el menu.",
+      "cherryPickDone": "{{hash}} copiado en esta rama como un commit nuevo."
     },
     "remote": {
       "title": "Gestion del Remote",

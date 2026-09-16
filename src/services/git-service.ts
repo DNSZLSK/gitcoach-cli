@@ -757,6 +757,38 @@ export class GitService {
     }));
   }
 
+  /**
+   * Commits that exist on another branch but not on HEAD.
+   *
+   * The mirror of getCommitsAhead, and the list a cherry-pick chooses from:
+   * picking a commit already on this branch would either do nothing or
+   * duplicate it.
+   */
+  async getCommitsNotIn(branch: string, maxCount: number = 50): Promise<CommitInfo[]> {
+    const log = await this.git.log({ from: 'HEAD', to: branch, maxCount });
+    return log.all.map(entry => ({
+      hash: entry.hash,
+      date: entry.date,
+      message: entry.message,
+      author: entry.author_name
+    }));
+  }
+
+  /**
+   * Apply one commit from elsewhere onto the current branch.
+   *
+   * Returns whether it finished, like rebaseOnto and for the same reason: a
+   * cherry-pick that stops on a conflict is not a failure but the interrupted
+   * state the in-progress flow already knows how to resolve. core.editor=true
+   * keeps git from opening an editor there is no terminal for.
+   */
+  async cherryPick(hash: string): Promise<boolean> {
+    return this.resumeOperation(
+      ['-c', 'core.editor=true', 'cherry-pick', hash],
+      () => this.isCherryPickInProgress()
+    );
+  }
+
   async skipRebase(): Promise<void> {
     await this.git.rebase(['--skip']);
     this.invalidateCache();

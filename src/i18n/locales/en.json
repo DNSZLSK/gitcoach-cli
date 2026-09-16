@@ -282,7 +282,16 @@
       "squashMessage": "Message for the squashed commit:",
       "squashConfirm": "Replace these {{count}} commits with one?",
       "squashDone": "{{count}} commits squashed into one.",
-      "squashDirty": "Commit or stash your changes before squashing."
+      "squashDirty": "Commit or stash your changes before squashing.",
+      "cherryPick": "Cherry-pick a commit",
+      "cherryPickExplain": "Cherry-pick copies one commit from another branch onto this one. The original stays where it is; the copy gets a new hash. Use it for a fix you need here but do not want the whole branch for.",
+      "cherryPickDirty": "Commit or stash your changes first. A cherry-pick that stops on a conflict would be impossible to tell apart from your own edits.",
+      "cherryPickSource": "Take the commit from which branch?",
+      "cherryPickNothing": "{{branch}} has no commit that is not already here.",
+      "cherryPickSelect": "Which commit should be copied here?",
+      "cherryPickConfirm": "Copy {{hash}} ({{message}}) onto this branch?",
+      "cherryPickStopped": "The cherry-pick stopped on a conflict. GitCoach will offer to continue or abort it next time you open the menu.",
+      "cherryPickDone": "{{hash}} copied onto this branch as a new commit."
     },
     "remote": {
       "title": "Remote Management",

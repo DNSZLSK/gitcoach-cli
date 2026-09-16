@@ -63,6 +63,8 @@ vi.mock('../../src/services/git-service.js', () => ({
     getCommitsAhead: vi.fn(),
     getUnpushedCommitCount: vi.fn(),
     rebaseOnto: vi.fn(),
+    getCommitsNotIn: vi.fn(),
+    cherryPick: vi.fn(),
     getLog: vi.fn(),
     squashCommits: vi.fn()
   }
@@ -142,6 +144,8 @@ describe('Branch menu', () => {
     git.getCommitsAhead.mockResolvedValue([commit('aaa1111', 'one')]);
     git.getUnpushedCommitCount.mockResolvedValue(1);
     git.rebaseOnto.mockResolvedValue(true);
+    git.getCommitsNotIn.mockResolvedValue([commit('ddd4444', 'a fix worth copying')]);
+    git.cherryPick.mockResolvedValue(true);
     git.getLog.mockResolvedValue([commit('aaa1111', 'one'), commit('bbb2222', 'two')]);
     prevention.validateCheckout.mockResolvedValue(clean);
     prevention.validateBranchDelete.mockResolvedValue(clean);
@@ -590,6 +594,134 @@ describe('Branch menu', () => {
       const result = await showBranchMenu();
 
       expect(git.squashCommits).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('cherry-picking', () => {
+    it('should refuse to start on a dirty tree', async () => {
+      choose('cherry_pick');
+      git.hasUncommittedChanges.mockResolvedValue(true);
+
+      const result = await showBranchMenu();
+
+      expect(git.cherryPick).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+    });
+
+    it('should copy the commit the user picked', async () => {
+      choose('cherry_pick');
+      select.mockResolvedValueOnce('feature' as never).mockResolvedValueOnce('ddd4444' as never);
+
+      const result = await showBranchMenu();
+
+      expect(git.getCommitsNotIn).toHaveBeenCalledWith('feature');
+      expect(git.cherryPick).toHaveBeenCalledWith('ddd4444');
+      expect(result).toEqual({ action: 'cherry_pick', branch: 'feature', success: true });
+    });
+
+    it('should never offer the current branch as a source', async () => {
+      choose('cherry_pick');
+      git.getLocalBranches.mockResolvedValue([
+        branch('main', true),
+        branch('feature'),
+        branch('hotfix')
+      ]);
+      select.mockResolvedValue('' as never);
+
+      await showBranchMenu();
+
+      const offered = (select.mock.calls[1][1] as { value: string }[]).map(c => c.value);
+      expect(offered).toEqual(['feature', 'hotfix', '']);
+    });
+
+    it('should offer a way out at the branch step that copies nothing', async () => {
+      choose('cherry_pick');
+      select.mockResolvedValueOnce('' as never);
+
+      const result = await showBranchMenu();
+
+      expect(git.getCommitsNotIn).not.toHaveBeenCalled();
+      expect(git.cherryPick).not.toHaveBeenCalled();
+      expect(result.success).toBe(true);
+    });
+
+    it('should offer a way out at the commit step that copies nothing', async () => {
+      choose('cherry_pick');
+      select.mockResolvedValueOnce('feature' as never).mockResolvedValueOnce('' as never);
+
+      const result = await showBranchMenu();
+
+      expect(confirm).not.toHaveBeenCalled();
+      expect(git.cherryPick).not.toHaveBeenCalled();
+      expect(result.success).toBe(true);
+    });
+
+    it('should not copy when the confirmation is declined', async () => {
+      choose('cherry_pick');
+      select.mockResolvedValueOnce('feature' as never).mockResolvedValueOnce('ddd4444' as never);
+      confirm.mockResolvedValue(false);
+
+      await showBranchMenu();
+
+      expect(confirm.mock.calls[0][1]).toBe(false);
+      expect(git.cherryPick).not.toHaveBeenCalled();
+    });
+
+    it('should offer only commits this branch does not already have', async () => {
+      choose('cherry_pick');
+      git.getCommitsNotIn.mockResolvedValue([
+        commit('ddd4444', 'a fix worth copying'),
+        commit('eee5555', 'another one')
+      ]);
+      select.mockResolvedValueOnce('feature' as never).mockResolvedValueOnce('' as never);
+
+      await showBranchMenu();
+
+      const offered = (select.mock.calls[2][1] as { value: string }[]).map(c => c.value);
+      expect(offered).toEqual(['ddd4444', 'eee5555', '']);
+    });
+
+    it('should say so when the source branch has nothing to give', async () => {
+      choose('cherry_pick');
+      git.getCommitsNotIn.mockResolvedValue([]);
+      select.mockResolvedValueOnce('feature' as never);
+
+      const result = await showBranchMenu();
+
+      expect(confirm).not.toHaveBeenCalled();
+      expect(git.cherryPick).not.toHaveBeenCalled();
+      expect(result.success).toBe(true);
+    });
+
+    it('should show only the subject line of a multi-line message', async () => {
+      choose('cherry_pick');
+      git.getCommitsNotIn.mockResolvedValue([commit('ddd4444', 'the subject\n\nthe body')]);
+      select.mockResolvedValueOnce('feature' as never).mockResolvedValueOnce('' as never);
+
+      await showBranchMenu();
+
+      const offered = (select.mock.calls[2][1] as { name: string }[]).map(c => c.name);
+      expect(offered[0]).toBe('ddd4444  the subject');
+    });
+
+    it('should report the stop when the copy halts on a conflict', async () => {
+      choose('cherry_pick');
+      select.mockResolvedValueOnce('feature' as never).mockResolvedValueOnce('ddd4444' as never);
+      git.cherryPick.mockResolvedValue(false);
+
+      const result = await showBranchMenu();
+
+      expect(result).toEqual({ action: 'cherry_pick', branch: 'feature', success: false });
+    });
+
+    it('should do nothing when there is no other branch to take from', async () => {
+      choose('cherry_pick');
+      git.getLocalBranches.mockResolvedValue([branch('main', true)]);
+
+      const result = await showBranchMenu();
+
+      expect(git.cherryPick).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
     });
   });
