@@ -1,131 +1,165 @@
-import { describe, it, expect } from 'vitest';
+import type { Mocked } from 'vitest';
 
 /**
- * Unit tests for level-based behavior logic
- * Tests the expected behavior of shouldConfirm, shouldShowWarning, shouldShowExplanation
- * without importing the actual modules (to avoid ESM issues)
+ * The real level helper, driven through the real user config.
+ *
+ * This file used to reimplement shouldConfirm, shouldShowWarning and
+ * shouldShowExplanation at the top and then assert against the copy, because
+ * under Jest the module could not be imported at all. The assertions were
+ * correct and proved nothing: the copy would have gone on passing while the
+ * shipped code did whatever it liked.
+ *
+ * The questions it asks are worth keeping, though, because these three
+ * functions decide how often every menu in the tool stops to ask. So the cases
+ * are the same; only the target changed.
  */
 
-// Replicate the logic from level-helper.ts for testing
-type ExperienceLevel = 'beginner' | 'intermediate' | 'expert';
-type WarningCategory = 'critical' | 'warning' | 'info';
+vi.mock('../../src/config/user-config.js', () => ({
+  userConfig: {
+    getExperienceLevel: vi.fn(),
+    getConfirmDestructiveActions: vi.fn()
+  }
+}));
 
-// Test implementations matching the actual code
-function shouldConfirmLogic(level: ExperienceLevel, isDestructive: boolean, confirmDestructive: boolean): boolean {
-  if (level === 'beginner' || level === 'intermediate') return true;
-  return isDestructive && confirmDestructive;
-}
+import {
+  getLevel,
+  isLevel,
+  shouldConfirm,
+  shouldShowWarning,
+  shouldShowExplanation
+} from '../../src/utils/level-helper.js';
+import { userConfig } from '../../src/config/user-config.js';
+import type { ExperienceLevel } from '../../src/config/defaults.js';
 
-function shouldShowWarningLogic(level: ExperienceLevel, category: WarningCategory): boolean {
-  if (level === 'beginner') return true;
-  if (level === 'intermediate') return category !== 'info';
-  return category === 'critical'; // expert
-}
+const config = userConfig as Mocked<typeof userConfig>;
 
-function shouldShowExplanationLogic(level: ExperienceLevel): boolean {
-  return level === 'beginner';
-}
+const at = (level: ExperienceLevel, confirmDestructive = true) => {
+  config.getExperienceLevel.mockReturnValue(level);
+  config.getConfirmDestructiveActions.mockReturnValue(confirmDestructive);
+};
 
-describe('Level Helper Functions - Logic Tests', () => {
-  describe('Beginner Level', () => {
-    const level: ExperienceLevel = 'beginner';
+describe('level helper', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
 
-    it('should confirm non-destructive actions', () => {
-      expect(shouldConfirmLogic(level, false, true)).toBe(true);
+  describe('beginner', () => {
+    it('should confirm everything, destructive or not', () => {
+      at('beginner');
+
+      expect(shouldConfirm(false)).toBe(true);
+      expect(shouldConfirm(true)).toBe(true);
     });
 
-    it('should confirm destructive actions', () => {
-      expect(shouldConfirmLogic(level, true, true)).toBe(true);
+    it('should still confirm destructive actions with the preference off', () => {
+      // The level wins: someone who has not turned the preference on is not
+      // the person to trust with an unconfirmed reset.
+      at('beginner', false);
+
+      expect(shouldConfirm(true)).toBe(true);
     });
 
-    it('should show info warnings', () => {
-      expect(shouldShowWarningLogic(level, 'info')).toBe(true);
-    });
+    it('should show warnings of every severity', () => {
+      at('beginner');
 
-    it('should show warning warnings', () => {
-      expect(shouldShowWarningLogic(level, 'warning')).toBe(true);
-    });
-
-    it('should show critical warnings', () => {
-      expect(shouldShowWarningLogic(level, 'critical')).toBe(true);
+      expect(shouldShowWarning('info')).toBe(true);
+      expect(shouldShowWarning('warning')).toBe(true);
+      expect(shouldShowWarning('critical')).toBe(true);
     });
 
     it('should show explanations', () => {
-      expect(shouldShowExplanationLogic(level)).toBe(true);
+      at('beginner');
+
+      expect(shouldShowExplanation()).toBe(true);
     });
   });
 
-  describe('Intermediate Level', () => {
-    const level: ExperienceLevel = 'intermediate';
+  describe('intermediate', () => {
+    it('should confirm everything, destructive or not', () => {
+      at('intermediate');
 
-    it('should confirm non-destructive actions', () => {
-      expect(shouldConfirmLogic(level, false, true)).toBe(true);
+      expect(shouldConfirm(false)).toBe(true);
+      expect(shouldConfirm(true)).toBe(true);
     });
 
-    it('should confirm destructive actions', () => {
-      expect(shouldConfirmLogic(level, true, true)).toBe(true);
+    it('should still confirm destructive actions with the preference off', () => {
+      at('intermediate', false);
+
+      expect(shouldConfirm(true)).toBe(true);
     });
 
-    it('should NOT show info warnings', () => {
-      expect(shouldShowWarningLogic(level, 'info')).toBe(false);
+    it('should drop the info warnings and keep the rest', () => {
+      at('intermediate');
+
+      expect(shouldShowWarning('info')).toBe(false);
+      expect(shouldShowWarning('warning')).toBe(true);
+      expect(shouldShowWarning('critical')).toBe(true);
     });
 
-    it('should show warning warnings', () => {
-      expect(shouldShowWarningLogic(level, 'warning')).toBe(true);
+    it('should not show explanations', () => {
+      at('intermediate');
+
+      expect(shouldShowExplanation()).toBe(false);
+    });
+  });
+
+  describe('expert', () => {
+    it('should not confirm a reversible action', () => {
+      at('expert');
+
+      expect(shouldConfirm(false)).toBe(false);
     });
 
-    it('should show critical warnings', () => {
-      expect(shouldShowWarningLogic(level, 'critical')).toBe(true);
+    it('should confirm a destructive one while the preference is on', () => {
+      at('expert', true);
+
+      expect(shouldConfirm(true)).toBe(true);
     });
 
-    it('should NOT show explanations', () => {
-      expect(shouldShowExplanationLogic(level)).toBe(false);
+    it('should skip even that when the preference is off', () => {
+      at('expert', false);
+
+      expect(shouldConfirm(true)).toBe(false);
+    });
+
+    it('should show critical warnings only', () => {
+      at('expert');
+
+      expect(shouldShowWarning('info')).toBe(false);
+      expect(shouldShowWarning('warning')).toBe(false);
+      expect(shouldShowWarning('critical')).toBe(true);
+    });
+
+    it('should not show explanations', () => {
+      at('expert');
+
+      expect(shouldShowExplanation()).toBe(false);
     });
   });
 
-  describe('Expert Level', () => {
-    const level: ExperienceLevel = 'expert';
+  describe('reading the level', () => {
+    it('should report the level the config holds', () => {
+      at('expert');
 
-    it('should NOT confirm non-destructive actions', () => {
-      expect(shouldConfirmLogic(level, false, true)).toBe(false);
+      expect(getLevel()).toBe('expert');
     });
 
-    it('should confirm destructive actions when setting enabled', () => {
-      expect(shouldConfirmLogic(level, true, true)).toBe(true);
+    it('should match only the level in effect', () => {
+      at('intermediate');
+
+      expect(isLevel('intermediate')).toBe(true);
+      expect(isLevel('beginner')).toBe(false);
+      expect(isLevel('expert')).toBe(false);
     });
 
-    it('should NOT confirm destructive actions when setting disabled', () => {
-      expect(shouldConfirmLogic(level, true, false)).toBe(false);
+    it('should read the config on every call, not once at import', () => {
+      // Menus call these long after startup, and the config menu can change
+      // the level mid-session. A value captured at import would go stale.
+      at('beginner');
+      expect(shouldShowExplanation()).toBe(true);
+
+      at('expert');
+      expect(shouldShowExplanation()).toBe(false);
     });
-
-    it('should NOT show info warnings', () => {
-      expect(shouldShowWarningLogic(level, 'info')).toBe(false);
-    });
-
-    it('should NOT show warning warnings', () => {
-      expect(shouldShowWarningLogic(level, 'warning')).toBe(false);
-    });
-
-    it('should show critical warnings', () => {
-      expect(shouldShowWarningLogic(level, 'critical')).toBe(true);
-    });
-
-    it('should NOT show explanations', () => {
-      expect(shouldShowExplanationLogic(level)).toBe(false);
-    });
-  });
-});
-
-describe('Level Helper - Edge Cases', () => {
-  it('beginner + destructive disabled = still confirm (level overrides)', () => {
-    expect(shouldConfirmLogic('beginner', true, false)).toBe(true);
-  });
-
-  it('intermediate + destructive disabled = still confirm (level overrides)', () => {
-    expect(shouldConfirmLogic('intermediate', true, false)).toBe(true);
-  });
-
-  it('expert + non-destructive + destructive enabled = no confirm', () => {
-    expect(shouldConfirmLogic('expert', false, true)).toBe(false);
   });
 });
