@@ -9,120 +9,9 @@ import { logger } from '../../utils/logger.js';
 import { mapGitError } from '../../utils/error-mapper.js';
 import { isValidRemoteUrl } from '../../utils/validators.js';
 import { APP_VERSION } from '../../utils/version.js';
+import { GITIGNORE_TEMPLATES, GitignoreTemplate } from '../../utils/gitignore.js';
 
 export type SetupMenuAction = 'init' | 'clone' | 'quit';
-
-const GITIGNORE_TEMPLATES: Record<string, string> = {
-  node: `# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
-
-# Build
-dist/
-build/
-.next/
-
-# Environment
-.env
-.env.local
-.env*.local
-
-# Logs
-*.log
-npm-debug.log*
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-`,
-  python: `# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-venv/
-env/
-.venv/
-
-# Distribution / packaging
-dist/
-build/
-*.egg-info/
-
-# Environment
-.env
-
-# IDE
-.idea/
-.vscode/
-*.swp
-
-# Jupyter
-.ipynb_checkpoints/
-
-# OS
-.DS_Store
-Thumbs.db
-`,
-  java: `# Compiled class files
-*.class
-
-# Package files
-*.jar
-*.war
-*.ear
-
-# Build
-target/
-build/
-out/
-
-# IDE
-.idea/
-*.iml
-.eclipse/
-.settings/
-.project
-.classpath
-
-# Logs
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-`,
-  generic: `# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Environment
-.env
-.env.local
-
-# Logs
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Build
-dist/
-build/
-out/
-`
-};
 
 export async function showSetupMenu(): Promise<SetupMenuAction> {
   const theme = getTheme();
@@ -212,7 +101,7 @@ async function createGitignoreFile(): Promise<void> {
   ];
 
   const projectType = await promptSelect<string>(t('setup.gitignoreType'), choices);
-  const template = GITIGNORE_TEMPLATES[projectType] || GITIGNORE_TEMPLATES.generic;
+  const template = GITIGNORE_TEMPLATES[projectType as GitignoreTemplate] || GITIGNORE_TEMPLATES.generic;
 
   const gitignorePath = join(process.cwd(), '.gitignore');
 

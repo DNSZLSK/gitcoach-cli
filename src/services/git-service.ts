@@ -59,6 +59,7 @@ export class GitService {
   private statusCache: { data: GitStatus; timestamp: number } | null = null;
   private basePath: string;
   private gitDirCache: string | null = null;
+  private repoRootCache: string | null = null;
 
   constructor(basePath?: string) {
     this.basePath = basePath || process.cwd();
@@ -79,10 +80,27 @@ export class GitService {
     return this.gitDirCache;
   }
 
+  /**
+   * Absolute path to the top of the working tree.
+   *
+   * `--show-toplevel` rather than the process cwd, because .gitignore belongs
+   * at the repository root and the user may well be several directories down
+   * from it.
+   */
+  async getRepoRoot(): Promise<string> {
+    if (this.repoRootCache) {
+      return this.repoRootCache;
+    }
+    const raw = (await this.git.revparse(['--show-toplevel'])).trim();
+    this.repoRootCache = isAbsolute(raw) ? raw : resolve(this.basePath, raw);
+    return this.repoRootCache;
+  }
+
   setWorkingDirectory(path: string): void {
     this.basePath = path;
     this.git = simpleGit(path);
     this.gitDirCache = null;
+    this.repoRootCache = null;
     this.invalidateCache();
   }
 
@@ -986,6 +1004,47 @@ export class GitService {
 
   async pushAllTags(remote: string = 'origin'): Promise<void> {
     await this.git.push([remote, '--tags']);
+  }
+
+  /**
+   * Whether a path is excluded by a .gitignore rule.
+   *
+   * `check-ignore` exits 1 when the path is *not* ignored, which simple-git
+   * surfaces as a thrown error. That is the answer, not a failure.
+   */
+  async isIgnored(path: string): Promise<boolean> {
+    try {
+      await this.git.raw(['check-ignore', '-q', '--', path]);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Whether git is already tracking a path.
+   *
+   * Worth asking before writing a .gitignore entry for it: ignore rules apply
+   * only to untracked files, so adding a tracked file to .gitignore changes
+   * nothing and looks, to the person who did it, like the tool did nothing.
+   */
+  async isTracked(path: string): Promise<boolean> {
+    try {
+      const output = await this.git.raw(['ls-files', '--error-unmatch', '--', path]);
+      return output.trim().length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Stop tracking a path while leaving it on disk.
+   *
+   * This is the other half of ignoring something already committed. `--cached`
+   * is what keeps the working copy; without it this would delete the file.
+   */
+  async untrackKeepingFile(path: string): Promise<void> {
+    await this.git.raw(['rm', '--cached', '-r', '--', path]);
   }
 
   /**

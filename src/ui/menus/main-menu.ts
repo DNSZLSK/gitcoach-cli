@@ -36,6 +36,7 @@ export type MainMenuAction =
   | 'tags'
   | 'advanced'
   | 'stash'
+  | 'gitignore'
   | 'config'
   | 'stats'
   | 'help'
@@ -101,6 +102,12 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     {
       name: theme.menuItem('C', getMenuLabel('commit')),
       value: 'commit' as MainMenuAction
+    },
+    {
+      // Next to Add on purpose: the moment someone wants to ignore something
+      // is the moment they see it listed as untracked.
+      name: theme.menuItem('I', getMenuLabel('gitignore')),
+      value: 'gitignore' as MainMenuAction
     },
     {
       name: theme.menuItem('P', getMenuLabel('push')),

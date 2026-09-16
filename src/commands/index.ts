@@ -193,6 +193,12 @@ export default class Index extends Command {
         return true;
       }
 
+      case 'gitignore': {
+        const { showGitignoreMenu } = await import('../ui/menus/gitignore-menu.js');
+        await showGitignoreMenu();
+        return true;
+      }
+
       case 'stash': {
         const { showStashMenu } = await import('../ui/menus/stash-menu.js');
         await showStashMenu();
