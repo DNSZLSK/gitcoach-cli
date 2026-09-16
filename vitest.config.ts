@@ -57,10 +57,10 @@ export default defineConfig({
       //
       // Set just under the current figures so a regression fails the build.
       thresholds: {
-        branches: 55,
-        functions: 59,
-        lines: 60,
-        statements: 60
+        branches: 63,
+        functions: 71,
+        lines: 71,
+        statements: 71
       }
     }
   }
