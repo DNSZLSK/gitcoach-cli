@@ -83,7 +83,13 @@
     "tags": "Etiquetas",
     "tagsDesc": "Marcar y publicar versiones",
     "advanced": "Avanzado",
-    "advancedDesc": "Submodulos, arboles de trabajo y firma"
+    "advancedDesc": "Submodulos, arboles de trabajo y firma",
+    "tagsBeginner": "Etiquetas - Marcar una version a la que volver",
+    "tagsIntermediate": "Etiquetas - Marcar y publicar versiones",
+    "tagsExpert": "git tag",
+    "advancedBeginner": "Avanzado - Submodulos, arboles de trabajo y firma",
+    "advancedIntermediate": "Avanzado - Submodulos, arboles de trabajo, firma",
+    "advancedExpert": "git submodule / worktree / config"
   },
   "levels": {
     "beginner": "Principiante",

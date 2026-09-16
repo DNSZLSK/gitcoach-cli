@@ -83,7 +83,13 @@
     "tags": "Tags",
     "tagsDesc": "Mark and publish releases",
     "advanced": "Advanced",
-    "advancedDesc": "Submodules, worktrees and signing"
+    "advancedDesc": "Submodules, worktrees and signing",
+    "tagsBeginner": "Tags - Mark a version you can come back to",
+    "tagsIntermediate": "Tags - Mark and publish releases",
+    "tagsExpert": "git tag",
+    "advancedBeginner": "Advanced - Submodules, worktrees and signing",
+    "advancedIntermediate": "Advanced - Submodules, worktrees, signing",
+    "advancedExpert": "git submodule / worktree / config"
   },
   "levels": {
     "beginner": "Beginner",
