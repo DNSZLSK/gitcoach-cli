@@ -358,7 +358,15 @@
       "reverted": "Commit annule. Un nouveau commit l'annule desormais.",
       "revertConflict": "L'annulation a provoque un conflit. Resolvez les fichiers, puis commitez.",
       "noCommitsToRevert": "Aucun commit a annuler pour l'instant.",
-      "revertMessagePreview": "Git va creer ce commit :\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}."
+      "revertMessagePreview": "Git va creer ce commit :\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}.",
+      "clean": "Supprimer les fichiers non suivis",
+      "cleanDesc": "Supprimer les fichiers dont git na jamais entendu parler",
+      "cleanWarning": "Ces fichiers nont jamais ete commites : git nen a aucune copie, nulle part. Contrairement a un reset, cette operation est irreversible par tout moyen. Les fichiers exclus par .gitignore ne sont pas touches.",
+      "cleanNothing": "Aucun fichier non suivi a supprimer.",
+      "cleanPreview": "{{count}} fichier(s) seraient supprimes :",
+      "selectFilesToClean": "Selectionnez les fichiers a supprimer definitivement :",
+      "confirmClean": "Supprimer definitivement {{count}} fichier(s) ? Cette action est irreversible.",
+      "cleanSuccess": "{{count}} fichier(s) supprime(s)."
     },
     "history": {
       "title": "Historique des Commits",

@@ -45,6 +45,8 @@ vi.mock('../../src/services/git-service.js', () => ({
     reset: vi.fn(),
     checkout: vi.fn(),
     revertCommit: vi.fn(),
+    previewClean: vi.fn(),
+    cleanUntracked: vi.fn(),
     hasConflicts: vi.fn()
   }
 }));
@@ -104,6 +106,7 @@ describe('Undo menu', () => {
     git.getStatus.mockResolvedValue(status());
     git.getStagedFiles.mockResolvedValue(['src/app.ts']);
     git.hasConflicts.mockResolvedValue(false);
+    git.previewClean.mockResolvedValue(['build/output.js', 'notes.txt']);
     confirm.mockResolvedValue(true);
     checkbox.mockResolvedValue([]);
   });
@@ -336,6 +339,95 @@ describe('Undo menu', () => {
 
       expect(checkbox).not.toHaveBeenCalled();
       expect(git.reset).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleting untracked files', () => {
+    it('should show what would go before offering to delete anything', async () => {
+      choose('clean');
+
+      await showUndoMenu();
+
+      expect(git.previewClean).toHaveBeenCalledTimes(1);
+      expect(git.previewClean.mock.invocationCallOrder[0]).toBeLessThan(
+        checkbox.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('should delete only the files picked, and only after confirmation', async () => {
+      choose('clean');
+      checkbox.mockResolvedValue(['notes.txt']);
+
+      await showUndoMenu();
+
+      expect(confirm).toHaveBeenCalledTimes(1);
+      expect(confirm.mock.calls[0][1]).toBe(false);
+      expect(git.cleanUntracked).toHaveBeenCalledWith(['notes.txt']);
+    });
+
+    it('should offer exactly what the preview listed', async () => {
+      choose('clean');
+
+      await showUndoMenu();
+
+      const offered = (checkbox.mock.calls[0][1] as { value: string }[]).map(c => c.value);
+      expect(offered).toEqual(['build/output.js', 'notes.txt']);
+    });
+
+    it('should leave every box unchecked, since nothing here can be recovered', async () => {
+      choose('clean');
+
+      await showUndoMenu();
+
+      const offered = checkbox.mock.calls[0][1] as { checked: boolean }[];
+      expect(offered.every(c => c.checked === false)).toBe(true);
+    });
+
+    it('should delete nothing when the confirmation is declined', async () => {
+      choose('clean');
+      checkbox.mockResolvedValue(['notes.txt']);
+      confirm.mockResolvedValue(false);
+
+      await showUndoMenu();
+
+      expect(git.cleanUntracked).not.toHaveBeenCalled();
+    });
+
+    it('should not even ask when no file is picked', async () => {
+      choose('clean');
+      checkbox.mockResolvedValue([]);
+
+      await showUndoMenu();
+
+      expect(confirm).not.toHaveBeenCalled();
+      expect(git.cleanUntracked).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when there is nothing untracked', async () => {
+      choose('clean');
+      git.previewClean.mockResolvedValue([]);
+
+      await showUndoMenu();
+
+      expect(checkbox).not.toHaveBeenCalled();
+      expect(git.cleanUntracked).not.toHaveBeenCalled();
+    });
+
+    it('should not delete anything when the preview itself fails', async () => {
+      choose('clean');
+      git.previewClean.mockRejectedValue(new Error('not a git repository'));
+
+      await expect(showUndoMenu()).resolves.toBeUndefined();
+      expect(checkbox).not.toHaveBeenCalled();
+      expect(git.cleanUntracked).not.toHaveBeenCalled();
+    });
+
+    it('should report the error rather than throw when the delete fails', async () => {
+      choose('clean');
+      checkbox.mockResolvedValue(['notes.txt']);
+      git.cleanUntracked.mockRejectedValue(new Error('permission denied'));
+
+      await expect(showUndoMenu()).resolves.toBeUndefined();
     });
   });
 

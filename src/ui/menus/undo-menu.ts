@@ -16,6 +16,7 @@ export type UndoAction =
   | 'hard_reset'
   | 'unstage'
   | 'restore'
+  | 'clean'
   | 'recover'
   | 'back';
 
@@ -56,6 +57,11 @@ export async function showUndoMenu(): Promise<void> {
       description: t('commands.undo.restoreDesc')
     },
     {
+      name: theme.menuItem('C', t('commands.undo.clean') + ' ⚠️'),
+      value: 'clean' as UndoAction,
+      description: t('commands.undo.cleanDesc')
+    },
+    {
       name: theme.menuItem('F', t('commands.recovery.menuItem')),
       value: 'recover' as UndoAction,
       description: t('commands.recovery.menuItemDesc')
@@ -93,6 +99,9 @@ export async function showUndoMenu(): Promise<void> {
       break;
     case 'restore':
       await handleRestore();
+      break;
+    case 'clean':
+      await handleClean();
       break;
     case 'recover':
       await showRecoveryMenu();
@@ -341,6 +350,72 @@ async function handleRevert(): Promise<void> {
       logger.raw(warningBox(t('commands.undo.revertConflict')));
       return;
     }
+    logger.raw(errorBox(mapGitError(error)));
+  }
+}
+
+/**
+ * Delete untracked files.
+ *
+ * The most destructive thing in this menu, and it is worth being explicit
+ * about why. A hard reset drops commits, but the reflog still holds them for
+ * weeks. Untracked files were never committed at all: once deleted there is
+ * nothing anywhere to recover from. So nothing is deleted before the user has
+ * seen the exact list and picked from it.
+ *
+ * Files excluded by .gitignore are not offered — see previewClean.
+ */
+async function handleClean(): Promise<void> {
+  const theme = getTheme();
+
+  logger.raw(errorBox(
+    t('commands.undo.cleanWarning'),
+    '⚠️ ' + t('warnings.dangerous')
+  ));
+
+  let candidates: string[];
+  try {
+    logger.command('git clean -nd');
+    candidates = await gitService.previewClean();
+  } catch (error) {
+    logger.raw(errorBox(mapGitError(error)));
+    return;
+  }
+
+  if (candidates.length === 0) {
+    logger.raw(warningBox(t('commands.undo.cleanNothing')));
+    return;
+  }
+
+  logger.raw('\n' + theme.textBold(t('commands.undo.cleanPreview', { count: candidates.length })) + '\n');
+  candidates.forEach(path => logger.raw(theme.file(path, 'untracked')));
+  logger.raw('');
+
+  const selected = await promptCheckbox<string>(
+    t('commands.undo.selectFilesToClean'),
+    candidates.map(path => ({ name: theme.file(path, 'untracked'), value: path, checked: false }))
+  );
+
+  if (selected.length === 0) {
+    logger.raw(theme.textMuted(t('prompts.cancel')) + '\n');
+    return;
+  }
+
+  const confirmed = await promptConfirm(
+    t('commands.undo.confirmClean', { count: selected.length }),
+    false
+  );
+
+  if (!confirmed) {
+    logger.raw(theme.textMuted(t('prompts.cancel')) + '\n');
+    return;
+  }
+
+  try {
+    logger.command(`git clean -fd -- ${selected.join(' ')}`);
+    await gitService.cleanUntracked(selected);
+    logger.raw('\n' + successBox(t('commands.undo.cleanSuccess', { count: selected.length })));
+  } catch (error) {
     logger.raw(errorBox(mapGitError(error)));
   }
 }

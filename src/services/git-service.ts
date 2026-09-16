@@ -789,6 +789,43 @@ export class GitService {
     );
   }
 
+  /**
+   * What `git clean` would delete, without deleting anything.
+   *
+   * Untracked files are the one thing git cannot give back: they were never
+   * committed, so there is no reflog, no stash, no object to recover from.
+   * Nothing in this tool calls the destructive form without showing this list
+   * first.
+   *
+   * Deliberately without -x, so files excluded by .gitignore are left alone.
+   * That is where node_modules and .env live, and losing either to a menu the
+   * user opened to tidy up build output would be the exact accident GitCoach
+   * exists to prevent.
+   */
+  async previewClean(): Promise<string[]> {
+    const raw = await this.git.raw(['clean', '-nd']);
+    return raw
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.startsWith('Would remove '))
+      .map(line => line.slice('Would remove '.length).trim())
+      .filter(path => path.length > 0);
+  }
+
+  /**
+   * Delete untracked files. Irreversible; callers must confirm first.
+   *
+   * Paths are passed after `--` so one beginning with a dash cannot be read as
+   * an option.
+   */
+  async cleanUntracked(paths: string[]): Promise<void> {
+    if (paths.length === 0) {
+      return;
+    }
+    await this.git.raw(['clean', '-fd', '--', ...paths]);
+    this.invalidateCache();
+  }
+
   async skipRebase(): Promise<void> {
     await this.git.rebase(['--skip']);
     this.invalidateCache();

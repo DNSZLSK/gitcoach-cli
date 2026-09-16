@@ -358,7 +358,15 @@
       "reverted": "Commit revertido. Un commit nuevo lo deshace.",
       "revertConflict": "La reversion provoco un conflicto. Resuelva los archivos y haga commit.",
       "noCommitsToRevert": "Aun no hay commits que revertir.",
-      "revertMessagePreview": "Git creara este commit:\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}."
+      "revertMessagePreview": "Git creara este commit:\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}.",
+      "clean": "Eliminar archivos sin seguimiento",
+      "cleanDesc": "Eliminar archivos de los que git nunca ha sabido nada",
+      "cleanWarning": "Estos archivos nunca se confirmaron, asi que git no tiene ninguna copia en ningun sitio. A diferencia de un reset, esto no se puede deshacer por ningun medio. Los archivos excluidos por .gitignore no se tocan.",
+      "cleanNothing": "No hay archivos sin seguimiento que eliminar.",
+      "cleanPreview": "Se eliminarian {{count}} archivo(s):",
+      "selectFilesToClean": "Seleccione los archivos a eliminar definitivamente:",
+      "confirmClean": "Eliminar definitivamente {{count}} archivo(s)? Esto no se puede deshacer.",
+      "cleanSuccess": "{{count}} archivo(s) eliminado(s)."
     },
     "history": {
       "title": "Historial de Commits",

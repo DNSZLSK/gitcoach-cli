@@ -358,7 +358,15 @@
       "reverted": "Commit reverted. A new commit now undoes it.",
       "revertConflict": "The revert hit a conflict. Resolve the files, then commit.",
       "noCommitsToRevert": "No commits to revert yet.",
-      "revertMessagePreview": "Git will create this commit:\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}."
+      "revertMessagePreview": "Git will create this commit:\n\n  Revert \"{{subject}}\"\n\n  This reverts commit {{hash}}.",
+      "clean": "Delete untracked files",
+      "cleanDesc": "Remove files git has never been told about",
+      "cleanWarning": "These files were never committed, so git has no copy of them anywhere. Unlike a reset, this cannot be undone by any means. Files excluded by .gitignore are left alone.",
+      "cleanNothing": "There are no untracked files to delete.",
+      "cleanPreview": "{{count}} file(s) would be deleted:",
+      "selectFilesToClean": "Select the files to delete permanently:",
+      "confirmClean": "Permanently delete {{count}} file(s)? This cannot be undone.",
+      "cleanSuccess": "{{count}} file(s) deleted."
     },
     "history": {
       "title": "Commit History",
