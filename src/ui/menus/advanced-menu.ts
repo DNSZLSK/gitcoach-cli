@@ -8,7 +8,7 @@ import { mapGitError } from '../../utils/error-mapper.js';
 import { isValidRemoteUrl } from '../../utils/validators.js';
 import { shouldShowExplanation } from '../../utils/level-helper.js';
 
-type AdvancedAction = 'submodules' | 'worktrees' | 'signing' | 'back';
+type AdvancedAction = 'submodules' | 'worktrees' | 'signing' | 'lfs' | 'back';
 
 /**
  * The operations a real project eventually needs but a beginner never should:
@@ -26,6 +26,7 @@ export async function showAdvancedMenu(): Promise<void> {
       { name: theme.menuItem('S', t('commands.advanced.submodules')), value: 'submodules' },
       { name: theme.menuItem('W', t('commands.advanced.worktrees')), value: 'worktrees' },
       { name: theme.menuItem('G', t('commands.advanced.signing')), value: 'signing' },
+      { name: theme.menuItem('L', t('commands.advanced.lfs')), value: 'lfs' },
       { name: theme.menuItem('B', t('menu.back')), value: 'back' }
     ]);
 
@@ -37,7 +38,8 @@ export async function showAdvancedMenu(): Promise<void> {
     try {
       if (action === 'submodules') await submoduleSection();
       else if (action === 'worktrees') await worktreeSection();
-      else await signingSection();
+      else if (action === 'signing') await signingSection();
+      else await lfsSection();
     } catch (error) {
       logger.raw(warningBox(mapGitError(error)));
     }
@@ -286,4 +288,139 @@ async function signingSection(): Promise<void> {
     await gitService.setSigningEnabled(false);
     logger.raw(successBox(t('commands.advanced.signDisabled')));
   }
+}
+
+/* --------------------------------------------------------------------- LFS */
+
+/**
+ * Git LFS: keep large binaries out of the history.
+ *
+ * LFS is a separate program, so the first thing this does is check whether it
+ * exists. Everything else — tracking a pattern, listing what is stored — is
+ * meaningless without it, and telling someone to install it is more use than
+ * failing at the first command with a git error they did not cause.
+ */
+async function lfsSection(): Promise<void> {
+  const theme = getTheme();
+  logger.raw('\n' + theme.title(t('commands.advanced.lfsTitle')) + '\n');
+
+  if (shouldShowExplanation()) {
+    logger.raw(infoBox(t('commands.advanced.lfsExplain')));
+  }
+
+  if (!(await gitService.isLfsAvailable())) {
+    logger.raw(warningBox(t('commands.advanced.lfsMissing'), t('warnings.title')));
+    logger.raw(infoBox(t('commands.advanced.lfsInstallHint')));
+    return;
+  }
+
+  const initialized = await gitService.isLfsInitialized();
+
+  if (!initialized) {
+    logger.raw(infoBox(t('commands.advanced.lfsNotInitialized')));
+
+    const setUp = await promptConfirm(t('commands.advanced.lfsInitQuestion'), true);
+    if (!setUp) {
+      return;
+    }
+
+    logger.command('git lfs install --local');
+    await gitService.lfsInstall();
+    logger.raw(successBox(t('commands.advanced.lfsInitialized')));
+  }
+
+  logger.command('git lfs track');
+  const patterns = await gitService.getLfsPatterns();
+
+  if (patterns.length === 0) {
+    logger.raw(theme.textMuted(`  ${t('commands.advanced.lfsNoPatterns')}\n`));
+  } else {
+    logger.raw(theme.textMuted(`  ${t('commands.advanced.lfsPatternCount', { count: patterns.length })}\n`));
+    patterns.forEach(pattern => logger.raw(`  ${pattern}`));
+    logger.raw('');
+  }
+
+  const choices: Array<{ name: string; value: string }> = [
+    { name: t('commands.advanced.lfsTrack'), value: 'track' }
+  ];
+
+  if (patterns.length > 0) {
+    choices.push({ name: t('commands.advanced.lfsUntrack'), value: 'untrack' });
+    choices.push({ name: t('commands.advanced.lfsList'), value: 'list' });
+  }
+
+  choices.push({ name: t('menu.back'), value: '' });
+
+  const action = await promptSelect<string>(t('commands.advanced.selectAction'), choices);
+
+  if (action === 'track') {
+    await trackLfsPattern(patterns);
+  } else if (action === 'untrack') {
+    await untrackLfsPattern(patterns);
+  } else if (action === 'list') {
+    await listLfsFiles();
+  }
+}
+
+async function trackLfsPattern(existing: string[]): Promise<void> {
+  const pattern = await promptInput(t('commands.advanced.lfsEnterPattern'), '', value =>
+    value.trim().length > 0 ? true : t('commands.advanced.lfsPatternRequired')
+  );
+
+  if (!pattern || pattern.trim().length === 0) {
+    return;
+  }
+
+  const target = pattern.trim();
+
+  if (existing.includes(target)) {
+    logger.raw(infoBox(t('commands.advanced.lfsAlreadyTracked', { pattern: target })));
+    return;
+  }
+
+  logger.command(`git lfs track "${target}"`);
+  await gitService.lfsTrack(target);
+
+  logger.raw(successBox(t('commands.advanced.lfsTracked', { pattern: target })));
+  // Tracking edits .gitattributes, and that file has to be committed or the
+  // rule exists only on this machine.
+  logger.raw(infoBox(t('commands.advanced.lfsCommitAttributes')));
+}
+
+async function untrackLfsPattern(patterns: string[]): Promise<void> {
+  const pattern = await promptSelect<string>(t('commands.advanced.lfsSelectUntrack'), [
+    ...patterns.map(value => ({ name: value, value })),
+    { name: t('menu.back'), value: '' }
+  ]);
+
+  if (!pattern) {
+    return;
+  }
+
+  // Files already stored in LFS stay there; untracking only stops new ones
+  // going in. Saying so avoids the belief that this pulls history back.
+  if (!(await promptConfirm(t('commands.advanced.lfsUntrackConfirm', { pattern }), false))) {
+    return;
+  }
+
+  logger.command(`git lfs untrack "${pattern}"`);
+  await gitService.lfsUntrack(pattern);
+  logger.raw(successBox(t('commands.advanced.lfsUntracked', { pattern })));
+  logger.raw(infoBox(t('commands.advanced.lfsCommitAttributes')));
+}
+
+async function listLfsFiles(): Promise<void> {
+  const theme = getTheme();
+
+  logger.command('git lfs ls-files');
+  const files = await gitService.getLfsFiles();
+
+  if (files.length === 0) {
+    logger.raw(infoBox(t('commands.advanced.lfsNoFiles')));
+    return;
+  }
+
+  logger.raw('\n' + theme.textBold(t('commands.advanced.lfsFileCount', { count: files.length })) + '\n');
+  files.forEach(file => logger.raw(`  ${file}`));
+  logger.raw('');
 }

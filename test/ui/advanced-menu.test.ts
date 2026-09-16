@@ -41,7 +41,14 @@ vi.mock('../../src/services/git-service.js', () => ({
     removeWorktree: vi.fn(),
     getSigningConfig: vi.fn(),
     setSigningEnabled: vi.fn(),
-    setSigningKey: vi.fn()
+    setSigningKey: vi.fn(),
+    isLfsAvailable: vi.fn(),
+    isLfsInitialized: vi.fn(),
+    lfsInstall: vi.fn(),
+    getLfsPatterns: vi.fn(),
+    lfsTrack: vi.fn(),
+    lfsUntrack: vi.fn(),
+    getLfsFiles: vi.fn()
   }
 }));
 
@@ -82,6 +89,10 @@ describe('Advanced menu', () => {
     git.getSubmodules.mockResolvedValue([]);
     git.getWorktrees.mockResolvedValue([worktree('/repo', 'master')]);
     git.getSigningConfig.mockResolvedValue({ enabled: false, key: null });
+    git.isLfsAvailable.mockResolvedValue(true);
+    git.isLfsInitialized.mockResolvedValue(true);
+    git.getLfsPatterns.mockResolvedValue(['*.psd']);
+    git.getLfsFiles.mockResolvedValue(['art/logo.psd']);
     confirm.mockResolvedValue(false);
     input.mockResolvedValue('');
   });
@@ -300,6 +311,132 @@ describe('Advanced menu', () => {
       await showAdvancedMenu();
 
       expect(git.setSigningKey).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('large files (LFS)', () => {
+    it('should say what to do rather than fail when git-lfs is missing', async () => {
+      git.isLfsAvailable.mockResolvedValue(false);
+      answers('lfs');
+
+      await showAdvancedMenu();
+
+      expect(git.isLfsInitialized).not.toHaveBeenCalled();
+      expect(git.getLfsPatterns).not.toHaveBeenCalled();
+      expect(git.lfsInstall).not.toHaveBeenCalled();
+    });
+
+    it('should offer to set LFS up when it is installed but not configured here', async () => {
+      git.isLfsInitialized.mockResolvedValue(false);
+      confirm.mockResolvedValue(true);
+      answers('lfs', '');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsInstall).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stop without setting anything up when that is declined', async () => {
+      git.isLfsInitialized.mockResolvedValue(false);
+      confirm.mockResolvedValue(false);
+      answers('lfs');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsInstall).not.toHaveBeenCalled();
+      expect(git.getLfsPatterns).not.toHaveBeenCalled();
+    });
+
+    it('should not run the setup again when it is already configured', async () => {
+      answers('lfs', '');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsInstall).not.toHaveBeenCalled();
+    });
+
+    it('should track the pattern the user typed', async () => {
+      answers('lfs', 'track');
+      input.mockResolvedValue('*.mp4');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsTrack).toHaveBeenCalledWith('*.mp4');
+    });
+
+    it('should track nothing when the input is left empty', async () => {
+      answers('lfs', 'track');
+      input.mockResolvedValue('');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsTrack).not.toHaveBeenCalled();
+    });
+
+    it('should not track a pattern that is already tracked', async () => {
+      answers('lfs', 'track');
+      input.mockResolvedValue('*.psd');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsTrack).not.toHaveBeenCalled();
+    });
+
+    it('should not offer untrack or list when nothing is tracked yet', async () => {
+      git.getLfsPatterns.mockResolvedValue([]);
+      answers('lfs', '');
+
+      await showAdvancedMenu();
+
+      const offered = (select.mock.calls[1][1] as { value: string }[]).map(c => c.value);
+      expect(offered).toEqual(['track', '']);
+    });
+
+    it('should offer untrack and list once a pattern is tracked', async () => {
+      answers('lfs', '');
+
+      await showAdvancedMenu();
+
+      const offered = (select.mock.calls[1][1] as { value: string }[]).map(c => c.value);
+      expect(offered).toEqual(['track', 'untrack', 'list', '']);
+    });
+
+    it('should untrack the chosen pattern after confirmation', async () => {
+      confirm.mockResolvedValue(true);
+      answers('lfs', 'untrack', '*.psd');
+
+      await showAdvancedMenu();
+
+      expect(git.lfsUntrack).toHaveBeenCalledWith('*.psd');
+    });
+
+    it('should untrack nothing when the confirmation is declined', async () => {
+      confirm.mockResolvedValue(false);
+      answers('lfs', 'untrack', '*.psd');
+
+      await showAdvancedMenu();
+
+      expect(confirm.mock.calls[0][1]).toBe(false);
+      expect(git.lfsUntrack).not.toHaveBeenCalled();
+    });
+
+    it('should offer a way out of the untrack list', async () => {
+      answers('lfs', 'untrack', '');
+
+      await showAdvancedMenu();
+
+      expect(confirm).not.toHaveBeenCalled();
+      expect(git.lfsUntrack).not.toHaveBeenCalled();
+    });
+
+    it('should list the stored files without changing anything', async () => {
+      answers('lfs', 'list');
+
+      await showAdvancedMenu();
+
+      expect(git.getLfsFiles).toHaveBeenCalledTimes(1);
+      expect(git.lfsTrack).not.toHaveBeenCalled();
+      expect(git.lfsUntrack).not.toHaveBeenCalled();
     });
   });
 });

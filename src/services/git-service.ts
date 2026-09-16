@@ -748,7 +748,11 @@ export class GitService {
   }
 
   async getCommitsAhead(base: string, maxCount: number = 50): Promise<CommitInfo[]> {
-    const log = await this.git.log({ from: base, to: 'HEAD', maxCount });
+    // symmetric: false is not optional. simple-git defaults `from`/`to` to
+    // `from...to`, the symmetric difference, which also returns the commits
+    // only `base` has — so a rebase would announce, and count as its own,
+    // commits belonging to the branch being rebased onto.
+    const log = await this.git.log({ from: base, to: 'HEAD', symmetric: false, maxCount });
     return log.all.map(entry => ({
       hash: entry.hash,
       date: entry.date,
@@ -765,7 +769,9 @@ export class GitService {
    * duplicate it.
    */
   async getCommitsNotIn(branch: string, maxCount: number = 50): Promise<CommitInfo[]> {
-    const log = await this.git.log({ from: 'HEAD', to: branch, maxCount });
+    // symmetric: false, for the same reason as getCommitsAhead — otherwise the
+    // cherry-pick list would include commits this branch already has.
+    const log = await this.git.log({ from: 'HEAD', to: branch, symmetric: false, maxCount });
     return log.all.map(entry => ({
       hash: entry.hash,
       date: entry.date,
@@ -824,6 +830,93 @@ export class GitService {
     }
     await this.git.raw(['clean', '-fd', '--', ...paths]);
     this.invalidateCache();
+  }
+
+  /**
+   * Whether the git-lfs extension is installed on this machine.
+   *
+   * LFS is a separate program, not part of git, so every other call here is
+   * meaningless until this says yes. A missing extension is the normal case
+   * for most users, not an error worth surfacing.
+   */
+  async isLfsAvailable(): Promise<boolean> {
+    try {
+      const output = await this.git.raw(['lfs', 'version']);
+      return output.toLowerCase().includes('git-lfs');
+    } catch {
+      logger.debug('git-lfs is not installed');
+      return false;
+    }
+  }
+
+  /**
+   * Whether LFS has been set up in this repository.
+   *
+   * Read from the clean filter rather than from .gitattributes: `git lfs
+   * install` writes the filter config, and it is what actually makes checkout
+   * and commit go through LFS. A .gitattributes copied in from elsewhere would
+   * list patterns that do nothing.
+   */
+  async isLfsInitialized(): Promise<boolean> {
+    try {
+      const output = await this.git.raw(['config', '--get', 'filter.lfs.clean']);
+      return output.trim().length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Set LFS up for this repository only, leaving the user's global config alone. */
+  async lfsInstall(): Promise<void> {
+    await this.git.raw(['lfs', 'install', '--local']);
+  }
+
+  /**
+   * Patterns currently sent to LFS.
+   *
+   * `git lfs track` with no argument lists them, under a heading and indented,
+   * with the source file appended in brackets.
+   */
+  async getLfsPatterns(): Promise<string[]> {
+    try {
+      const raw = await this.git.raw(['lfs', 'track']);
+      return raw
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.toLowerCase().startsWith('listing tracked'))
+        .map(line => line.replace(/\s*\([^)]*\)\s*$/, '').trim())
+        .filter(line => line.length > 0);
+    } catch {
+      logger.debug('Failed to list LFS patterns');
+      return [];
+    }
+  }
+
+  async lfsTrack(pattern: string): Promise<void> {
+    await this.git.raw(['lfs', 'track', pattern]);
+  }
+
+  async lfsUntrack(pattern: string): Promise<void> {
+    await this.git.raw(['lfs', 'untrack', pattern]);
+  }
+
+  /** Files stored in LFS, as `<oid> <status> <path>` lines reduced to paths. */
+  async getLfsFiles(maxCount: number = 50): Promise<string[]> {
+    try {
+      const raw = await this.git.raw(['lfs', 'ls-files']);
+      return raw
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => {
+          const parts = line.split(/\s+/);
+          return parts.length > 2 ? parts.slice(2).join(' ') : line;
+        })
+        .slice(0, maxCount);
+    } catch {
+      logger.debug('Failed to list LFS files');
+      return [];
+    }
   }
 
   async skipRebase(): Promise<void> {
@@ -1078,14 +1171,18 @@ export class GitService {
   /**
    * Whether a path is excluded by a .gitignore rule.
    *
-   * `check-ignore` exits 1 when the path is *not* ignored, which simple-git
-   * surfaces as a thrown error. That is the answer, not a failure.
+   * Read from the output, not from the exit code. `check-ignore` exits 1 when
+   * nothing matches, but simple-git resolves that quietly rather than
+   * rejecting, so a version of this that returned true on success and false in
+   * a catch answered "ignored" for every path ever given to it. Without -q the
+   * matching path is echoed back, and an empty result is the honest no.
    */
   async isIgnored(path: string): Promise<boolean> {
     try {
-      await this.git.raw(['check-ignore', '-q', '--', path]);
-      return true;
+      const output = await this.git.raw(['check-ignore', '--', path]);
+      return output.trim().length > 0;
     } catch {
+      logger.debug('check-ignore failed; treating the path as not ignored');
       return false;
     }
   }
