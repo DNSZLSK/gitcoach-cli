@@ -53,33 +53,55 @@ target to hit.
 
 ### Test reality
 
-1222 tests, 49 suites, all green on Vitest. Coverage stands at **61%**.
+1036 tests, 41 suites, all green on Vitest. Coverage stands at **72%**.
 
-It has been restated downward twice and raised since, and only the rises count
-for anything: the falls came from removing things that were never evidence
-(files Jest could not load; `require()` calls istanbul scored as executed
-statements), the rises from tests that break when the code changes.
+The figure has been restated downward twice and raised four times. Only the
+rises mean anything: the falls came from removing things that were never
+evidence (files Jest could not load; `require()` calls istanbul scored as
+executed statements), the rises from tests that break when the code changes.
 
-Every menu suite is verified by mutation - the guard is removed on purpose and
-the suite has to fail. The five main menus sit at 93-96%, and every feature
-added since came with the same treatment.
+Every menu suite is verified by mutation — the guard is removed on purpose and
+the suite has to fail. That is the standard here, not the percentage.
 
-Still at zero, and next in line: `add-menu`, `stash-menu`, `config-menu`,
-`history-menu`, `main-menu` beyond its labels, `remote-menu`, `help-menu`,
-`detached-head-menu`, and the `src/commands` entry points.
+**The phantom tests are gone.** 317 of them, counted from a measurement rather
+than estimated: every test file was run alone under coverage to find which
+executed no production line. Twelve suites were deleted once their behaviour
+was covered for real, two were rewritten in place, and four new suites were
+written to cover the menus the deleted ones had only ever described.
 
-Roughly **278 tests still execute no production line at all**. They assert on
-mocks, on arrays of strings, or on the text of source files -
-`test/e2e/user-journeys.test.ts`, `test/integration/basic-workflow.test.ts`,
-`test/config/user-config.test.ts` and the older `test/ui/*` suites are the
-pattern.
+(The commit that did the deleting says 215. That was a net figure — deletions
+minus the replacements written alongside them — reported as though it were the
+count of phantom tests. 317 is the count.)
+
+One suite covers no statements and stays: `test/i18n/translations.test.ts`
+validates the locale JSON, which is production data even though it is not
+production code. Zero coverage means a test is not exercising behaviour — not
+that it is worthless.
+
+Still untested, and the honest list of what to do next:
+
+| Module | Statements |
+|--------|-----------|
+| `add-menu.ts` | 0% |
+| `remote-menu.ts` | 0% |
+| `help-menu.ts` | 0% |
+| `recovery-menu.ts` | 0% |
+| `detached-head-menu.ts` | 0% |
+| `flows/amend.ts` | 0% |
+| `components/prompt.ts`, `spinner.ts`, `table.ts` | 0% |
+| `commands/index.ts`, `init.ts`, `quick.ts` | 2-6% |
+| `themes/colored.ts`, `monochrome.ts` | ~11% |
+
+The components and themes are thin wrappers over inquirer, ora and chalk, and
+testing them mostly tests those libraries. The menus and the command entry
+points are not, and are worth doing.
 
 ### Bugs these tests have found, in order
 
 Worth keeping, because each one was invisible to the suite as it stood:
 
 - the main menu printed `menu.tagsBeginner` and `menu.advancedExpert` to the
-  user, in all three languages. Key parity across locales could not see it -
+  user, in all three languages. Key parity across locales could not see it —
   the key was missing from all three alike
 - the Java .gitignore template had no `.env`, alone among the four
 - `isIgnored` answered "ignored" for every path ever given to it. It assumed
@@ -121,9 +143,19 @@ next test.
 and LFS, each with behaviour tests and a mutation check, and each with its
 strings in all three locales.
 
-**4. Clear out the 278 phantom tests**, either by rewriting them against the real
-modules or by deleting them. A test that cannot fail is worse than no test: it
-buys confidence it has not earned.
+**4. ~~Clear out the phantom tests~~ — done.** 215 of them, found by running
+each test file alone under coverage rather than by reading them. Ten suites
+deleted, four rewritten against the real modules.
+
+One deletion is a real loss, and worth naming rather than burying:
+`menu-navigation.test.ts` grepped every menu source for a back option, and it
+would have caught a menu with no way out. The behaviour suites now check that
+per menu, for the menus that have suites — so a menu added tomorrow with no
+exit and no tests would not be caught. The untested menus are listed above.
+
+**Next**, if this continues: `add-menu` and `remote-menu` are the last
+everyday menus at zero, and `src/commands` — the entry points — are barely
+touched.
 
 ---
 
