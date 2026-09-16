@@ -44,3 +44,7 @@ coverage-*/
 
 # Claude Code (local/personal settings)
 .claude/
+# Project instructions for Claude Code. Kept out of the repository: it is
+# working notes for a tool, not part of what GitCoach ships, and it sat in the
+# public file listing where it read as a project artifact.
+CLAUDE.md
