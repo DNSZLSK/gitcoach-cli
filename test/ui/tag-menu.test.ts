@@ -1,3 +1,4 @@
+import type { Mocked, MockedFunction } from 'vitest';
 /**
  * Behaviour tests for the real tag menu.
  *
@@ -10,45 +11,42 @@
  * because chalk and boxen ship ESM that Jest will not transform.
  */
 
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) =>
     params ? `${key}:${JSON.stringify(params)}` : key
 }));
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
-jest.mock('../../src/ui/themes/index.js', () =>
-  require('../helpers/module-mocks.js').themeMock());
+vi.mock('../../src/ui/themes/index.js', async () => (await import('../helpers/module-mocks.js')).themeMock());
 
-jest.mock('../../src/ui/components/box.js', () =>
-  require('../helpers/module-mocks.js').boxMock());
+vi.mock('../../src/ui/components/box.js', async () => (await import('../helpers/module-mocks.js')).boxMock());
 
-jest.mock('../../src/utils/error-mapper.js', () => ({
+vi.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (error: unknown) => String(error)
 }));
 
-jest.mock('../../src/utils/level-helper.js', () => ({
+vi.mock('../../src/utils/level-helper.js', () => ({
   shouldShowExplanation: () => false
 }));
 
-jest.mock('../../src/ui/components/prompt.js', () => ({
-  promptSelect: jest.fn(),
-  promptConfirm: jest.fn(),
-  promptInput: jest.fn()
+vi.mock('../../src/ui/components/prompt.js', () => ({
+  promptSelect: vi.fn(),
+  promptConfirm: vi.fn(),
+  promptInput: vi.fn()
 }));
 
-jest.mock('../../src/services/git-service.js', () => ({
+vi.mock('../../src/services/git-service.js', () => ({
   gitService: {
-    getTags: jest.fn(),
-    tagExists: jest.fn(),
-    createTag: jest.fn(),
-    deleteTag: jest.fn(),
-    deleteRemoteTag: jest.fn(),
-    pushTag: jest.fn(),
-    pushAllTags: jest.fn(),
-    getUnpushedTags: jest.fn(),
-    hasRemote: jest.fn()
+    getTags: vi.fn(),
+    tagExists: vi.fn(),
+    createTag: vi.fn(),
+    deleteTag: vi.fn(),
+    deleteRemoteTag: vi.fn(),
+    pushTag: vi.fn(),
+    pushAllTags: vi.fn(),
+    getUnpushedTags: vi.fn(),
+    hasRemote: vi.fn()
   }
 }));
 
@@ -57,10 +55,10 @@ import { gitService } from '../../src/services/git-service.js';
 import { promptSelect, promptConfirm, promptInput } from '../../src/ui/components/prompt.js';
 import { logger } from '../../src/utils/logger.js';
 
-const git = gitService as jest.Mocked<typeof gitService>;
-const select = promptSelect as jest.MockedFunction<typeof promptSelect>;
-const confirm = promptConfirm as jest.MockedFunction<typeof promptConfirm>;
-const input = promptInput as jest.MockedFunction<typeof promptInput>;
+const git = gitService as Mocked<typeof gitService>;
+const select = promptSelect as MockedFunction<typeof promptSelect>;
+const confirm = promptConfirm as MockedFunction<typeof promptConfirm>;
+const input = promptInput as MockedFunction<typeof promptInput>;
 
 const tag = (name: string, annotated = true) => ({
   name,
@@ -78,7 +76,7 @@ const answers = (...values: unknown[]) => {
 
 describe('Tag menu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     git.getTags.mockResolvedValue([tag('v1.0.0')]);
     git.tagExists.mockResolvedValue(false);
     git.hasRemote.mockResolvedValue(true);

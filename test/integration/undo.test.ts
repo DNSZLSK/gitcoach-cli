@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 /**
  * Integration tests for Undo Operations
  * Tests: soft reset, hard reset, unstage, restore
@@ -7,8 +9,8 @@ import { createTestRepoWithCommit } from '../helpers/test-utils.js';
 import { createMockGitService, type MockGitService } from '../helpers/mock-git.js';
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
-jest.mock('../../src/services/git-service.js');
-jest.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/services/git-service.js');
+vi.mock('../../src/ui/components/prompt.js');
 
 describe('Undo Operations', () => {
   let mockGitService: MockGitService;
@@ -25,7 +27,7 @@ describe('Undo Operations', () => {
       ahead: 1
     });
     mockPrompts = createMockPrompts();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Soft Reset', () => {
@@ -333,8 +335,6 @@ describe('Undo Operations - Real Git', () => {
       repo.git('reset --hard HEAD~1');
 
       // File should be gone
-      const { existsSync } = require('node:fs');
-      const { join } = require('node:path');
       expect(existsSync(join(repo.path, 'to-remove.txt'))).toBe(false);
     } finally {
       repo.cleanup();
@@ -368,8 +368,6 @@ describe('Undo Operations - Real Git', () => {
     const repo = createTestRepoWithCommit('real-restore');
 
     try {
-      const { readFileSync } = require('node:fs');
-      const { join } = require('node:path');
 
       // Modify tracked file
       repo.modifyFile('README.md', 'Modified content');

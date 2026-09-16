@@ -7,13 +7,18 @@
  * that caused it is nowhere in the stack. That happened once already: a shared
  * box stub missing `titleBox` broke the stats command tests.
  *
- * The real modules cannot simply be imported here, because they pull in chalk
- * and ora, which ship ESM that Jest will not transform. So the export surface is
- * read from the source instead.
+ * Under Jest the real modules could not be imported here at all — they pull in
+ * chalk and ora — so their export surface was scraped out of the source with a
+ * regex that only ever saw `export function` and `export const`. It missed
+ * `export { coloredTheme, monochromeTheme }` entirely. Vitest loads the modules,
+ * so the comparison is now against the modules themselves.
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import * as boxModule from '../../src/ui/components/box.js';
+import * as promptModule from '../../src/ui/components/prompt.js';
+import * as errorMapperModule from '../../src/utils/error-mapper.js';
+import * as themesModule from '../../src/ui/themes/index.js';
+import { logger as realLogger } from '../../src/utils/logger.js';
 import {
   loggerMock,
   boxMock,
@@ -23,52 +28,34 @@ import {
   spinnerMock
 } from '../helpers/module-mocks.js';
 
-const SRC = join(__dirname, '..', '..', 'src');
-
-/** Names exported with `export function` or `export const` from a module. */
-function exportedNames(relativePath: string): string[] {
-  const source = readFileSync(join(SRC, relativePath), 'utf-8');
-  const names = [...source.matchAll(/^export\s+(?:async\s+)?(?:function|const)\s+(\w+)/gm)]
-    .map(match => match[1]);
-  return [...new Set(names)];
-}
-
-/** Public methods of the exported `logger` singleton. */
-function loggerMethods(): string[] {
-  const source = readFileSync(join(SRC, 'utils', 'logger.ts'), 'utf-8');
-  const names = [...source.matchAll(/^ {2}([a-z][A-Za-z]*)\s*\(/gm)].map(match => match[1]);
-  return [...new Set(names)];
+/** Runtime exports of a module, minus the interop `default` key. */
+function exportsOf(module: object): string[] {
+  return Object.keys(module).filter(name => name !== 'default');
 }
 
 describe('shared module mocks', () => {
   it('should cover every export of the box module', () => {
-    const real = exportedNames(join('ui', 'components', 'box.ts'));
-
-    expect(Object.keys(boxMock())).toEqual(expect.arrayContaining(real));
+    expect(Object.keys(boxMock())).toEqual(expect.arrayContaining(exportsOf(boxModule)));
   });
 
   it('should cover every export of the prompt module', () => {
-    const real = exportedNames(join('ui', 'components', 'prompt.ts'));
-
-    expect(Object.keys(promptMock())).toEqual(expect.arrayContaining(real));
+    expect(Object.keys(promptMock())).toEqual(expect.arrayContaining(exportsOf(promptModule)));
   });
 
   it('should cover every export of the error mapper', () => {
-    const real = exportedNames(join('utils', 'error-mapper.ts'));
-
-    expect(Object.keys(errorMapperMock())).toEqual(expect.arrayContaining(real));
+    expect(Object.keys(errorMapperMock())).toEqual(
+      expect.arrayContaining(exportsOf(errorMapperModule))
+    );
   });
 
   it('should cover every export of the themes module', () => {
-    const real = exportedNames(join('ui', 'themes', 'index.ts'));
-
-    expect(Object.keys(themeMock())).toEqual(expect.arrayContaining(real));
+    expect(Object.keys(themeMock())).toEqual(expect.arrayContaining(exportsOf(themesModule)));
   });
 
   it('should cover every method of the logger', () => {
-    const real = loggerMethods();
-
-    expect(Object.keys(loggerMock().logger)).toEqual(expect.arrayContaining(real));
+    expect(Object.keys(loggerMock().logger)).toEqual(
+      expect.arrayContaining(Object.keys(realLogger))
+    );
   });
 
   it('should expose a spinner with the methods callers use', () => {

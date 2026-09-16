@@ -1,30 +1,29 @@
 import { copilotService } from '../../src/services/copilot-service.js';
 
 // Mock i18n
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string) => key
 }));
 
 // Mock i18next (used by getLanguageInstruction)
-jest.mock('i18next', () => ({
+vi.mock('i18next', () => ({
   default: { language: 'en' },
   __esModule: true
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 // Mock helpers
-const mockExecuteFile = jest.fn();
-jest.mock('../../src/utils/helpers.js', () => ({
+const mockExecuteFile = vi.fn();
+vi.mock('../../src/utils/helpers.js', () => ({
   executeFile: (...args: unknown[]) => mockExecuteFile(...args),
-  sleep: jest.fn().mockResolvedValue(undefined)
+  sleep: vi.fn().mockResolvedValue(undefined)
 }));
 
 describe('CopilotService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     copilotService.resetAvailability();
   });
 

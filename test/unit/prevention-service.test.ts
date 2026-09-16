@@ -1,7 +1,8 @@
+import type { Mocked } from 'vitest';
 import { preventionService } from '../../src/services/prevention-service.js';
 
 // Mock i18n
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) => {
     if (params) {
       let result = key;
@@ -15,40 +16,39 @@ jest.mock('../../src/i18n/index.js', () => ({
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 // Mock user config
-jest.mock('../../src/config/user-config.js', () => ({
+vi.mock('../../src/config/user-config.js', () => ({
   userConfig: {
-    incrementErrorsPrevented: jest.fn(),
-    getConfirmDestructiveActions: jest.fn().mockReturnValue(true)
+    incrementErrorsPrevented: vi.fn(),
+    getConfirmDestructiveActions: vi.fn().mockReturnValue(true)
   }
 }));
 
-// Mock git service - must be inline in factory since jest.mock is hoisted
-jest.mock('../../src/services/git-service.js', () => ({
+// Mock git service - must be inline in factory since vi.mock is hoisted
+vi.mock('../../src/services/git-service.js', () => ({
   gitService: {
-    hasUncommittedChanges: jest.fn(),
-    getCurrentBranch: jest.fn(),
-    isDetachedHead: jest.fn(),
-    hasRemote: jest.fn(),
-    isGitRepo: jest.fn(),
-    getStagedFiles: jest.fn(),
-    isMergeInProgress: jest.fn(),
-    isRebaseInProgress: jest.fn(),
-    isCherryPickInProgress: jest.fn(),
-    isBisectInProgress: jest.fn()
+    hasUncommittedChanges: vi.fn(),
+    getCurrentBranch: vi.fn(),
+    isDetachedHead: vi.fn(),
+    hasRemote: vi.fn(),
+    isGitRepo: vi.fn(),
+    getStagedFiles: vi.fn(),
+    isMergeInProgress: vi.fn(),
+    isRebaseInProgress: vi.fn(),
+    isCherryPickInProgress: vi.fn(),
+    isBisectInProgress: vi.fn()
   }
 }));
 
 // Get reference to the mocked git service
 import { gitService } from '../../src/services/git-service.js';
-const mockGitService = gitService as jest.Mocked<typeof gitService>;
+const mockGitService = gitService as Mocked<typeof gitService>;
 
 describe('PreventionService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('checkUncommittedChanges', () => {

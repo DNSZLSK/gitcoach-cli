@@ -7,8 +7,7 @@
  * it is a distinct branch, not to restate the happy path.
  */
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 import {
   truncateString,
@@ -123,7 +122,7 @@ describe('helpers', () => {
 
   describe('debounce', () => {
     it('should run once for a burst of calls', async () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       const debounced = debounce(spy, 20);
 
       debounced();

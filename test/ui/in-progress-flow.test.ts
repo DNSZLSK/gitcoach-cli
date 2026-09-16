@@ -1,3 +1,4 @@
+import type { Mocked, MockedFunction } from 'vitest';
 /**
  * Behaviour tests for the interrupted-operation flow, driving the real module.
  *
@@ -6,51 +7,48 @@
  * These tests pin that down, along with which exits are offered in each state.
  */
 
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) =>
     params ? `${key}:${JSON.stringify(params)}` : key
 }));
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
-jest.mock('../../src/ui/themes/index.js', () =>
-  require('../helpers/module-mocks.js').themeMock());
+vi.mock('../../src/ui/themes/index.js', async () => (await import('../helpers/module-mocks.js')).themeMock());
 
-jest.mock('../../src/ui/components/box.js', () =>
-  require('../helpers/module-mocks.js').boxMock());
+vi.mock('../../src/ui/components/box.js', async () => (await import('../helpers/module-mocks.js')).boxMock());
 
-jest.mock('../../src/utils/error-mapper.js', () => ({
+vi.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (error: unknown) => String(error)
 }));
 
-jest.mock('../../src/utils/level-helper.js', () => ({
+vi.mock('../../src/utils/level-helper.js', () => ({
   shouldShowExplanation: () => false
 }));
 
-jest.mock('../../src/ui/components/prompt.js', () => ({
-  promptSelect: jest.fn(),
-  promptConfirm: jest.fn(),
-  promptInput: jest.fn()
+vi.mock('../../src/ui/components/prompt.js', () => ({
+  promptSelect: vi.fn(),
+  promptConfirm: vi.fn(),
+  promptInput: vi.fn()
 }));
 
-jest.mock('../../src/services/git-service.js', () => ({
+vi.mock('../../src/services/git-service.js', () => ({
   gitService: {
-    isRebaseInProgress: jest.fn(),
-    isCherryPickInProgress: jest.fn(),
-    isMergeInProgress: jest.fn(),
-    isBisectInProgress: jest.fn(),
-    getRebaseProgress: jest.fn(),
-    getConflictedFiles: jest.fn(),
-    hasConflicts: jest.fn(),
-    continueRebase: jest.fn(),
-    continueCherryPick: jest.fn(),
-    commitNoEdit: jest.fn(),
-    skipRebase: jest.fn(),
-    abortRebase: jest.fn(),
-    abortCherryPick: jest.fn(),
-    abortMerge: jest.fn(),
-    abortBisect: jest.fn()
+    isRebaseInProgress: vi.fn(),
+    isCherryPickInProgress: vi.fn(),
+    isMergeInProgress: vi.fn(),
+    isBisectInProgress: vi.fn(),
+    getRebaseProgress: vi.fn(),
+    getConflictedFiles: vi.fn(),
+    hasConflicts: vi.fn(),
+    continueRebase: vi.fn(),
+    continueCherryPick: vi.fn(),
+    commitNoEdit: vi.fn(),
+    skipRebase: vi.fn(),
+    abortRebase: vi.fn(),
+    abortCherryPick: vi.fn(),
+    abortMerge: vi.fn(),
+    abortBisect: vi.fn()
   }
 }));
 
@@ -59,15 +57,15 @@ import { gitService } from '../../src/services/git-service.js';
 import { promptSelect } from '../../src/ui/components/prompt.js';
 import { logger } from '../../src/utils/logger.js';
 
-const git = gitService as jest.Mocked<typeof gitService>;
-const select = promptSelect as jest.MockedFunction<typeof promptSelect>;
+const git = gitService as Mocked<typeof gitService>;
+const select = promptSelect as MockedFunction<typeof promptSelect>;
 
 const offeredValues = () =>
   (select.mock.calls[0][1] as { value: string }[]).map(choice => choice.value);
 
 describe('Interrupted operation flow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     git.isRebaseInProgress.mockResolvedValue(false);
     git.isCherryPickInProgress.mockResolvedValue(false);
     git.isMergeInProgress.mockResolvedValue(false);

@@ -1,6 +1,7 @@
+import type { Mocked } from 'vitest';
 // Mock i18n - must be before imports
-jest.mock('../../src/i18n/index.js', () => ({
-  initI18n: jest.fn().mockResolvedValue(undefined),
+vi.mock('../../src/i18n/index.js', () => ({
+  initI18n: vi.fn().mockResolvedValue(undefined),
   t: (key: string, params?: Record<string, unknown>) => {
     if (params) {
       let result = key;
@@ -11,39 +12,36 @@ jest.mock('../../src/i18n/index.js', () => ({
     }
     return key;
   },
-  changeLanguage: jest.fn()
+  changeLanguage: vi.fn()
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 // Mock user config
-jest.mock('../../src/config/user-config.js', () => ({
+vi.mock('../../src/config/user-config.js', () => ({
   userConfig: {
-    getTotalCommits: jest.fn().mockReturnValue(0),
-    getErrorsPreventedCount: jest.fn().mockReturnValue(0),
-    getAiCommitsGenerated: jest.fn().mockReturnValue(0),
-    getTheme: jest.fn().mockReturnValue('colored')
+    getTotalCommits: vi.fn().mockReturnValue(0),
+    getErrorsPreventedCount: vi.fn().mockReturnValue(0),
+    getAiCommitsGenerated: vi.fn().mockReturnValue(0),
+    getTheme: vi.fn().mockReturnValue('colored')
   }
 }));
 
 // Mock analysis service
-jest.mock('../../src/services/analysis-service.js', () => ({
+vi.mock('../../src/services/analysis-service.js', () => ({
   analysisService: {
-    calculateEstimatedTimeSaved: jest.fn().mockReturnValue('0 minutes')
+    calculateEstimatedTimeSaved: vi.fn().mockReturnValue('0 minutes')
   }
 }));
 
 // Mock theme
-jest.mock('../../src/ui/themes/index.js', () =>
-  require('../helpers/module-mocks.js').themeMock());
+vi.mock('../../src/ui/themes/index.js', async () => (await import('../helpers/module-mocks.js')).themeMock());
 
 // Mock UI components
-jest.mock('../../src/ui/components/box.js', () =>
-  require('../helpers/module-mocks.js').boxMock());
+vi.mock('../../src/ui/components/box.js', async () => (await import('../helpers/module-mocks.js')).boxMock());
 
-jest.mock('../../src/ui/components/table.js', () => ({
+vi.mock('../../src/ui/components/table.js', () => ({
   statsTable: (stats: Array<{ label: string; value: string | number }>) =>
     stats.map(s => `${s.label}: ${s.value}`).join('\n')
 }));
@@ -53,15 +51,15 @@ import { userConfig } from '../../src/config/user-config.js';
 import { analysisService } from '../../src/services/analysis-service.js';
 import { logger } from '../../src/utils/logger.js';
 
-const mockUserConfig = userConfig as jest.Mocked<typeof userConfig>;
-const mockAnalysisService = analysisService as jest.Mocked<typeof analysisService>;
-const mockLogger = logger as jest.Mocked<typeof logger>;
+const mockUserConfig = userConfig as Mocked<typeof userConfig>;
+const mockAnalysisService = analysisService as Mocked<typeof analysisService>;
+const mockLogger = logger as Mocked<typeof logger>;
 
 describe('Stats Command', () => {
   let statsCommand: Stats;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     statsCommand = new Stats([], {} as never);
   });
 

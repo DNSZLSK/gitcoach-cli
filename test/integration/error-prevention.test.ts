@@ -1,3 +1,7 @@
+import { execSync } from 'node:child_process';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { rmSync, writeFileSync } from 'node:fs';
 /**
  * Integration tests for Error Prevention
  * Tests: uncommitted changes warning, force push protection, pull before push
@@ -8,9 +12,9 @@ import { createMockGitService, type MockGitService } from '../helpers/mock-git.j
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
 // Mock modules
-jest.mock('../../src/services/git-service.js');
-jest.mock('../../src/ui/components/prompt.js');
-jest.mock('../../src/services/prevention-service.js');
+vi.mock('../../src/services/git-service.js');
+vi.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/services/prevention-service.js');
 
 describe('Error Prevention', () => {
   let mockGitService: MockGitService;
@@ -19,7 +23,7 @@ describe('Error Prevention', () => {
   beforeEach(() => {
     mockGitService = createMockGitService();
     mockPrompts = createMockPrompts();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Uncommitted Changes Warning', () => {
@@ -360,10 +364,6 @@ describe('Error Prevention - Real Git', () => {
     const { repo, remote } = createTestRepoWithRemote('diverged');
 
     try {
-      const { execSync } = require('node:child_process');
-      const { join } = require('node:path');
-      const { tmpdir } = require('node:os');
-      const { writeFileSync, rmSync } = require('node:fs');
 
       // Create another clone
       const otherPath = join(tmpdir(), `other-${Date.now()}`);

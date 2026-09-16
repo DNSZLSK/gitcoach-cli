@@ -1,3 +1,7 @@
+import { execSync } from 'node:child_process';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { rmSync, writeFileSync } from 'node:fs';
 /**
  * Integration tests for Basic Git Workflow
  * Tests: status, add, commit, push, pull
@@ -8,8 +12,8 @@ import { createMockGitService, type MockGitService } from '../helpers/mock-git.j
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
 // Mock modules
-jest.mock('../../src/services/git-service.js');
-jest.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/services/git-service.js');
+vi.mock('../../src/ui/components/prompt.js');
 
 describe('Basic Workflow', () => {
   let mockGitService: MockGitService;
@@ -18,7 +22,7 @@ describe('Basic Workflow', () => {
   beforeEach(() => {
     mockGitService = createMockGitService();
     mockPrompts = createMockPrompts();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Status', () => {
@@ -371,9 +375,6 @@ describe('Basic Workflow - Real Git', () => {
 
     try {
       // Create another clone and push changes
-      const { execSync } = require('node:child_process');
-      const { join } = require('node:path');
-      const { tmpdir } = require('node:os');
       const otherClonePath = join(tmpdir(), `other-clone-${Date.now()}`);
 
       execSync(`git clone "${remote.path}" "${otherClonePath}"`, { stdio: 'pipe' });
@@ -381,7 +382,6 @@ describe('Basic Workflow - Real Git', () => {
       execSync('git config user.name "Other User"', { cwd: otherClonePath, stdio: 'pipe' });
 
       // Make changes in other clone
-      const { writeFileSync } = require('node:fs');
       writeFileSync(join(otherClonePath, 'remote-change.txt'), 'From remote');
       execSync('git add -A', { cwd: otherClonePath, stdio: 'pipe' });
       execSync('git commit -m "Remote change"', { cwd: otherClonePath, stdio: 'pipe' });
@@ -402,7 +402,6 @@ describe('Basic Workflow - Real Git', () => {
       expect(files).toContain('remote-change.txt');
 
       // Cleanup other clone
-      const { rmSync } = require('node:fs');
       rmSync(otherClonePath, { recursive: true, force: true });
     } finally {
       repo.cleanup();

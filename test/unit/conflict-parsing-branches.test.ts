@@ -7,33 +7,29 @@
  * appear without forming a complete block. Those were the untested branches.
  */
 
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string) => key
 }));
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
-jest.mock('../../src/ui/themes/index.js', () =>
-  require('../helpers/module-mocks.js').themeMock());
+vi.mock('../../src/ui/themes/index.js', async () => (await import('../helpers/module-mocks.js')).themeMock());
 
-jest.mock('../../src/ui/components/box.js', () =>
-  require('../helpers/module-mocks.js').boxMock());
+vi.mock('../../src/ui/components/box.js', async () => (await import('../helpers/module-mocks.js')).boxMock());
 
-jest.mock('../../src/ui/components/prompt.js', () => ({
-  promptSelect: jest.fn(),
-  promptConfirm: jest.fn(),
-  promptInput: jest.fn()
+vi.mock('../../src/ui/components/prompt.js', () => ({
+  promptSelect: vi.fn(),
+  promptConfirm: vi.fn(),
+  promptInput: vi.fn()
 }));
 
 // The menu module pulls in the spinner, and ora is ESM that Jest will not
 // transform. Only the pure parsing functions are under test here.
-jest.mock('../../src/ui/components/spinner.js', () =>
-  require('../helpers/module-mocks.js').spinnerMock());
+vi.mock('../../src/ui/components/spinner.js', async () => (await import('../helpers/module-mocks.js')).spinnerMock());
 
-jest.mock('../../src/services/git-service.js', () => ({ gitService: {} }));
-jest.mock('../../src/services/ai/index.js', () => ({ aiService: {} }));
-jest.mock('../../src/utils/error-mapper.js', () => ({
+vi.mock('../../src/services/git-service.js', () => ({ gitService: {} }));
+vi.mock('../../src/services/ai/index.js', () => ({ aiService: {} }));
+vi.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (error: unknown) => String(error)
 }));
 

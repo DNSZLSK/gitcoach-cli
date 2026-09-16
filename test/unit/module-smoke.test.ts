@@ -3,33 +3,22 @@
  *
  * Two jobs. First, it is a genuine smoke test: a module that throws while being
  * loaded, or that has a circular import, fails here rather than in front of a
- * user. Second, it makes coverage honest. Jest only reports on files it has
- * loaded, so before this existed the reported percentage described the fourteen
- * files tests happened to touch, not the fifty-seven the project ships.
+ * user. Second, it proves the whole tree is reachable from a test at all —
+ * which, under Jest, most of it was not.
  *
  * It asserts nothing about behaviour on purpose. The behaviour is covered by
- * the suites next to it; this one guards the act of loading.
+ * the suites next to it; this one guards the act of loading. Note that loading
+ * a module is worth almost nothing to coverage under real ESM: imports are
+ * hoisted out of the module body, so a menu whose whole content sits inside a
+ * function still reports zero here. That is correct, and it is why this file
+ * makes no claim about coverage.
  */
-
-// src/i18n/index.ts uses `import.meta.url` to locate its locale files, which
-// cannot be evaluated in the CommonJS mode the suite runs in. Jest's own mock
-// machinery does not work in real ESM either, so the module is stubbed here and
-// excluded from the list below; its behaviour is covered by translations.test.ts.
-jest.mock('../../src/i18n/index.js', () => ({
-  initI18n: jest.fn().mockResolvedValue(undefined),
-  changeLanguage: jest.fn().mockResolvedValue(undefined),
-  getCurrentLanguage: jest.fn().mockReturnValue('en'),
-  t: (key: string) => key
-}));
 
 import { readdirSync, statSync } from 'fs';
 import { join, relative, sep } from 'path';
 
 const ROOT = process.cwd();
 const SRC = join(ROOT, 'src');
-
-/** Modules that cannot be loaded in this mode; see the note above. */
-const EXCLUDED = new Set(['i18n/index.ts']);
 
 /** Every .ts file under src, excluding declaration files. */
 function sourceFiles(dir: string): string[] {
@@ -42,11 +31,10 @@ function sourceFiles(dir: string): string[] {
 
 const modules = sourceFiles(SRC)
   .map(file => relative(SRC, file).split(sep).join('/'))
-  .filter(label => !EXCLUDED.has(label))
   .map(label => ({
     label,
-    // Jest maps the .js suffix back to the TypeScript source.
-    specifier: '../../src/' + label.replace(/\.ts$/, '.js')
+    // Vite resolves the .js suffix back to the TypeScript source.
+    specifier: '../../src/' + label.replace(/[.]ts$/, '.js')
   }));
 
 describe('module loading', () => {

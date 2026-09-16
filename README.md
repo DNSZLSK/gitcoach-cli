@@ -369,7 +369,7 @@ gitcoach-cli/
 
 Built with TypeScript, [Inquirer.js](https://github.com/SBoudrias/Inquirer.js),
 [simple-git](https://github.com/steveukx/git-js), cross-spawn (shell-free AI CLI
-calls), [i18next](https://www.i18next.com/), Chalk and Jest.
+calls), [i18next](https://www.i18next.com/), Chalk and Vitest.
 
 ---
 

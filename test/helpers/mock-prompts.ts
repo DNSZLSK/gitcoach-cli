@@ -42,7 +42,7 @@ export function createMockPrompts(responses: Partial<MockPromptResponses> = {}) 
       Object.assign(state, newResponses);
     },
 
-    promptSelect: jest.fn(async <T>(_message: string, _choices: Array<{ name: string; value: T }>): Promise<T> => {
+    promptSelect: vi.fn(async <T>(_message: string, _choices: Array<{ name: string; value: T }>): Promise<T> => {
       const response = state.select[selectIndex++];
       if (response === undefined) {
         throw new Error(`No mock response for promptSelect at index ${selectIndex - 1}`);
@@ -50,7 +50,7 @@ export function createMockPrompts(responses: Partial<MockPromptResponses> = {}) 
       return response as T;
     }),
 
-    promptConfirm: jest.fn(async (_message: string, _defaultValue?: boolean): Promise<boolean> => {
+    promptConfirm: vi.fn(async (_message: string, _defaultValue?: boolean): Promise<boolean> => {
       const response = state.confirm[confirmIndex++];
       if (response === undefined) {
         return _defaultValue ?? false;
@@ -58,7 +58,7 @@ export function createMockPrompts(responses: Partial<MockPromptResponses> = {}) 
       return response;
     }),
 
-    promptInput: jest.fn(async (_message: string, _defaultValue?: string, _validate?: (value: string) => boolean | string): Promise<string> => {
+    promptInput: vi.fn(async (_message: string, _defaultValue?: string, _validate?: (value: string) => boolean | string): Promise<string> => {
       const response = state.input[inputIndex++];
       if (response === undefined) {
         return _defaultValue ?? '';
@@ -66,7 +66,7 @@ export function createMockPrompts(responses: Partial<MockPromptResponses> = {}) 
       return response;
     }),
 
-    promptCheckbox: jest.fn(async <T>(_message: string, _choices: Array<{ name: string; value: T }>): Promise<T[]> => {
+    promptCheckbox: vi.fn(async <T>(_message: string, _choices: Array<{ name: string; value: T }>): Promise<T[]> => {
       const response = state.checkbox[checkboxIndex++];
       if (response === undefined) {
         return [];

@@ -1,7 +1,8 @@
+import type { Mocked } from 'vitest';
 import { analysisService } from '../../src/services/analysis-service.js';
 
 // Mock i18n
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) => {
     if (params) {
       let result = key;
@@ -15,40 +16,39 @@ jest.mock('../../src/i18n/index.js', () => ({
 }));
 
 // Mock logger
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 // Mock user config
-jest.mock('../../src/config/user-config.js', () => ({
+vi.mock('../../src/config/user-config.js', () => ({
   userConfig: {
-    getExperienceLevel: jest.fn().mockReturnValue('beginner'),
-    getErrorsPreventedCount: jest.fn().mockReturnValue(0),
-    getAiCommitsGenerated: jest.fn().mockReturnValue(0)
+    getExperienceLevel: vi.fn().mockReturnValue('beginner'),
+    getErrorsPreventedCount: vi.fn().mockReturnValue(0),
+    getAiCommitsGenerated: vi.fn().mockReturnValue(0)
   }
 }));
 
 // Mock copilot service
-jest.mock('../../src/services/copilot-service.js', () => ({
+vi.mock('../../src/services/copilot-service.js', () => ({
   copilotService: {
-    analyzeContext: jest.fn().mockResolvedValue({ success: false, message: '' })
+    analyzeContext: vi.fn().mockResolvedValue({ success: false, message: '' })
   }
 }));
 
 // Mock git service
-jest.mock('../../src/services/git-service.js', () => ({
+vi.mock('../../src/services/git-service.js', () => ({
   gitService: {
-    getStatus: jest.fn()
+    getStatus: vi.fn()
   }
 }));
 
 import { gitService } from '../../src/services/git-service.js';
 import { userConfig } from '../../src/config/user-config.js';
-const mockGitService = gitService as jest.Mocked<typeof gitService>;
-const mockUserConfig = userConfig as jest.Mocked<typeof userConfig>;
+const mockGitService = gitService as Mocked<typeof gitService>;
+const mockUserConfig = userConfig as Mocked<typeof userConfig>;
 
 describe('AnalysisService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUserConfig.getExperienceLevel.mockReturnValue('beginner');
     mockUserConfig.getErrorsPreventedCount.mockReturnValue(0);
     mockUserConfig.getAiCommitsGenerated.mockReturnValue(0);

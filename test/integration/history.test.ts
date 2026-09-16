@@ -7,8 +7,8 @@ import { createTestRepoWithCommit } from '../helpers/test-utils.js';
 import { createMockGitService, type MockGitService } from '../helpers/mock-git.js';
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
-jest.mock('../../src/services/git-service.js');
-jest.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/services/git-service.js');
+vi.mock('../../src/ui/components/prompt.js');
 
 describe('History (Git Log)', () => {
   let mockGitService: MockGitService;
@@ -23,7 +23,7 @@ describe('History (Git Log)', () => {
       ]
     });
     mockPrompts = createMockPrompts();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('View Commits', () => {

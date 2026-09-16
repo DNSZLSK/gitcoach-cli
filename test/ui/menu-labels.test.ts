@@ -1,4 +1,8 @@
-import { describe, it, expect } from '@jest/globals';
+import { fileURLToPath } from 'node:url';
+
+// Vitest runs this file as ESM, where __dirname does not exist.
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
+import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 

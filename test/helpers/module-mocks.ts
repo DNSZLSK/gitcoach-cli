@@ -7,24 +7,24 @@
  * per file meant one stub definition per suite, so a change to any of them had
  * to be made everywhere.
  *
- * jest.mock factories are hoisted above imports and may not close over
+ * vi.mock factories are hoisted above imports and may not close over
  * out-of-scope variables, but they may `require`. So use them like this:
  *
- *     jest.mock('../../src/utils/logger.js', () =>
+ *     vi.mock('../../src/utils/logger.js', () =>
  *       require('../helpers/module-mocks.js').loggerMock());
  */
 
-/** Logger stub. Every method is a jest.fn so calls can be asserted. */
+/** Logger stub. Every method is a vi.fn so calls can be asserted. */
 export function loggerMock() {
   return {
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      success: jest.fn(),
-      raw: jest.fn(),
-      command: jest.fn()
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      success: vi.fn(),
+      raw: vi.fn(),
+      command: vi.fn()
     }
   };
 }
@@ -36,8 +36,15 @@ export function loggerMock() {
  * themes never breaks a test that does not care about colour.
  */
 export function themeMock() {
+  const passthroughTheme = () =>
+    new Proxy({}, { get: () => (value: string) => String(value) });
   return {
-    getTheme: () => new Proxy({}, { get: () => (value: string) => String(value) })
+    getTheme: passthroughTheme,
+    // The real module re-exports these two alongside getTheme. Nothing under
+    // test imports them today, but the surface guard compares against the real
+    // module now, and a stand-in should stand in for all of it.
+    coloredTheme: passthroughTheme(),
+    monochromeTheme: passthroughTheme()
   };
 }
 
@@ -65,11 +72,11 @@ export function boxMock() {
 export function spinnerMock() {
   return {
     createSpinner: () => ({
-      start: jest.fn(),
-      stop: jest.fn(),
-      succeed: jest.fn(),
-      warn: jest.fn(),
-      fail: jest.fn()
+      start: vi.fn(),
+      stop: vi.fn(),
+      succeed: vi.fn(),
+      warn: vi.fn(),
+      fail: vi.fn()
     }),
     withSpinner: async (_text: string, task: () => unknown) => task()
   };
@@ -103,10 +110,10 @@ export function errorMapperMock() {
  */
 export function promptMock() {
   return {
-    promptSelect: jest.fn(),
-    promptInput: jest.fn(),
-    promptConfirm: jest.fn(),
-    promptCheckbox: jest.fn(),
-    promptEditor: jest.fn()
+    promptSelect: vi.fn(),
+    promptInput: vi.fn(),
+    promptConfirm: vi.fn(),
+    promptCheckbox: vi.fn(),
+    promptEditor: vi.fn()
   };
 }

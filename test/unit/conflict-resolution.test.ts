@@ -6,51 +6,47 @@ import {
 } from '../../src/ui/menus/conflict-resolution-menu.js';
 
 // Mock all dependencies (not needed for pure functions, but required for module loading)
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string) => key
 }));
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 // The conflict menu now reaches user-config via the AI facade; the real module
 // imports the ESM-only `conf` package which Jest cannot load, so stub it.
-jest.mock('../../src/config/user-config.js', () => ({
+vi.mock('../../src/config/user-config.js', () => ({
   userConfig: { getAiProvider: () => 'copilot' }
 }));
 
-jest.mock('../../src/services/git-service.js', () => ({
+vi.mock('../../src/services/git-service.js', () => ({
   gitService: {
-    getConflictedFiles: jest.fn(),
-    add: jest.fn(),
-    commit: jest.fn(),
-    commitNoEdit: jest.fn()
+    getConflictedFiles: vi.fn(),
+    add: vi.fn(),
+    commit: vi.fn(),
+    commitNoEdit: vi.fn()
   }
 }));
 
-jest.mock('../../src/ui/themes/index.js', () =>
-  require('../helpers/module-mocks.js').themeMock());
+vi.mock('../../src/ui/themes/index.js', async () => (await import('../helpers/module-mocks.js')).themeMock());
 
-jest.mock('../../src/ui/components/box.js', () =>
-  require('../helpers/module-mocks.js').boxMock());
+vi.mock('../../src/ui/components/box.js', async () => (await import('../helpers/module-mocks.js')).boxMock());
 
-jest.mock('../../src/ui/components/prompt.js', () => ({
-  promptSelect: jest.fn(),
-  promptConfirm: jest.fn(),
-  promptInput: jest.fn()
+vi.mock('../../src/ui/components/prompt.js', () => ({
+  promptSelect: vi.fn(),
+  promptConfirm: vi.fn(),
+  promptInput: vi.fn()
 }));
 
-jest.mock('../../src/utils/error-mapper.js', () => ({
+vi.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (e: unknown) => String(e)
 }));
 
-jest.mock('../../src/ui/components/spinner.js', () =>
-  require('../helpers/module-mocks.js').spinnerMock());
+vi.mock('../../src/ui/components/spinner.js', async () => (await import('../helpers/module-mocks.js')).spinnerMock());
 
-jest.mock('../../src/services/copilot-service.js', () => ({
+vi.mock('../../src/services/copilot-service.js', () => ({
   copilotService: {
-    isAvailable: jest.fn().mockResolvedValue(false),
-    suggestConflictResolution: jest.fn().mockResolvedValue(null)
+    isAvailable: vi.fn().mockResolvedValue(false),
+    suggestConflictResolution: vi.fn().mockResolvedValue(null)
   }
 }));
 

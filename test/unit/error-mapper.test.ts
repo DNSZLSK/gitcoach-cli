@@ -1,7 +1,7 @@
 import { mapGitError } from '../../src/utils/error-mapper.js';
 
 // Mock i18n to return the key as-is for testing
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) => {
     if (params && 'message' in params) {
       return `${key}:${params.message}`;
@@ -11,12 +11,11 @@ jest.mock('../../src/i18n/index.js', () => ({
 }));
 
 // Mock logger to suppress output
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 // Mock user config: error-mapper now reaches it via the AI facade, and the real
 // module pulls in the ESM-only `conf` package which Jest cannot load.
-jest.mock('../../src/config/user-config.js', () => ({
+vi.mock('../../src/config/user-config.js', () => ({
   userConfig: { getAiProvider: () => 'copilot' }
 }));
 

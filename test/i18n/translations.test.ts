@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import en from '../../src/i18n/locales/en.json';
 import fr from '../../src/i18n/locales/fr.json';
 import es from '../../src/i18n/locales/es.json';

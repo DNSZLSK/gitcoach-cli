@@ -10,6 +10,105 @@
 
 ---
 
+## Current State (2026-09-16)
+
+Version 1.1.7 shipped. Ten commits sit on `master` unpushed. **Do not push without
+being asked** — the remote is `github.com/DNSZLSK/gitcoach-cli` and npm publish
+follows from it.
+
+### Shipped since 1.1.7 (local only)
+
+Tags and releases, commit amend and revert, a way out of interrupted operations
+(`--continue` / `--skip` / `--abort` for merge, rebase, cherry-pick), rebase onto a
+branch and squash, blame / commit patch / branch comparison, submodules,
+worktrees, commit signing, and a ~165ms cut to startup.
+
+### Not shipped — the four features that finish the tool
+
+1. `.gitignore` management (the only current mention is inside `setup-menu.ts`)
+2. Cherry-pick **as an action the user initiates** — today the tool can only
+   rescue a cherry-pick that is already in progress
+3. `git clean` for untracked files
+4. Git LFS
+
+### What a good test is here
+
+Coverage is a smoke alarm, not a certificate. It says which lines were walked
+through, never whether an assertion checked anything worth checking. This
+project has the proof in its own history: 278 tests with non-zero coverage that
+execute no production line at all.
+
+The standard is simple — **a test earns its place by failing when the behaviour
+changes.** The integration tests that run against real git have met it: they
+caught the simple-git bug on `rebase --continue`, the `^{}` suffix from
+`ls-remote`, the NUL byte Node rejects. A test that mocks a thing and then
+asserts the mock was called has met nothing.
+
+So read the percentages below as a map of untested territory, and never as a
+target to hit.
+
+### Test reality
+
+938 tests, 40 suites, all green on Vitest. Coverage stands at **38.5%**, a
+figure that has been restated twice downward without a line being deleted:
+
+- The suite once implied 83%. That described the fourteen files Jest could
+  load, not the fifty-seven the project ships.
+- Stubbing the ESM dependencies made all of them loadable, and it read 45%.
+- Moving to Vitest took it to 38.5%. ts-jest compiled `import` to `require()`
+  and istanbul counted those calls as statements that ran, so merely loading a
+  menu scored its import block. Real ESM hoists imports out of the module body,
+  where they count for nothing.
+
+Each restatement removed something that was never evidence.
+
+The five most-used menus now read as the zero they always were:
+
+| Menu | Statements |
+|------|-----------|
+| `branch-menu.ts` | 0% |
+| `commit-menu.ts` | 0% |
+| `undo-menu.ts` | 0% |
+| `push-menu.ts` | 0% |
+| `pull-menu.ts` | 0% |
+| `stash-menu.ts` | 0% |
+
+The ~278 tests that execute nothing assert on mocks, on arrays of strings, or on
+the text of source files — `test/e2e/user-journeys.test.ts`,
+`test/integration/basic-workflow.test.ts`, `test/config/user-config.test.ts` and
+the older `test/ui/*` suites are the pattern.
+
+The suites that do it right, and that new tests should copy:
+`test/ui/tag-menu.test.ts`, `test/ui/in-progress-flow.test.ts`,
+`test/ui/advanced-menu.test.ts` — they import the real menu, drive it through
+mocked prompts, and assert on the git calls it made.
+
+---
+
+## Roadmap — in this order
+
+**1. ~~Migrate Jest → Vitest~~ — done.** Config lives in `vitest.config.ts`;
+`jest.config.js` and `test/stubs/` are gone, along with the `moduleNameMapper`.
+chalk, ora, boxen and `@inquirer/prompts` load for real. Globals stay injected
+(`globals: true`), so the migration touched mocking and nothing else.
+
+One stub survives, aliased in the config and unrelated to ESM:
+`test/mocks/conf.ts`. `src/config/user-config.ts` builds its store at module
+scope, so importing it would write to the developer's own config directory.
+
+**2. Real tests for the five main menus** — branch, commit, undo, push, pull —
+on the `tag-menu.test.ts` model: import the real menu, drive it through mocked
+prompts, assert on the git calls it made. Write them to catch the mistake the
+menu exists to prevent, not to move the percentage.
+
+**3. The four missing features**: `.gitignore`, cherry-pick, `clean`, LFS.
+
+**4. Clear out the 278 phantom tests**, either by rewriting them against the real
+modules or by deleting them. A test that cannot fail is worse than no test: it
+buys confidence it has not earned.
+
+---
+
 ## Tech Stack
 
 | Category | Technology |
@@ -22,8 +121,8 @@
 | i18n | i18next |
 | AI Integration | GitHub Copilot CLI |
 | Config Storage | Conf |
-| Analytics | Local SQLite |
-| Testing | Jest + mock-git |
+| Analytics | Counters in the Conf store (no SQLite) |
+| Testing | Vitest (migrating off Jest — see Roadmap) |
 
 ---
 

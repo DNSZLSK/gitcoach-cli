@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 /**
  * Integration tests for Stash Operations
  * Tests: save, list, apply, pop, drop
@@ -7,8 +9,8 @@ import { createTestRepoWithCommit } from '../helpers/test-utils.js';
 import { createMockGitService, type MockGitService } from '../helpers/mock-git.js';
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
-jest.mock('../../src/services/git-service.js');
-jest.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/services/git-service.js');
+vi.mock('../../src/ui/components/prompt.js');
 
 describe('Stash Operations', () => {
   let mockGitService: MockGitService;
@@ -24,7 +26,7 @@ describe('Stash Operations', () => {
       ]
     });
     mockPrompts = createMockPrompts();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Save Stash', () => {
@@ -329,8 +331,6 @@ describe('Stash Operations - Real Git', () => {
     const repo = createTestRepoWithCommit('real-stash-apply');
 
     try {
-      const { readFileSync } = require('node:fs');
-      const { join } = require('node:path');
 
       // Make changes and stash
       repo.modifyFile('README.md', 'Stashed content');

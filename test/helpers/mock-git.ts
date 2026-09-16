@@ -58,9 +58,9 @@ export function createMockGitService(initialState: Partial<MockGitState> = {}) {
     },
 
     // Git service methods
-    isGitRepo: jest.fn(async () => state.isRepo),
+    isGitRepo: vi.fn(async () => state.isRepo),
 
-    getStatus: jest.fn(async (): Promise<GitStatus> => ({
+    getStatus: vi.fn(async (): Promise<GitStatus> => ({
       isClean: state.staged.length === 0 && state.modified.length === 0 &&
                state.deleted.length === 0 && state.untracked.length === 0,
       current: state.currentBranch,
@@ -73,42 +73,42 @@ export function createMockGitService(initialState: Partial<MockGitState> = {}) {
       behind: state.behind
     })),
 
-    getCurrentBranch: jest.fn(async () => state.currentBranch),
+    getCurrentBranch: vi.fn(async () => state.currentBranch),
 
-    isDetachedHead: jest.fn(async () => state.detached),
+    isDetachedHead: vi.fn(async () => state.detached),
 
-    getBranches: jest.fn(async () => state.branches),
+    getBranches: vi.fn(async () => state.branches),
 
-    getStagedFiles: jest.fn(async () => state.staged),
+    getStagedFiles: vi.fn(async () => state.staged),
 
-    getUnstagedFiles: jest.fn(async () => [...state.modified, ...state.deleted]),
+    getUnstagedFiles: vi.fn(async () => [...state.modified, ...state.deleted]),
 
-    hasUncommittedChanges: jest.fn(async () =>
+    hasUncommittedChanges: vi.fn(async () =>
       state.staged.length > 0 || state.modified.length > 0 ||
       state.deleted.length > 0 || state.untracked.length > 0
     ),
 
-    hasUnpushedCommits: jest.fn(async () => {
+    hasUnpushedCommits: vi.fn(async () => {
       if (state.tracking) {
         return state.ahead > 0;
       }
       return state.commits.length > 0;
     }),
 
-    getUnpushedCommitCount: jest.fn(async () => {
+    getUnpushedCommitCount: vi.fn(async () => {
       if (state.tracking) {
         return state.ahead;
       }
       return state.commits.length;
     }),
 
-    add: jest.fn(async (files: string[]) => {
+    add: vi.fn(async (files: string[]) => {
       state.staged = [...state.staged, ...files];
       state.modified = state.modified.filter(f => !files.includes(f));
       state.untracked = state.untracked.filter(f => !files.includes(f));
     }),
 
-    commit: jest.fn(async (message: string) => {
+    commit: vi.fn(async (message: string) => {
       const hash = Math.random().toString(36).substring(2, 9);
       state.commits.unshift({
         hash,
@@ -121,18 +121,18 @@ export function createMockGitService(initialState: Partial<MockGitState> = {}) {
       return hash;
     }),
 
-    push: jest.fn(async (_remote?: string, _branch?: string, _force?: boolean, _setUpstream?: boolean) => {
+    push: vi.fn(async (_remote?: string, _branch?: string, _force?: boolean, _setUpstream?: boolean) => {
       if (!state.tracking && _setUpstream) {
         state.tracking = `origin/${state.currentBranch}`;
       }
       state.ahead = 0;
     }),
 
-    pull: jest.fn(async (_remote?: string, _branch?: string) => {
+    pull: vi.fn(async (_remote?: string, _branch?: string) => {
       state.behind = 0;
     }),
 
-    checkout: jest.fn(async (branchOrFile: string) => {
+    checkout: vi.fn(async (branchOrFile: string) => {
       const branch = state.branches.find(b => b.name === branchOrFile);
       if (branch) {
         state.branches = state.branches.map(b => ({
@@ -143,7 +143,7 @@ export function createMockGitService(initialState: Partial<MockGitState> = {}) {
       }
     }),
 
-    createBranch: jest.fn(async (name: string, checkout: boolean = false) => {
+    createBranch: vi.fn(async (name: string, checkout: boolean = false) => {
       const newBranch: BranchInfo = {
         name,
         current: checkout,
@@ -157,19 +157,19 @@ export function createMockGitService(initialState: Partial<MockGitState> = {}) {
       state.branches.push(newBranch);
     }),
 
-    deleteBranch: jest.fn(async (name: string) => {
+    deleteBranch: vi.fn(async (name: string) => {
       state.branches = state.branches.filter(b => b.name !== name);
     }),
 
-    getLog: jest.fn(async (maxCount: number = 10) => {
+    getLog: vi.fn(async (maxCount: number = 10) => {
       return state.commits.slice(0, maxCount);
     }),
 
-    getDiff: jest.fn(async (_staged: boolean = false) => {
+    getDiff: vi.fn(async (_staged: boolean = false) => {
       return 'diff --git a/file.txt b/file.txt\n+added line';
     }),
 
-    reset: jest.fn(async (mode: 'soft' | 'hard' | 'mixed', _target: string) => {
+    reset: vi.fn(async (mode: 'soft' | 'hard' | 'mixed', _target: string) => {
       if (mode === 'hard') {
         state.modified = [];
         state.staged = [];
@@ -184,39 +184,39 @@ export function createMockGitService(initialState: Partial<MockGitState> = {}) {
       }
     }),
 
-    stash: jest.fn(async (message?: string) => {
+    stash: vi.fn(async (message?: string) => {
       state.stashes.unshift(message || `WIP on ${state.currentBranch}`);
       state.modified = [];
       state.staged = [];
       state.untracked = [];
     }),
 
-    stashPop: jest.fn(async () => {
+    stashPop: vi.fn(async () => {
       if (state.stashes.length > 0) {
         state.stashes.shift();
       }
     }),
 
-    stashApply: jest.fn(async (_index: number = 0) => {
+    stashApply: vi.fn(async (_index: number = 0) => {
       // Stash remains after apply
     }),
 
-    stashDrop: jest.fn(async (index: number = 0) => {
+    stashDrop: vi.fn(async (index: number = 0) => {
       state.stashes.splice(index, 1);
     }),
 
-    getStashList: jest.fn(async () => state.stashes),
+    getStashList: vi.fn(async () => state.stashes),
 
-    init: jest.fn(async () => {
+    init: vi.fn(async () => {
       state.isRepo = true;
       state.currentBranch = 'main';
     }),
 
-    addRemote: jest.fn(async (_name: string, _url: string) => {
+    addRemote: vi.fn(async (_name: string, _url: string) => {
       // Remote added
     }),
 
-    clone: jest.fn(async (_url: string, _dir?: string) => {
+    clone: vi.fn(async (_url: string, _dir?: string) => {
       state.isRepo = true;
     })
   };

@@ -7,8 +7,7 @@
 
 // git-service imports logger, which imports chalk; chalk ships ESM that Jest
 // will not transform, so the logger is replaced with a factory mock.
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
 import { createTestRepoWithCommit } from '../helpers/test-utils.js';
 import { GitService } from '../../src/services/git-service.js';

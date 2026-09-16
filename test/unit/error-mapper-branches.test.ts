@@ -1,3 +1,4 @@
+import type { Mocked } from 'vitest';
 /**
  * Branch-level tests for the git error mapper.
  *
@@ -7,29 +8,28 @@
  * exercised and the AI enrichment path, including its failure modes.
  */
 
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) =>
     params ? `${key}:${JSON.stringify(params)}` : key
 }));
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
-jest.mock('../../src/services/ai/index.js', () => ({
+vi.mock('../../src/services/ai/index.js', () => ({
   aiService: {
-    isAvailable: jest.fn(),
-    explainGitError: jest.fn()
+    isAvailable: vi.fn(),
+    explainGitError: vi.fn()
   }
 }));
 
 import { mapGitError, mapGitErrorWithAI } from '../../src/utils/error-mapper.js';
 import { aiService } from '../../src/services/ai/index.js';
 
-const ai = aiService as jest.Mocked<typeof aiService>;
+const ai = aiService as Mocked<typeof aiService>;
 
 describe('error mapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ai.isAvailable.mockResolvedValue(false);
   });
 

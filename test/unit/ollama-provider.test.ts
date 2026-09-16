@@ -7,21 +7,20 @@
  * answers it gets back, including malformed ones.
  */
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
-jest.mock('../../src/config/user-config.js', () => ({
+vi.mock('../../src/config/user-config.js', () => ({
   userConfig: {
-    getAiEndpoint: jest.fn(() => 'http://localhost:11434'),
-    getAiModel: jest.fn(() => 'llama3.2')
+    getAiEndpoint: vi.fn(() => 'http://localhost:11434'),
+    getAiModel: vi.fn(() => 'llama3.2')
   }
 }));
 
-jest.mock('i18next', () => ({ __esModule: true, default: { language: 'en' } }));
+vi.mock('i18next', () => ({ __esModule: true, default: { language: 'en' } }));
 
 import { ollamaProvider } from '../../src/services/ai/ollama-provider.js';
 
-const fetchMock = jest.fn();
+const fetchMock = vi.fn();
 global.fetch = fetchMock as unknown as typeof fetch;
 
 /** A successful /api/generate response carrying `text`. */

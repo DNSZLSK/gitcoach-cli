@@ -1,3 +1,5 @@
+import { execSync } from 'node:child_process';
+import { join } from 'node:path';
 /**
  * Integration tests for Setup Flow
  * Tests: init, clone, .gitignore creation
@@ -8,8 +10,8 @@ import { createMockGitService, type MockGitService } from '../helpers/mock-git.j
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
 // Mock modules
-jest.mock('../../src/services/git-service.js');
-jest.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/services/git-service.js');
+vi.mock('../../src/ui/components/prompt.js');
 
 describe('Setup Flow', () => {
   let mockGitService: MockGitService;
@@ -20,7 +22,7 @@ describe('Setup Flow', () => {
     mockPrompts = createMockPrompts();
 
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Non-Git Directory Detection', () => {
@@ -205,7 +207,6 @@ describe('Setup Flow - Real Git', () => {
     const dir = createNonGitDir('real-init');
 
     try {
-      const { execSync } = require('node:child_process');
 
       // Verify it's not a repo
       expect(() => {
@@ -229,8 +230,6 @@ describe('Setup Flow - Real Git', () => {
     const targetDir = createNonGitDir('clone-target');
 
     try {
-      const { execSync } = require('node:child_process');
-      const { join } = require('node:path');
 
       // Clone into target
       execSync(`git clone "${bareRepo.path}" cloned-repo`, {

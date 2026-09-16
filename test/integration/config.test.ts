@@ -5,8 +5,8 @@
 
 import { createMockPrompts, userFlow, type MockPrompts } from '../helpers/mock-prompts.js';
 
-jest.mock('../../src/config/user-config.js');
-jest.mock('../../src/ui/components/prompt.js');
+vi.mock('../../src/config/user-config.js');
+vi.mock('../../src/ui/components/prompt.js');
 
 describe('Configuration', () => {
   let mockPrompts: MockPrompts;
@@ -22,7 +22,7 @@ describe('Configuration', () => {
       confirmDestructive: true,
       autoGenerateCommit: true
     };
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Language Settings', () => {

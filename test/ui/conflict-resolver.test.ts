@@ -1,3 +1,4 @@
+import type { Mocked, MockedFunction } from 'vitest';
 /**
  * Behaviour tests for the guided conflict resolver.
  *
@@ -7,45 +8,41 @@
  * assert on what ends up written to disk and staged.
  */
 
-jest.mock('../../src/i18n/index.js', () => ({
+vi.mock('../../src/i18n/index.js', () => ({
   t: (key: string, params?: Record<string, unknown>) =>
     params ? `${key}:${JSON.stringify(params)}` : key
 }));
 
-jest.mock('../../src/utils/logger.js', () =>
-  require('../helpers/module-mocks.js').loggerMock());
+vi.mock('../../src/utils/logger.js', async () => (await import('../helpers/module-mocks.js')).loggerMock());
 
-jest.mock('../../src/ui/themes/index.js', () =>
-  require('../helpers/module-mocks.js').themeMock());
+vi.mock('../../src/ui/themes/index.js', async () => (await import('../helpers/module-mocks.js')).themeMock());
 
-jest.mock('../../src/ui/components/box.js', () =>
-  require('../helpers/module-mocks.js').boxMock());
+vi.mock('../../src/ui/components/box.js', async () => (await import('../helpers/module-mocks.js')).boxMock());
 
-jest.mock('../../src/ui/components/spinner.js', () =>
-  require('../helpers/module-mocks.js').spinnerMock());
+vi.mock('../../src/ui/components/spinner.js', async () => (await import('../helpers/module-mocks.js')).spinnerMock());
 
-jest.mock('../../src/utils/error-mapper.js', () => ({
+vi.mock('../../src/utils/error-mapper.js', () => ({
   mapGitError: (error: unknown) => String(error)
 }));
 
-jest.mock('../../src/ui/components/prompt.js', () => ({
-  promptSelect: jest.fn(),
-  promptConfirm: jest.fn(),
-  promptInput: jest.fn()
+vi.mock('../../src/ui/components/prompt.js', () => ({
+  promptSelect: vi.fn(),
+  promptConfirm: vi.fn(),
+  promptInput: vi.fn()
 }));
 
-jest.mock('../../src/services/git-service.js', () => ({
+vi.mock('../../src/services/git-service.js', () => ({
   gitService: {
-    getConflictedFiles: jest.fn(),
-    add: jest.fn(),
-    commitNoEdit: jest.fn()
+    getConflictedFiles: vi.fn(),
+    add: vi.fn(),
+    commitNoEdit: vi.fn()
   }
 }));
 
-jest.mock('../../src/services/ai/index.js', () => ({
+vi.mock('../../src/services/ai/index.js', () => ({
   aiService: {
-    isAvailable: jest.fn(),
-    suggestConflictResolution: jest.fn()
+    isAvailable: vi.fn(),
+    suggestConflictResolution: vi.fn()
   }
 }));
 
@@ -57,10 +54,10 @@ import { gitService } from '../../src/services/git-service.js';
 import { aiService } from '../../src/services/ai/index.js';
 import { promptSelect, promptConfirm } from '../../src/ui/components/prompt.js';
 
-const git = gitService as jest.Mocked<typeof gitService>;
-const ai = aiService as jest.Mocked<typeof aiService>;
-const select = promptSelect as jest.MockedFunction<typeof promptSelect>;
-const confirm = promptConfirm as jest.MockedFunction<typeof promptConfirm>;
+const git = gitService as Mocked<typeof gitService>;
+const ai = aiService as Mocked<typeof aiService>;
+const select = promptSelect as MockedFunction<typeof promptSelect>;
+const confirm = promptConfirm as MockedFunction<typeof promptConfirm>;
 
 const conflict = (local: string, remote: string) =>
   `<<<<<<< HEAD\n${local}\n=======\n${remote}\n>>>>>>> branch\n`;
@@ -77,7 +74,7 @@ describe('Guided conflict resolver', () => {
   const read = () => readFileSync(file, 'utf-8');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dir = mkdtempSync(join(tmpdir(), 'gitcoach-conflict-'));
     file = join(dir, 'conflicted.txt');
     ai.isAvailable.mockResolvedValue(false);
