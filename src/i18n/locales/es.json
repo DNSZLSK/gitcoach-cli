@@ -873,5 +873,13 @@
     "emailInvalid": "Introduce una direccion de correo valida.",
     "configured": "Identidad definida: {{name}} <{{email}}>",
     "required": "Se requiere una identidad de Git para commitear."
+  },
+  "table": {
+    "file": "Archivo",
+    "branch": "Rama",
+    "lastCommit": "Último commit",
+    "hash": "Hash",
+    "message": "Mensaje",
+    "date": "Fecha"
   }
 }

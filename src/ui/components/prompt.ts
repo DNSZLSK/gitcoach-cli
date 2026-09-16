@@ -21,6 +21,19 @@ export interface CheckboxOption<T> {
   disabled?: boolean | string;
 }
 
+/**
+ * How many entries a list may show at once.
+ *
+ * inquirer shows seven by default and scrolls the rest, which hid more than
+ * half of a seventeen-entry main menu behind a scroll the user had no reason
+ * to suspect was there. Show the whole list when it fits, and leave a few
+ * lines for the prompt, the title and whatever was printed above it.
+ */
+function visibleRows(count: number): number {
+  const available = (process.stdout.rows || 24) - 6;
+  return Math.max(7, Math.min(count, available));
+}
+
 export async function promptSelect<T>(
   message: string,
   choices: SelectOption<T>[]
@@ -29,6 +42,7 @@ export async function promptSelect<T>(
 
   return select({
     message: theme.primary(message),
+    pageSize: visibleRows(choices.length),
     choices: choices.map(c => ({
       name: c.name,
       value: c.value,
@@ -89,6 +103,11 @@ export async function promptCheckbox<T>(
 
   return checkbox({
     message: theme.primary(message),
+    // Same reason as promptSelect, and it matters more here: these lists are
+    // files, and a file hidden below the fold is one the user did not mean to
+    // leave unselected — or, for the clean menu, did not know was up for
+    // deletion.
+    pageSize: visibleRows(choices.length),
     choices: choices.map(c => ({
       name: c.name,
       value: c.value,

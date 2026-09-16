@@ -873,5 +873,13 @@
     "emailInvalid": "Please enter a valid email address.",
     "configured": "Identity set: {{name}} <{{email}}>",
     "required": "A git identity is required to commit."
+  },
+  "table": {
+    "file": "File",
+    "branch": "Branch",
+    "lastCommit": "Last commit",
+    "hash": "Hash",
+    "message": "Message",
+    "date": "Date"
   }
 }

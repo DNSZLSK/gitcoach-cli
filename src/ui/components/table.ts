@@ -1,4 +1,5 @@
 import Table from 'cli-table3';
+import { t } from '../../i18n/index.js';
 import { getTheme } from '../themes/index.js';
 import { userConfig } from '../../config/user-config.js';
 
@@ -51,7 +52,7 @@ export function statusTable(files: { name: string; status: string }[]): string {
   });
 
   return createTable(rows, {
-    head: ['', 'File']
+    head: ['', t('table.file')]
   });
 }
 
@@ -64,7 +65,7 @@ export function branchTable(branches: { name: string; current: boolean; commit: 
   ]);
 
   return createTable(rows, {
-    head: ['Branch', 'Last Commit']
+    head: [t('table.branch'), t('table.lastCommit')]
   });
 }
 
@@ -91,7 +92,7 @@ export function commitTable(commits: { hash: string; message: string; date: stri
   ]);
 
   return createTable(rows, {
-    head: ['Hash', 'Message', 'Date'],
+    head: [t('table.hash'), t('table.message'), t('table.date')],
     colWidths: [10, 55, 20]
   });
 }

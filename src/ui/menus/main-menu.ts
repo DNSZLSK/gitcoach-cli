@@ -42,6 +42,9 @@ export type MainMenuAction =
   | 'help'
   | 'quit';
 
+/** Whether the banner has already greeted this session. See its use below. */
+let bannerShown = false;
+
 export async function showMainMenu(): Promise<MainMenuAction> {
   const theme = getTheme();
 
@@ -73,8 +76,14 @@ export async function showMainMenu(): Promise<MainMenuAction> {
     }
   }
 
-  // Show ASCII art banner
-  logger.raw(banner(APP_VERSION, t('app.tagline')));
+  // The banner is a greeting, and a greeting repeated after every action stops
+  // being one: the main menu is re-rendered on every pass of the loop, so this
+  // printed the logo again after each commit, push and branch switch, pushing
+  // the thing the user just did off the top of the screen. Once per session.
+  if (!bannerShown) {
+    logger.raw(banner(APP_VERSION, t('app.tagline')));
+    bannerShown = true;
+  }
 
   // Recovering from a detached HEAD moves HEAD, which makes the status started
   // above stale; only then is a second call warranted.
