@@ -5,9 +5,9 @@ All notable changes to GitCoach are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.8] - 2026-09-15
+## [1.1.8] - 2026-09-16
 
-Committed and ready; not yet published to npm.
+Not yet published to npm.
 
 ### Added
 
@@ -31,6 +31,30 @@ Committed and ready; not yet published to npm.
 - **Advanced menu.** Submodules (status, init, update, add), worktrees (list,
   add, remove) and commit signing (key, on, off), grouped under one entry rather
   than three so the main menu stays readable.
+- **.gitignore management**, as its own main-menu entry next to Add, because
+  the moment you want to ignore a file is the moment you see it listed as
+  untracked. Ignore files by picking them from that list, add or remove a
+  pattern by hand, write a starter template for Node, Python, Java or a generic
+  project, and ask `git check-ignore` whether a path is covered. It also says
+  the thing git never does: an ignore rule has no effect on a file already
+  tracked, so `.env` added to .gitignore after being committed keeps being
+  committed. GitCoach notices and offers the `git rm --cached` that makes it
+  real, keeping the file on disk.
+- **Cherry-pick**, in the Branch menu. The tool could already rescue one that
+  had stopped part-way; there was no way to start one. It refuses on a dirty
+  tree, offers only commits the current branch does not already have, and
+  reports a conflict as the interrupted state the in-progress flow resolves
+  rather than as a failure.
+- **Deleting untracked files**, in Undo, always behind a preview. Untracked
+  files were never committed, so unlike a reset there is no reflog to recover
+  from — nothing is deleted before the exact list has been shown and picked
+  from, every box starts unchecked, and the confirmation says it cannot be
+  undone. Deliberately without `-x`: files covered by .gitignore, where
+  node_modules and .env live, are never in the list.
+- **Git LFS**, in the Advanced menu: set it up for the repository, send a
+  pattern to it, stop sending one, list what is stored. git-lfs is a separate
+  program, so a missing one is reported with how to install it rather than as a
+  git error the user did not cause.
 
 ### Fixed
 
@@ -44,18 +68,59 @@ Committed and ready; not yet published to npm.
   behaved differently depending on the command. Both are normalised, and the
   outcome is read from the repository state rather than from the absence of an
   exception.
+- **The main menu printed untranslated keys.** Labels are chosen per experience
+  level, so `menu.tags` is looked up as `menu.tagsBeginner`. Tags and Advanced
+  were added without those variants, and i18next returned the key: the menu had
+  been showing `[V] menu.tagsBeginner` and `[X] menu.advancedExpert` to the
+  user, in all three languages. The key-parity test could not catch it, since
+  the key was missing from en, fr and es alike.
+- **`git check-ignore` was read wrong, so every path looked ignored.** The check
+  assumed a non-zero exit would surface as a thrown error; simple-git resolves
+  it quietly, so the branch that answered "not ignored" never ran.
+- **Rebase counted commits belonging to the other branch.** simple-git defaults
+  `log({from, to})` to the symmetric difference, not `from..to`, so the rebase
+  confirmation offered to replay commits belonging to the branch being rebased
+  *onto*. Present since rebase was added.
+- **The Java .gitignore template did not cover `.env`**, alone among the four.
+- **Only seven menu entries were visible at a time.** inquirer's default page
+  size hid more than half of a seventeen-entry main menu behind a scroll with
+  no indication it was there. Lists are now sized to the terminal. It mattered
+  most on file checkboxes, where an entry below the fold is one the user did
+  not mean to leave unselected.
+- **The banner reappeared after every action**, because the main menu is
+  re-rendered on each pass of the loop, pushing the result of what you just did
+  off the screen. Shown once per session now.
+- **Table headers were hard-coded in English** — Branch, Last Commit, Hash,
+  Message, Date, File — and stayed English in a French or Spanish session.
+- **Missing elisions in the French locale**: "na aucun" for "n'a aucun", "Cest"
+  for "C'est", "l interieur" for "l'intérieur", across twenty-seven strings.
 
 ### Changed
 
 - Startup is roughly 165ms faster. The twelve secondary menus load on demand
   instead of on every launch, and the two git probes the main menu needs now run
   concurrently.
-- `npm run test:coverage` passes. The 70% thresholds in jest.config.js had been
-  unmet since before this work. Several UI suites called a mock and then
-  asserted the mock had been called, which executes none of the code under test;
-  they are replaced by tests that drive the real modules. Statements 65.67% to
-  83.25%, branches to 70.80%, functions to 81.75%, lines to 84.12%, across 871
-  tests.
+- **The test suite moved from Jest to Vitest**, which runs the source as ESM.
+  The five CommonJS stubs that stood in for chalk, ora, boxen, conf and
+  @inquirer/prompts are gone, along with the moduleNameMapper that pointed at
+  them; those packages load for real. One stub remains, unrelated to ESM: conf,
+  because importing the config module builds its store and would otherwise
+  write to the developer's own config directory.
+- **The coverage figure is honest now, and lower for it.** An earlier entry in
+  this file claimed 83.25%; that number described the fourteen files Jest could
+  load, not the fifty-seven the project ships. Stubbing made all of them
+  loadable and it read 45%. Vitest took it to 38%, because ts-jest compiled
+  `import` to `require()` and istanbul counted those calls as statements that
+  ran — so merely loading a menu scored its import block. Real work then took it
+  to **72%**: 1036 tests across 41 suites, with branch, commit, undo, push,
+  pull, stash, config, history, setup and gitignore driven through their real
+  modules.
+- **317 tests that executed no production line were removed or rewritten.**
+  Found by running every test file alone under coverage rather than by reading
+  them. Twelve suites asserted on mocks they had just called, on arrays of
+  strings, or on the text of source files; ten were deleted once their behaviour
+  was covered for real, and the rest rewritten. Every menu suite is now checked
+  by mutation — the guard is removed on purpose and the suite has to fail.
 
 ## [1.1.7] - 2026-09-15
 

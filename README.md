@@ -64,6 +64,7 @@ Navigate Git with menus instead of memorizing commands.
 > [S] Status   - View current changes
   [A] Add      - Stage files for commit
   [C] Commit   - Save your changes
+  [I] Ignored  - Tell git what to leave alone
   [P] Push     - Upload to remote
   [L] Pull     - Download changes
   [B] Branch   - Manage branches
@@ -164,6 +165,66 @@ deletion when the tag is actually published there.
 | Rebase onto a branch | Branch | refuses on a dirty tree, counts the published commits |
 | Squash commits | Branch | lists the commits that will disappear |
 
+### Ignored files
+
+The `.gitignore` menu does the ordinary things — add or remove a pattern, write
+a starter template for Node, Python, Java or a plain project, ask
+`git check-ignore` why a file is not showing up — and one thing git will never
+tell you on its own.
+
+An ignore rule has no effect on a file git is already tracking. Add `.env` to
+`.gitignore` after committing it once and nothing changes: every edit keeps
+going into every commit, while the person who added the rule has every reason
+to believe they are covered. GitCoach checks, says so plainly, and offers the
+`git rm --cached` that makes the rule real without deleting the file.
+
+```
+⚠ git is already tracking ".env". An ignore rule does not apply to a tracked
+  file, so it will keep being committed until it is untracked.
+
+? Stop tracking ".env" but keep the file on disk? (y/N)
+```
+
+You can also pick straight from the untracked list rather than retyping paths,
+which is where the typos come from.
+
+### Deleting untracked files
+
+`git clean`, behind a preview that is not optional.
+
+Untracked files are the one thing git cannot give back. A hard reset drops
+commits but the reflog keeps them for weeks; a file that was never committed
+has no reflog, no stash, no object to recover from. So GitCoach runs
+`git clean -nd` first, prints exactly what would go, and lets you choose from
+that list with every box unchecked.
+
+Files covered by `.gitignore` are never in the list. That is where
+`node_modules` and `.env` live, and losing either to a menu you opened to tidy
+up build output is precisely the accident this tool exists to prevent.
+
+### Cherry-pick
+
+Take one commit from another branch without taking the branch.
+
+GitCoach offers only commits the current branch does not already have, refuses
+to start on a dirty tree, and — for beginners — says the part that surprises
+people: the commit is copied, not moved. The original stays where it is and the
+copy gets a new hash. If it stops on a conflict, that is not reported as a
+failure; it is the interrupted state the tool already knows how to walk you out
+of.
+
+### Large files
+
+Git stores every version of every file forever, which makes a repository full
+of binaries slow to clone for everyone who touches it. Git LFS keeps those
+files on a server and leaves a pointer in the history.
+
+The Advanced menu sets LFS up for the repository, sends a pattern to it, stops
+sending one, and lists what is stored. git-lfs is a separate program from git,
+so if it is missing GitCoach says how to install it instead of failing with an
+error you did not cause. Tracking edits `.gitattributes`, and the menu reminds
+you that file has to be committed or the rule exists only on your machine.
+
 ### Getting unstuck
 
 If git stopped part-way through a rebase, cherry-pick, merge or bisect,
@@ -188,9 +249,9 @@ file, and a comparison between two branches.
 
 ### Advanced
 
-Submodules (status, init, update, add), worktrees (list, add, remove) and
-commit signing (key, on, off). Grouped under one entry so the main menu stays
-readable.
+Submodules (status, init, update, add), worktrees (list, add, remove), commit
+signing (key, on, off) and Git LFS. Grouped under one entry so the main menu
+stays readable.
 
 ---
 
